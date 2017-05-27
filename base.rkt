@@ -23,11 +23,11 @@
   [fault-actual (-> fault? attribute?)]
   [fault-expected (-> fault? attribute?)]
   [fault-contexts (-> fault? (listof context?))]
-  [struct (self-attribute attribute)
-    ([description string?] [value any/c])]
-  [make-self-attribute (-> any/c self-attribute?)]
   [struct context ([description string?]) #:omit-constructor]
   [struct attribute ([description string?]) #:omit-constructor]
+  [self-attribute (-> any/c self-attribute?)]
+  [self-attribute? predicate/c]
+  [self-attribute-value (-> self-attribute? any/c)]
   [struct (exn:fail:expect exn:fail)
     ([message string?]
      [continuation-marks continuation-mark-set?]
@@ -42,9 +42,13 @@
 (struct result (subject faults) #:transparent)
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
-(struct self-attribute attribute (value) #:transparent)
 
-(define (make-self-attribute v) (self-attribute (~v v) v))
+(struct self-attribute attribute (value)
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-self-attribute)
+
+(define (self-attribute v) (make-self-attribute (~v v) v))
 
 (struct fault (summary expected actual contexts)
   #:transparent #:omit-define-syntaxes #:constructor-name make-fault)

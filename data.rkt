@@ -44,7 +44,7 @@
          (list)
          (list (fault #:summary "a different value"
                       #:expected (attr e)
-                      #:actual (make-self-attribute v)))))))
+                      #:actual (self-attribute v)))))))
 
 (define (expect-eq? e) (expect-compare eq? make-eq-attribute e))
 (define (expect-eqv? e) (expect-compare eqv? make-eqv-attribute e))
@@ -83,7 +83,7 @@
          (list)
          (list (fault #:summary "a different number"
                       #:expected (make-=-attribute e tolerance)
-                      #:actual (make-self-attribute v)))))))
+                      #:actual (self-attribute v)))))))
 
 ;; Predicate and boolean constructors
 
@@ -99,7 +99,7 @@
          (list)
          (list (fault #:summary "a different kind of value"
                       #:expected (make-pred-attribute pred)
-                      #:actual (make-self-attribute v)))))))
+                      #:actual (self-attribute v)))))))
 
 (define expect-true
   (expectation
@@ -107,16 +107,16 @@
      (if (equal? v #t)
          (list)
          (list (fault #:summary "true"
-                      #:expected (make-self-attribute #t)
-                      #:actual (make-self-attribute v)))))))
+                      #:expected (self-attribute #t)
+                      #:actual (self-attribute v)))))))
 
 (define expect-false
   (expectation
    (λ (v)
      (if v
          (list (fault #:summary "false"
-                      #:expected (make-self-attribute #f)
-                      #:actual (make-self-attribute v)))
+                      #:expected (self-attribute #f)
+                      #:actual (self-attribute v)))
          (list)))))
 
 (define expect-not-false
@@ -125,9 +125,8 @@
      (if v
          (list)
          (list (fault #:summary "a non-false value"
-                      #:expected (make-not-attribute
-                                  (make-self-attribute #f))
-                      #:actual (make-self-attribute v)))))))
+                      #:expected (make-not-attribute (self-attribute #f))
+                      #:actual (self-attribute v)))))))
 
 ;; Compound data constructors
 
