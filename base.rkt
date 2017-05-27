@@ -23,11 +23,11 @@
   [fault-actual (-> fault? attribute?)]
   [fault-expected (-> fault? attribute?)]
   [fault-contexts (-> fault? (listof context?))]
-  [struct context ([description string?])]
-  [struct attribute ([description string?])]
   [struct (self-attribute attribute)
     ([description string?] [value any/c])]
   [make-self-attribute (-> any/c self-attribute?)]
+  [struct context ([description string?]) #:omit-constructor]
+  [struct attribute ([description string?]) #:omit-constructor]
   [struct (exn:fail:expect exn:fail)
     ([message string?]
      [continuation-marks continuation-mark-set?]
