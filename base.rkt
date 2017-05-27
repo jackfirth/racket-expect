@@ -8,7 +8,7 @@
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c result?)]
-  [expectation-faults (-> expectation? any/c (listof fault?))]
+  [expectation-apply/faults (-> expectation? any/c (listof fault?))]
   [result (-> any/c (listof fault?) result?)]
   [result? predicate/c]
   [result-subject (-> result? any/c)]
@@ -55,9 +55,9 @@
                #:contexts [contexts (list)])
   (make-fault summary expected actual contexts))
 
-(define (expectation-faults exp v) ((expectation-proc exp) v))
+(define (expectation-apply/faults exp v) ((expectation-proc exp) v))
 (define (expectation-apply exp v)
-  (result v (expectation-faults exp v)))
+  (result v (expectation-apply/faults exp v)))
 
 (struct exn:fail:expect exn:fail (result) #:transparent)
 
