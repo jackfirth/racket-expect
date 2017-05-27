@@ -37,9 +37,10 @@
   (expectation
    (λ (v)
      (define faults-stream (stream-map (expectation-apply/faults _ v) exps))
-     (for/first ([faults (in-stream faults-stream)]
-                 #:unless (empty? faults))
-       faults))))
+     (or (for/first ([faults (in-stream faults-stream)]
+                     #:unless (empty? faults))
+           faults)
+         (list)))))
 
 (define (expect-if exp pred)
   (expectation (λ (v) (if (pred v) (expectation-apply/faults exp v) (list)))))
