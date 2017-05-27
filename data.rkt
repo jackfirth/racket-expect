@@ -10,6 +10,7 @@
   [expect-not-eqv? (-> any/c expectation?)]
   [expect-equal? (-> any/c expectation?)]
   [expect-not-equal? (-> any/c expectation?)]
+  [expect-= (-> real? real? expectation?)]
   [expect-pred (-> predicate/c expectation?)]
   [expect-true expectation?]
   [expect-false expectation?]
@@ -65,6 +66,24 @@
 
 (define (expect-not-equal? e)
   (expect-compare (negate equal?) (negate-attribute make-equal-attribute) e))
+
+(struct =-attribute attribute (value tolerance) #:transparent)
+
+(define (make-=-attribute value tolerance)
+  (=-attribute (format "= to ~v (within a tolerance of ~v)" value tolerance)
+               value
+               tolerance))
+
+(define (expect-= e tolerance)
+  (define lower (- e tolerance))
+  (define upper (+ e tolerance))
+  (expectation
+   (λ (v)
+     (if (<= lower v upper)
+         (list)
+         (list (fault #:summary "a different number"
+                      #:expected (make-=-attribute e tolerance)
+                      #:actual (make-self-attribute v)))))))
 
 ;; Predicate and boolean constructors
 
