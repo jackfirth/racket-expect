@@ -9,7 +9,6 @@
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c result?)]
   [expectation-apply/faults (-> expectation? any/c (listof fault?))]
-  [result (-> any/c (listof fault?) result?)]
   [result? predicate/c]
   [result-subject (-> result? any/c)]
   [result-faults (-> result? (listof fault?))]
