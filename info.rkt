@@ -7,7 +7,8 @@
     "fancy-app"
     "reprovide-lang"))
 (define build-deps
-  '("doc-coverage"
+  '("rackunit-doc"
+    "doc-coverage"
     "racket-doc"
     "scribble-lib"
     "scribble-text-lib"))

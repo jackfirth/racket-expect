@@ -15,7 +15,26 @@
   [expect-true expectation?]
   [expect-false expectation?]
   [expect-not-false expectation?]
-  [expect-list (->* () #:rest (listof expectation?) expectation?)]))
+  [expect-list (->* () #:rest (listof expectation?) expectation?)]
+  [eq-attribute? predicate/c]
+  [eq-attribute (-> any/c eq-attribute?)]
+  [eq-attribute-value (-> eq-attribute? any/c)]
+  [eqv-attribute? predicate/c]
+  [eqv-attribute (-> any/c eqv-attribute?)]
+  [eqv-attribute-value (-> eqv-attribute? any/c)]
+  [equal-attribute? predicate/c]
+  [equal-attribute (-> any/c equal-attribute?)]
+  [equal-attribute-value (-> equal-attribute? any/c)]
+  [not-attribute? predicate/c]
+  [not-attribute (-> attribute? not-attribute?)]
+  [not-attribute-negated (-> not-attribute? attribute?)]
+  [pred-attribute (-> predicate/c pred-attribute?)]
+  [pred-attribute? predicate/c]
+  [pred-attribute-value (-> pred-attribute? predicate/c)]
+  [=-attribute (-> real? real? =-attribute?)]
+  [=-attribute? predicate/c]
+  [=-attribute-value (-> =-attribute? real?)]
+  [=-attribute-epsilon (-> =-attribute? real?)]))
 
 (require fancy-app
          racket/format
@@ -26,16 +45,21 @@
 
 ;; Equivalence constructors
 
-(struct eq-attribute attribute (value) #:transparent)
-(struct eqv-attribute attribute (value) #:transparent)
-(struct equal-attribute attribute (value) #:transparent)
+(struct eq-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-eq-attribute)
+
+(struct eqv-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-eqv-attribute)
+
+(struct equal-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-equal-attribute)
 
 (define (comp-attr construct desc v)
   (construct (format "~a to ~v" desc v) v))
 
-(define (make-eq-attribute v) (comp-attr eq-attribute "eq?" v))
-(define (make-eqv-attribute v) (comp-attr eqv-attribute "eqv?" v))
-(define (make-equal-attribute v) (comp-attr equal-attribute "equal?" v))
+(define (eq-attribute v) (comp-attr make-eq-attribute "eq?" v))
+(define (eqv-attribute v) (comp-attr make-eqv-attribute "eqv?" v))
+(define (equal-attribute v) (comp-attr make-equal-attribute "equal?" v))
 
 (define (expect-compare comparison attr e)
   (expectation
@@ -46,33 +70,33 @@
                       #:expected (attr e)
                       #:actual (self-attribute v)))))))
 
-(define (expect-eq? e) (expect-compare eq? make-eq-attribute e))
-(define (expect-eqv? e) (expect-compare eqv? make-eqv-attribute e))
-(define (expect-equal? e) (expect-compare equal? make-equal-attribute e))
+(define (expect-eq? e) (expect-compare eq? eq-attribute e))
+(define (expect-eqv? e) (expect-compare eqv? eqv-attribute e))
+(define (expect-equal? e) (expect-compare equal? equal-attribute e))
 
-(struct not-attribute attribute (negated) #:transparent)
+(struct not-attribute attribute (negated)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-not-attribute)
 
-(define (make-not-attribute negated)
-  (not-attribute (format "not ~a" (attribute-description negated)) negated))
+(define (not-attribute negated)
+  (make-not-attribute (format "not ~a" (attribute-description negated)) negated))
 
-(define ((negate-attribute attr-proc) v)
-  (make-not-attribute (attr-proc v)))
+(define ((negate-attribute attr-proc) v) (not-attribute (attr-proc v)))
 
 (define (expect-not-eq? e)
-  (expect-compare (negate eq?) (negate-attribute make-eq-attribute) e))
+  (expect-compare (negate eq?) (negate-attribute eq-attribute) e))
 
 (define (expect-not-eqv? e)
-  (expect-compare (negate eqv?) (negate-attribute make-eqv-attribute) e))
+  (expect-compare (negate eqv?) (negate-attribute eqv-attribute) e))
 
 (define (expect-not-equal? e)
-  (expect-compare (negate equal?) (negate-attribute make-equal-attribute) e))
+  (expect-compare (negate equal?) (negate-attribute equal-attribute) e))
 
-(struct =-attribute attribute (value tolerance) #:transparent)
+(struct =-attribute attribute (value epsilon)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-=-attribute)
 
-(define (make-=-attribute value tolerance)
-  (=-attribute (format "= to ~v (within a tolerance of ~v)" value tolerance)
-               value
-               tolerance))
+(define (=-attribute value tolerance)
+  (define desc (format "= to ~v (within a tolerance of ~v)" value tolerance))
+  (make-=-attribute desc value tolerance))
 
 (define (expect-= e tolerance)
   (define lower (- e tolerance))
@@ -82,15 +106,16 @@
      (if (<= lower v upper)
          (list)
          (list (fault #:summary "a different number"
-                      #:expected (make-=-attribute e tolerance)
+                      #:expected (=-attribute e tolerance)
                       #:actual (self-attribute v)))))))
 
 ;; Predicate and boolean constructors
 
-(struct pred-attribute attribute (pred) #:transparent)
+(struct pred-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-pred-attribute)
 
-(define (make-pred-attribute pred)
-  (pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
+(define (pred-attribute pred)
+  (make-pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
 
 (define (expect-pred pred)
   (expectation
@@ -98,7 +123,7 @@
      (if (pred v)
          (list)
          (list (fault #:summary "a different kind of value"
-                      #:expected (make-pred-attribute pred)
+                      #:expected (pred-attribute pred)
                       #:actual (self-attribute v)))))))
 
 (define expect-true
@@ -125,7 +150,7 @@
      (if v
          (list)
          (list (fault #:summary "a non-false value"
-                      #:expected (make-not-attribute (self-attribute #f))
+                      #:expected (not-attribute (self-attribute #f))
                       #:actual (self-attribute v)))))))
 
 ;; Compound data constructors
