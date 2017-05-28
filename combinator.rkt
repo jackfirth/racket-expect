@@ -25,26 +25,22 @@
               #:expected (fault-expected flt)
               #:actual (fault-actual flt)
               #:contexts new-ctxts))
-     (map add-context (expectation-faults exp v)))))
+     (map add-context (expectation-apply/faults exp v)))))
 
 (define (expect-map exp f)
-  (expectation
-   (λ (v)
-     (expectation-faults exp (f v)))))
+  (expectation (λ (v) (expectation-apply/faults exp (f v)))))
 
 (define (expect-all . exps)
-  (expectation
-   (λ (v)
-     (append-map (expectation-faults _ v) exps))))
+  (expectation (λ (v) (append-map (expectation-apply/faults _ v) exps))))
 
 (define (expect-and . exps)
   (expectation
    (λ (v)
-     (define faults-stream (stream-map (expectation-faults _ v) exps))
-     (for/first ([faults (in-stream faults-stream)]
-                 #:unless (empty? faults))
-       faults))))
+     (define faults-stream (stream-map (expectation-apply/faults _ v) exps))
+     (or (for/first ([faults (in-stream faults-stream)]
+                     #:unless (empty? faults))
+           faults)
+         (list)))))
 
 (define (expect-if exp pred)
-  (expectation
-   (λ (v) (if (pred v) (expectation-faults exp v) (list)))))
+  (expectation (λ (v) (if (pred v) (expectation-apply/faults exp v) (list)))))

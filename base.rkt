@@ -8,8 +8,7 @@
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c result?)]
-  [expectation-faults (-> expectation? any/c (listof fault?))]
-  [result (-> any/c (listof fault?) result?)]
+  [expectation-apply/faults (-> expectation? any/c (listof fault?))]
   [result? predicate/c]
   [result-subject (-> result? any/c)]
   [result-faults (-> result? (listof fault?))]
@@ -23,11 +22,11 @@
   [fault-actual (-> fault? attribute?)]
   [fault-expected (-> fault? attribute?)]
   [fault-contexts (-> fault? (listof context?))]
-  [struct context ([description string?])]
-  [struct attribute ([description string?])]
-  [struct (self-attribute attribute)
-    ([description string?] [value any/c])]
-  [make-self-attribute (-> any/c self-attribute?)]
+  [struct context ([description string?]) #:omit-constructor]
+  [struct attribute ([description string?]) #:omit-constructor]
+  [self-attribute (-> any/c self-attribute?)]
+  [self-attribute? predicate/c]
+  [self-attribute-value (-> self-attribute? any/c)]
   [struct (exn:fail:expect exn:fail)
     ([message string?]
      [continuation-marks continuation-mark-set?]
@@ -42,9 +41,13 @@
 (struct result (subject faults) #:transparent)
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
-(struct self-attribute attribute (value) #:transparent)
 
-(define (make-self-attribute v) (self-attribute (~v v) v))
+(struct self-attribute attribute (value)
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-self-attribute)
+
+(define (self-attribute v) (make-self-attribute (~v v) v))
 
 (struct fault (summary expected actual contexts)
   #:transparent #:omit-define-syntaxes #:constructor-name make-fault)
@@ -55,9 +58,9 @@
                #:contexts [contexts (list)])
   (make-fault summary expected actual contexts))
 
-(define (expectation-faults exp v) ((expectation-proc exp) v))
+(define (expectation-apply/faults exp v) ((expectation-proc exp) v))
 (define (expectation-apply exp v)
-  (result v (expectation-faults exp v)))
+  (result v (expectation-apply/faults exp v)))
 
 (struct exn:fail:expect exn:fail (result) #:transparent)
 
