@@ -79,7 +79,7 @@
   (define item-exps/count-guard
     (expectation
      (λ (vs)
-       (define count (length vs))
+       (define count (min (length vs) (length exps)))
        (define combined-item-exp (apply expect-all (take item-exps count)))
        (expectation-apply/faults combined-item-exp vs))))
   (expect-and (expect-pred list?) (expect-all count-exp item-exps/count-guard)))
