@@ -14,5 +14,8 @@ messages.
 
 @source-code-link{https://github.com/jackfirth/racket-expect}
 
+@local-table-of-contents[]
+
 @include-section["base.scrbl"]
 @include-section["data.scrbl"]
+@include-section["combinator.scrbl"]

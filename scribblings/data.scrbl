@@ -9,6 +9,8 @@ The @racketmodname[expect] library provides several built-in
 expectations are intended to supplant all the functionality of the checks
 provided by @racketmodname[rackunit].
 
+@section{Equality Expectations}
+
 @defproc[(expect-eq? [v any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is @racket[eq?]
  to @racket[v], returning a single @fault-tech{fault} otherwise. The fault
@@ -115,6 +117,8 @@ provided by @racketmodname[rackunit].
    (=-attribute? =10)
    (=-attribute-value =10)
    (=-attribute-epsilon =10))}
+
+@section{Boolean Expectations}
 
 @deftogether[
  (@defthing[expect-true expectation?]

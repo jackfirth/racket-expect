@@ -16,6 +16,7 @@
          racket/function
          syntax/parse/define
          "base.rkt"
+         "combinator.rkt"
          "data.rkt")
 
 

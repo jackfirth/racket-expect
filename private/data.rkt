@@ -15,7 +15,6 @@
   [expect-true expectation?]
   [expect-false expectation?]
   [expect-not-false expectation?]
-  [expect-list (->* () #:rest (listof expectation?) expectation?)]
   [eq-attribute? predicate/c]
   [eq-attribute (-> any/c eq-attribute?)]
   [eq-attribute-value (-> eq-attribute? any/c)]
@@ -39,8 +38,7 @@
 (require fancy-app
          racket/format
          racket/function
-         "base.rkt"
-         "combinator.rkt")
+         "base.rkt")
 
 
 ;; Equivalence constructors
@@ -152,39 +150,3 @@
          (list (fault #:summary "a non-false value"
                       #:expected (not-attribute (self-attribute #f))
                       #:actual (self-attribute v)))))))
-
-;; Compound data constructors
-
-(struct list-item-context context (index) #:transparent)
-
-(define (expect-list-item exp index)
-  (define ctxt
-    (list-item-context (~a "list item" index #:separator " ") index))
-  (expect-if (expect-map (expect/context exp ctxt) (list-ref _ index))
-             (λ (vs) (< index (length vs)))))
-
-(struct length-attribute attribute (length) #:transparent)
-
-(define (make-length-attribute n)
-  (length-attribute (format "length of ~v" n) n))
-
-(define (expect-count expected-count count-proc items-desc)
-  (define (~items v) (~a v items-desc #:separator " "))
-  (expectation
-   (λ (vs)
-     (define count (count-proc vs))
-     (define (count-fault summary)
-       (fault #:summary summary
-              #:expected (make-length-attribute expected-count)
-              #:actual (make-length-attribute count)))
-     (cond [(< expected-count count) (list (count-fault (~items "fewer")))]
-           [(< count expected-count) (list (count-fault (~items "more")))]
-           [else (list)]))))
-
-(define (expect-list . exps)
-  (define item-exps
-    (for/list ([exp (in-list exps)] [i (in-naturals)])
-      (expect-list-item exp i)))
-  (define count-exp (expect-count (length exps) length "list items"))
-  (expect-and (expect-pred list?)
-              (apply expect-all count-exp item-exps)))

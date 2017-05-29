@@ -5,15 +5,17 @@
 (provide
  (contract-out
   [expect/context (-> expectation? context? expectation?)]
-  [expect-map (-> expectation? (-> any/c any/c) expectation?)]
+  [expect/proc (-> expectation? (-> any/c any/c) expectation?)]
   [expect-all (->* () #:rest (listof expectation?) expectation?)]
   [expect-and (->* () #:rest (listof expectation?) expectation?)]
-  [expect-if (-> expectation? predicate/c expectation?)]))
+  [expect-list (->* () #:rest (listof expectation?) expectation?)]))
 
 (require fancy-app
+         racket/format
          racket/list
          racket/stream
-         "base.rkt")
+         "base.rkt"
+         "data.rkt")
 
 
 (define (expect/context exp ctxt)
@@ -27,7 +29,7 @@
               #:contexts new-ctxts))
      (map add-context (expectation-apply/faults exp v)))))
 
-(define (expect-map exp f)
+(define (expect/proc exp f)
   (expectation (λ (v) (expectation-apply/faults exp (f v)))))
 
 (define (expect-all . exps)
@@ -42,5 +44,42 @@
            faults)
          (list)))))
 
-(define (expect-if exp pred)
-  (expectation (λ (v) (if (pred v) (expectation-apply/faults exp v) (list)))))
+;; Compound data constructors
+
+(struct list-item-context context (index) #:transparent)
+
+(define (expect-list-item exp index)
+  (define ctxt
+    (list-item-context (~a "list item" index #:separator " ") index))
+  (expect/proc (expect/context exp ctxt) (list-ref _ index)))
+
+(struct length-attribute attribute (length) #:transparent)
+
+(define (make-length-attribute n)
+  (length-attribute (format "length of ~v" n) n))
+
+(define (expect-count expected-count count-proc items-desc)
+  (define (~items v) (~a v items-desc #:separator " "))
+  (expectation
+   (λ (vs)
+     (define count (count-proc vs))
+     (define (count-fault summary)
+       (fault #:summary summary
+              #:expected (make-length-attribute expected-count)
+              #:actual (make-length-attribute count)))
+     (cond [(< expected-count count) (list (count-fault (~items "fewer")))]
+           [(< count expected-count) (list (count-fault (~items "more")))]
+           [else (list)]))))
+
+(define (expect-list . exps)
+  (define item-exps
+    (for/list ([exp (in-list exps)] [i (in-naturals)])
+      (expect-list-item exp i)))
+  (define count-exp (expect-count (length exps) length "list items"))
+  (define item-exps/count-guard
+    (expectation
+     (λ (vs)
+       (define count (length vs))
+       (define combined-item-exp (apply expect-all (take item-exps count)))
+       (expectation-apply/faults combined-item-exp vs))))
+  (expect-and (expect-pred list?) (expect-all count-exp item-exps/count-guard)))
