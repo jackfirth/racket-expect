@@ -46,6 +46,21 @@ use their basic functionalities.
    (expectation-apply/faults (expect-equal? (list 1 2)) (list 1 2))
    (expectation-apply/faults (expect-equal? (list 1 2)) (list 1 'foo)))}
 
+@defproc[(expect! [exp expectation?] [v any/c]) void?]{
+ Checks that @racket[v] has no @fault-tech{faults} according to @racket[exp]. If
+ it does, an instance of @racket[exn:fail:expect] is raised with a message
+ detailing the faults.
+ @(expect-examples
+   (define list-exp (expect-equal? (list 1 2)))
+   (expect! list-exp '(1 2))
+   (eval:error (expect! list-exp '(1 a b))))}
+
+@defstruct*[(exn:fail:expect exn:fail) ([result result?])]{
+ An instance of @racket[exn:fail] that is thrown by @racket[expect!] when a
+ value does not live up to an @expectation-tech{expectation}. The
+ @racket[result] field includes both the original subject of the expectation and
+ the list of @fault-tech{faults} found by the expectation.}
+
 @section{Faults and Results}
 
 @defproc[(fault? [v any/c]) boolean?]{
@@ -144,18 +159,3 @@ use their basic functionalities.
  @racket[self-attribute].
  @(expect-examples
    (self-attribute-value (self-attribute 'foo)))}
-
-@defproc[(expect! [exp expectation?] [v any/c]) void?]{
- Checks that @racket[v] has no @fault-tech{faults} according to @racket[exp]. If
- it does, an instance of @racket[exn:fail:expect] is raised with a message
- detailing the faults.
- @(expect-examples
-   (define list-exp (expect-equal? (list 1 2)))
-   (expect! list-exp '(1 2))
-   (eval:error (expect! list-exp '(1 a b))))}
-
-@defstruct*[(exn:fail:expect exn:fail) ([result result?])]{
- An instance of @racket[exn:fail] that is thrown by @racket[expect!] when a
- value does not live up to an @expectation-tech{expectation}. The
- @racket[result] field includes both the original subject of the expectation and
- the list of @fault-tech{faults} found by the expectation.}

@@ -96,7 +96,7 @@
 
 (define (result-message/plural rslt)
   (define (fault-message flt)
-    (error-message (format "expected: ~a" (fault-summary flt))
+    (error-message (format "fault: ~a" (fault-summary flt))
                    (fault-messages flt)
                    #:indent-depth 1))
   (error-message "multiple failures"
