@@ -43,6 +43,8 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! small-number -4))
    (eval:error (expect! small-number 'foo)))}
 
+@section{Extending Expectations}
+
 @defproc[(expect/context [exp expectation?] [ctxt context?]) expectation?]{
  Returns an @expectation-tech{expectation} that behaves the same as @racket[exp]
  except that any @fault-tech{faults} returned have @racket[ctxt] as an
