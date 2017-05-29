@@ -5,7 +5,7 @@
 (provide
  (contract-out
   [expect/context (-> expectation? context? expectation?)]
-  [expect-map (-> expectation? (-> any/c any/c) expectation?)]
+  [expect/proc (-> expectation? (-> any/c any/c) expectation?)]
   [expect-all (->* () #:rest (listof expectation?) expectation?)]
   [expect-and (->* () #:rest (listof expectation?) expectation?)]
   [expect-list (->* () #:rest (listof expectation?) expectation?)]))
@@ -29,7 +29,7 @@
               #:contexts new-ctxts))
      (map add-context (expectation-apply/faults exp v)))))
 
-(define (expect-map exp f)
+(define (expect/proc exp f)
   (expectation (λ (v) (expectation-apply/faults exp (f v)))))
 
 (define (expect-all . exps)
