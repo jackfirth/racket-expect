@@ -1,10 +1,7 @@
 #lang reprovide
 "base.rkt"
-"combinator.rkt"
 "convert.rkt"
-(except-in "data.rkt"
-           ;; omitted because convert.rkt reprovides these with logic handling
-           ;; expectation conversion
-           expect-equal?
-           expect-not-equal?
-           expect-list)
+;; omitted because convert.rkt reprovides these with logic handling expectation
+;; conversion
+(except-in "combinator.rkt" expect-list)
+(except-in "data.rkt" expect-equal? expect-not-equal?)
