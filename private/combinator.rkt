@@ -8,7 +8,6 @@
   [expect-map (-> expectation? (-> any/c any/c) expectation?)]
   [expect-all (->* () #:rest (listof expectation?) expectation?)]
   [expect-and (->* () #:rest (listof expectation?) expectation?)]
-  [expect-if (-> expectation? predicate/c expectation?)]))
   [expect-list (->* () #:rest (listof expectation?) expectation?)]))
 
 (require fancy-app
@@ -45,8 +44,6 @@
            faults)
          (list)))))
 
-(define (expect-if exp pred)
-  (expectation (λ (v) (if (pred v) (expectation-apply/faults exp v) (list)))))
 ;; Compound data constructors
 
 (struct list-item-context context (index) #:transparent)
