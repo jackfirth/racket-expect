@@ -1,7 +1,7 @@
 #lang info
 (define collection "expect")
 (define scribblings
-  '(("scribblings/main.scrbl" () (library) "expect")))
+  '(("scribblings/main.scrbl" (multi-page) (library) "expect")))
 (define deps
   '("base"
     "fancy-app"
