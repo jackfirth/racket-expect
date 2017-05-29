@@ -68,7 +68,7 @@ expectations out of simple ones while preserving error message quality.
 
 @section{Compound Data Structure Combinators}
 
-@defproc[(expect-list [item-exp expectation?] ...) expectation?]{
+@defproc[(expect-list [item-exp expectation-convertible?] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a list whose
  elements satisfy the @racket[item-exp] expectations. The length of the list is
  also checked, and only the @racket[item-exp] expectations for lists that
@@ -80,3 +80,25 @@ expectations out of simple ones while preserving error message quality.
    (expect! num+string-expectation '(10 "text"))
    (eval:error (expect! num+string-expectation '(foo bar)))
    (eval:error (expect! num+string-expectation '(foo))))}
+
+@section{Conversion to Expectations}
+
+@defproc[(expectation-convertible? [v any/c]) boolean?]{
+ Returns @racket[#t] when @racket[v] is a value that can be converted to an
+ @expectation-tech{expectation}, returns @racket[#f] otherwise. Several kinds of
+ values are convertible:
+
+ @itemlist[
+ @item{Any expectation (according to @racket[expectation?]) is convertible to
+   itself.}
+ @item{Booleans are convertible to either @racket[expect-true] or
+   @racket[expect-false].}
+ @item{Numbers, strings, symbols, and characters are convertible to expectations
+   constructed with @racket[expect-equal?].}
+ @item{Lists are convertible with @racket[expect-list] after first converting
+   their contents.}]}
+
+@defproc[(expectation-convert [v expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} constructed by converting @racket[v]
+ to an expectation. See @racket[expectation-convertible?] for a description of
+ what values are and aren't convertible.}
