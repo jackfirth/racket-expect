@@ -81,6 +81,18 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! num+string-expectation '(foo bar)))
    (eval:error (expect! num+string-expectation '(foo))))}
 
+@defproc[(expect-vector [item-exp expectation-convertible?] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector
+ whose elements satisfy the @racket[item-exp] expectations. The length of the
+ vector is also checked, and only the @racket[item-exp] expectations for vectors
+ that contain enough items to include the corresponding @racket[item-exp] are
+ checked.
+ @(expect-examples
+   (define num+foo-vec-expectation (expect-vector (expect-pred number?) 'foo))
+   (expect! num+foo-vec-expectation #(10 foo))
+   (eval:error (expect! num+foo-vec-expectation #(10 bar)))
+   (eval:error (expect! num+foo-vec-expectation #(10))))}
+
 @section{Conversion to Expectations}
 
 @defproc[(expectation-convertible? [v any/c]) boolean?]{
@@ -96,7 +108,9 @@ expectations out of simple ones while preserving error message quality.
  @item{Numbers, strings, symbols, and characters are convertible to expectations
    constructed with @racket[expect-equal?].}
  @item{Lists are convertible with @racket[expect-list] after first converting
-   their contents.}]}
+   their contents.}
+ @item{Vectors are convertible with @racket[expect-vector] after first
+   converting their contents.}]}
 
 @defproc[(expectation-convert [v expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} constructed by converting @racket[v]

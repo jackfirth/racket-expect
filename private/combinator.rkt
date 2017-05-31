@@ -6,16 +6,18 @@
  (contract-out
   [expect/context (-> expectation? context? expectation?)]
   [expect/proc (-> expectation? (-> any/c any/c) expectation?)]
-  [expect-all (->* () #:rest (listof expectation?) expectation?)]
-  [expect-and (->* () #:rest (listof expectation?) expectation?)]
-  [expect-list (->* () #:rest (listof expectation?) expectation?)]))
+  [expect-all (rest-> expectation? expectation?)]
+  [expect-and (rest-> expectation? expectation?)]
+  [expect-list (rest-> expectation? expectation?)]
+  [expect-vector (rest-> expectation? expectation?)]))
 
 (require fancy-app
          racket/format
          racket/list
          racket/stream
          "base.rkt"
-         "data.rkt")
+         "data.rkt"
+         "util.rkt")
 
 
 (define (expect/context exp ctxt)
@@ -46,40 +48,65 @@
 
 ;; Compound data constructors
 
-(struct list-item-context context (index) #:transparent)
 
-(define (expect-list-item exp index)
-  (define ctxt
-    (list-item-context (~a "list item" index #:separator " ") index))
-  (expect/proc (expect/context exp ctxt) (list-ref _ index)))
+(struct item-context context (type index)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-item-context)
 
-(struct length-attribute attribute (length) #:transparent)
+(define (item-context type index)
+  (make-item-context (format "~a item ~a" type index) type index))
 
-(define (make-length-attribute n)
-  (length-attribute (format "length of ~v" n) n))
+(define ((expect-item type ref) exp index)
+  (expect/proc (expect/context exp (item-context type index))
+               (ref _ index)))
+
+(define expect-list-item (expect-item 'list list-ref))
+(define expect-vector-item (expect-item 'vector vector-ref))
+
+(struct count-attribute attribute (type count)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-count-attribute)
+
+(define/contract (count-attribute type count)
+  (-> (or/c 'vector 'list) exact-positive-integer? count-attribute?)
+  (make-count-attribute (format "~a of size ~a" type count) type count))
+
+(define/contract (countable-type vs)
+  (-> (or/c vector? list?) (or/c 'vector 'list))
+  (cond [(vector? vs) 'vector] [(list? vs) 'list]))
 
 (define (expect-count expected-count count-proc items-desc)
   (define (~items v) (~a v items-desc #:separator " "))
   (expectation
    (λ (vs)
+     (define type (countable-type vs))
      (define count (count-proc vs))
      (define (count-fault summary)
        (fault #:summary summary
-              #:expected (make-length-attribute expected-count)
-              #:actual (make-length-attribute count)))
+              #:expected (count-attribute type expected-count)
+              #:actual (count-attribute type count)))
      (cond [(< expected-count count) (list (count-fault (~items "fewer")))]
            [(< count expected-count) (list (count-fault (~items "more")))]
            [else (list)]))))
+
+(define (expect-items-combined item-exps length-proc)
+  (expectation
+   (λ (vs)
+     (define count (min (length-proc vs) (length item-exps)))
+     (define combined (apply expect-all (take item-exps count)))
+     (expectation-apply/faults combined vs))))
 
 (define (expect-list . exps)
   (define item-exps
     (for/list ([exp (in-list exps)] [i (in-naturals)])
       (expect-list-item exp i)))
-  (define count-exp (expect-count (length exps) length "list items"))
-  (define item-exps/count-guard
-    (expectation
-     (λ (vs)
-       (define count (min (length vs) (length exps)))
-       (define combined-item-exp (apply expect-all (take item-exps count)))
-       (expectation-apply/faults combined-item-exp vs))))
-  (expect-and (expect-pred list?) (expect-all count-exp item-exps/count-guard)))
+  (expect-and (expect-pred list?)
+              (expect-all (expect-count (length exps) length "list items")
+                          (expect-items-combined item-exps length))))
+
+(define (expect-vector . exps)
+  (define item-exps
+    (for/list ([exp (in-list exps)] [i (in-naturals)])
+      (expect-vector-item exp i)))
+  (define num-exps (length exps))
+  (expect-and (expect-pred vector?)
+              (expect-all (expect-count num-exps vector-length "vector items")
+                          (expect-items-combined item-exps vector-length))))

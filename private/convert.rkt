@@ -17,16 +17,18 @@
          syntax/parse/define
          "base.rkt"
          "combinator.rkt"
-         "data.rkt")
+         "data.rkt"
+         "util.rkt")
 
 
 (define expectation-convertible?
-  (or/c expectation? list? boolean? number? string? symbol? char?))
+  (or/c expectation? list? vector? boolean? number? string? symbol? char?))
 
 (define (expectation-convert v)
   (cond
     [(expectation? v) v]
     [(list? v) (apply expect-list (map expectation-convert v))]
+    [(vector? v) (apply expect-vector (map expectation-convert v))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
 
@@ -51,20 +53,20 @@
        (define (converted arg.id ...) (id arg.expr ...))
        (provide (contract-out (rename converted id contract-expr))))])
 
-(define (expectation-convert/equal? v)
-  (cond
-    [(list? v) (apply expect-list (map expectation-convert/equal? v))]
-    [else v]))
-
 (define (expect-equal?/convert v)
   (cond
     [(list? v) (apply expect-list (map expect-equal?/convert v))]
+    [(vector? v) (apply expect-vector (map expect-equal?/convert v))]
     [else (expect-equal? v)]))
 
 (define (expect-not-equal?/convert v)
   (cond
     [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
+    [(vector? v) (apply expect-vector (map expect-not-equal?/convert v))]
     [else (expect-not-equal? v)]))
 
 (define/expectation-conversion (expect-list . <convert>)
-  (->* () #:rest (listof expectation-convertible?) expectation?))
+  (rest-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-vector . <convert>)
+  (rest-> expectation-convertible? expectation?))
