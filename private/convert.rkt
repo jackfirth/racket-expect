@@ -52,11 +52,6 @@
        (define (converted arg.id ...) (id arg.expr ...))
        (provide (contract-out (rename converted id contract-expr))))])
 
-(define (expectation-convert/equal? v)
-  (cond
-    [(list? v) (apply expect-list (map expectation-convert/equal? v))]
-    [else v]))
-
 (define (expect-equal?/convert v)
   (cond
     [(list? v) (apply expect-list (map expect-equal?/convert v))]
