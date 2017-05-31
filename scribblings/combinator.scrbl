@@ -81,6 +81,18 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! num+string-expectation '(foo bar)))
    (eval:error (expect! num+string-expectation '(foo))))}
 
+@defproc[(expect-vector [item-exp expectation-convertible?] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector
+ whose elements satisfy the @racket[item-exp] expectations. The length of the
+ vector is also checked, and only the @racket[item-exp] expectations for vectors
+ that contain enough items to include the corresponding @racket[item-exp] are
+ checked.
+ @(expect-examples
+   (define num+foo-vec-expectation (expect-vector (expect-pred number?) 'foo))
+   (expect! num+foo-vec-expectation #(10 foo))
+   (eval:error (expect! num+foo-vec-expectation #(10 bar)))
+   (eval:error (expect! num+foo-vec-expectation #(10))))}
+
 @section{Conversion to Expectations}
 
 @defproc[(expectation-convertible? [v any/c]) boolean?]{

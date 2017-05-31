@@ -17,7 +17,8 @@
          syntax/parse/define
          "base.rkt"
          "combinator.rkt"
-         "data.rkt")
+         "data.rkt"
+         "util.rkt")
 
 
 (define expectation-convertible?
@@ -67,4 +68,7 @@
     [else (expect-not-equal? v)]))
 
 (define/expectation-conversion (expect-list . <convert>)
-  (->* () #:rest (listof expectation-convertible?) expectation?))
+  (rest-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-vector . <convert>)
+  (rest-> expectation-convertible? expectation?))
