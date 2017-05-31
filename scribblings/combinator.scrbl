@@ -108,7 +108,9 @@ expectations out of simple ones while preserving error message quality.
  @item{Numbers, strings, symbols, and characters are convertible to expectations
    constructed with @racket[expect-equal?].}
  @item{Lists are convertible with @racket[expect-list] after first converting
-   their contents.}]}
+   their contents.}
+ @item{Vectors are convertible with @racket[expect-vector] after first
+   converting their contents.}]}
 
 @defproc[(expectation-convert [v expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} constructed by converting @racket[v]
