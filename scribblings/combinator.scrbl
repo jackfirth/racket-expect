@@ -93,6 +93,15 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! num+foo-vec-expectation #(10 bar)))
    (eval:error (expect! num+foo-vec-expectation #(10))))}
 
+@section{Procedure Expectations}
+
+@defthing[expect-not-raise expectation?]{
+ An expectation that expects a thunk (a function accepting no arguments) does
+ not @racket[raise] any value when called.
+ @(expect-examples
+   (expect! expect-not-raise (thunk 'success))
+   (eval:error (expect! expect-not-raise (thunk (raise 'failure)))))}
+
 @section{Conversion to Expectations}
 
 @defproc[(expectation-convertible? [v any/c]) boolean?]{

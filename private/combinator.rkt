@@ -9,10 +9,12 @@
   [expect-all (rest-> expectation? expectation?)]
   [expect-and (rest-> expectation? expectation?)]
   [expect-list (rest-> expectation? expectation?)]
-  [expect-vector (rest-> expectation? expectation?)]))
+  [expect-vector (rest-> expectation? expectation?)]
+  [expect-not-raise expectation?]))
 
 (require fancy-app
          racket/format
+         racket/function
          racket/list
          racket/stream
          "base.rkt"
@@ -110,3 +112,59 @@
   (expect-and (expect-pred vector?)
               (expect-all (expect-count num-exps vector-length "vector items")
                           (expect-items-combined item-exps vector-length))))
+
+(struct arity-includes-attribute attribute (num-positional kws-okay?)
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-arity-includes-attribute)
+
+(define (arity-includes-attribute num-positional
+                                  #:keywords-okay? [kws-okay? #f])
+  (make-arity-includes-attribute
+   (format "procedure accepting ~a positional argument~a and ~a keyword arguments"
+           num-positional
+           (if (= num-positional 1) "" "s")
+           (if kws-okay? "any" "no"))
+   num-positional
+   kws-okay?))
+
+(struct arity-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-arity-attribute)
+
+(define (arity-attribute proc)
+  (define arity (procedure-arity proc))
+  (make-arity-attribute (format "procedure with arity of ~a" arity) arity))
+
+(define (expect-procedure-arity-includes? k #:keywords-okay? [kws-okay? #f])
+  (define attr (arity-includes-attribute k #:keywords-okay? kws-okay?))
+  (expectation
+   (λ (proc)
+     (if (procedure-arity-includes? proc k kws-okay?)
+         (list)
+         (list (fault #:summary "procedure has unsuitable arity"
+                      #:expected attr
+                      #:actual (arity-attribute proc)))))))
+
+(struct not-raise-attribute attribute () #:transparent)
+(define the-not-raise-attribute (not-raise-attribute "no value raised"))
+
+(struct raise-attribute attribute (value)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-raise-attribute)
+
+(define (raise-attribute raised)
+  (make-raise-attribute (format "procedure raised ~v" raised)
+                        raised))
+
+(define (raise-fault raised)
+  (fault #:summary "no value raised during procedure call"
+         #:expected the-not-raise-attribute
+         #:actual (raise-attribute raised)))
+
+(define expect-not-raise
+  (expect-and (expect-pred procedure?)
+              (expect-procedure-arity-includes? 0)
+              (expectation
+               (λ (proc)
+                 (with-handlers ([(const #t) (λ (v) (list (raise-fault v)))])
+                   (proc)
+                   (list))))))
