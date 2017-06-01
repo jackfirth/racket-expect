@@ -95,16 +95,6 @@ expectations out of simple ones while preserving error message quality.
 
 @section{Procedure Expectations}
 
-@defthing[expect-not-raise expectation?]{
- An expectation that expects a thunk (a function accepting no arguments) does
- not @racket[raise] any value when called.
- @(expect-examples
-   (expect! expect-not-raise (thunk 'success))
-   (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
-   (define (not-a-thunk unexpected-arg)
-     'foo)
-   (eval:error (expect! expect-not-raise not-a-thunk)))}
-
 @defproc[(expect-raise [raise-exp expectation-convertible?] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
  a value which is then checked against @racket[raise-exp].
@@ -115,6 +105,16 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! (expect-raise 'foo) success))
    (define (raise-bar) (raise 'bar))
    (eval:error (expect! (expect-raise 'foo) raise-bar)))}
+
+@defthing[expect-not-raise expectation?]{
+ An expectation that expects a thunk (a function accepting no arguments) does
+ not @racket[raise] any value when called.
+ @(expect-examples
+   (expect! expect-not-raise (thunk 'success))
+   (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
+   (define (not-a-thunk unexpected-arg)
+     'foo)
+   (eval:error (expect! expect-not-raise not-a-thunk)))}
 
 @section{Conversion to Expectations}
 
