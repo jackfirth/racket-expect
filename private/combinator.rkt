@@ -21,6 +21,9 @@
          "data.rkt"
          "util.rkt")
 
+(module+ test
+  (require rackunit))
+
 
 (define (expect/context exp ctxt)
   (expectation
@@ -128,6 +131,16 @@
    num-positional
    kws-okay?))
 
+(module+ test
+  (define plural-desc
+    "arity including 5 positional arguments and no keyword arguments")
+  (check-equal? (attribute-description (arity-includes-attribute 5))
+                plural-desc)
+  (define singular-kw-desc
+    "arity including 1 positional argument and any keyword arguments")
+  (define singular-kw-attr (arity-includes-attribute 1 #:keywords-okay? #t))
+  (check-equal? (attribute-description singular-kw-attr) singular-kw-desc))
+
 (struct arity-attribute attribute (value)
   #:transparent #:omit-define-syntaxes #:constructor-name make-arity-attribute)
 
@@ -168,3 +181,14 @@
                  (with-handlers ([(const #t) (λ (v) (list (raise-fault v)))])
                    (proc)
                    (list))))))
+
+(module+ test
+  (check-equal? (expectation-apply/faults expect-not-raise void) (list))
+  (check-equal? (expectation-apply/faults expect-not-raise identity)
+                (list (fault #:summary "a procedure accepting no arguments"
+                             #:expected (arity-includes-attribute 0)
+                             #:actual (arity-attribute identity))))
+  (check-equal? (expectation-apply/faults expect-not-raise (thunk (raise 'foo)))
+                (list (fault #:summary "no value raised during procedure call"
+                             #:expected the-not-raise-attribute
+                             #:actual (raise-attribute 'foo)))))
