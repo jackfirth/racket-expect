@@ -1,17 +1,21 @@
 #lang racket/base
 
-(provide (for-label (all-from-out expect
+(provide (for-label (all-from-out arguments
+                                  expect
                                   racket/base
                                   racket/contract
                                   racket/format
+                                  racket/function
                                   racket/list))
          expect-examples
          source-code-link)
 
-(require (for-label expect
+(require (for-label arguments
+                    expect
                     racket/base
                     racket/contract
                     racket/format
+                    racket/function
                     racket/list)
          scribble/example
          scribble/manual
@@ -23,7 +27,8 @@
               (hyperlink github-str "on Github")))
 
 (define (make-expect-eval)
-  (make-base-eval #:lang 'racket/base '(require expect racket/list)))
+  (make-base-eval #:lang 'racket/base
+                  '(require arguments expect racket/function racket/list)))
 
 (define-simple-macro (expect-examples example:expr ...)
   (examples #:eval (make-expect-eval) example ...))

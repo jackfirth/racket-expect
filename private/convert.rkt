@@ -14,6 +14,7 @@
 (require (for-syntax racket/base
                      racket/syntax)
          racket/function
+         racket/vector
          syntax/parse/define
          "base.rkt"
          "combinator.rkt"
@@ -28,7 +29,8 @@
   (cond
     [(expectation? v) v]
     [(list? v) (apply expect-list (map expectation-convert v))]
-    [(vector? v) (apply expect-vector (map expectation-convert v))]
+    [(vector? v)
+     (apply expect-vector (map expectation-convert (vector->list v)))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
 
@@ -56,13 +58,15 @@
 (define (expect-equal?/convert v)
   (cond
     [(list? v) (apply expect-list (map expect-equal?/convert v))]
-    [(vector? v) (apply expect-vector (map expect-equal?/convert v))]
+    [(vector? v)
+     (apply expect-vector (map expect-equal?/convert (vector->list v)))]
     [else (expect-equal? v)]))
 
 (define (expect-not-equal?/convert v)
   (cond
     [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
-    [(vector? v) (apply expect-vector (map expect-not-equal?/convert v))]
+    [(vector? v)
+     (apply expect-vector (map expect-not-equal?/convert (vector->list v)))]
     [else (expect-not-equal? v)]))
 
 (define/expectation-conversion (expect-list . <convert>)
@@ -70,3 +74,9 @@
 
 (define/expectation-conversion (expect-vector . <convert>)
   (rest-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-raise <convert>)
+  (-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-return <convert>)
+  (-> expectation-convertible? expectation?))

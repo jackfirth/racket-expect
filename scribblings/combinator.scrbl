@@ -93,6 +93,52 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! num+foo-vec-expectation #(10 bar)))
    (eval:error (expect! num+foo-vec-expectation #(10))))}
 
+@section{Procedure Expectations}
+
+@defproc[(expect-call [args arguments?] [call-exp expectation?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a procedure and checks
+ @racket[call-exp] on a thunk wrapping a call to that procedure with
+ @racket[args]. Use with @racket[expect-return] to check the return value of the
+ procedure call and with @racket[expect-raise] or @racket[expect-not-raise] to
+ check how the procedure call behaves with respect to raised errors. The
+ expected procedure's arity is checked to ensure it can be called with
+ @racket[args].
+ @(expect-examples
+   (define exp-addition (expect-call (arguments 3 8) (expect-return 11)))
+   (expect! exp-addition +)
+   (eval:error (expect! exp-addition -))
+   (eval:error (expect! exp-addition (thunk 'wrong-arity)))
+   (eval:error (expect! exp-addition (thunk* (raise 'error)))))}
+
+@defproc[(expect-return [value-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a thunk returns a value,
+ then that value is checked against @racket[value-exp].
+ @(expect-examples
+   (expect! (expect-return 'foo) (thunk 'foo))
+   (eval:error (expect! (expect-return 'foo) (thunk 'bar)))
+   (eval:error (expect! (expect-return 'foo) (thunk (raise 'error)))))}
+
+@defproc[(expect-raise [raise-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
+ a value which is then checked against @racket[raise-exp].
+ @(expect-examples
+   (define (raise-foo) (raise 'foo))
+   (expect! (expect-raise 'foo) raise-foo)
+   (define (success) 'success)
+   (eval:error (expect! (expect-raise 'foo) success))
+   (define (raise-bar) (raise 'bar))
+   (eval:error (expect! (expect-raise 'foo) raise-bar)))}
+
+@defthing[expect-not-raise expectation?]{
+ An expectation that expects a thunk does not @racket[raise] any value when
+ called.
+ @(expect-examples
+   (expect! expect-not-raise (thunk 'success))
+   (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
+   (define (not-a-thunk unexpected-arg)
+     'foo)
+   (eval:error (expect! expect-not-raise not-a-thunk)))}
+
 @section{Conversion to Expectations}
 
 @defproc[(expectation-convertible? [v any/c]) boolean?]{

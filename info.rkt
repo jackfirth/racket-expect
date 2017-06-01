@@ -3,11 +3,13 @@
 (define scribblings
   '(("scribblings/main.scrbl" (multi-page) (library) "expect")))
 (define deps
-  '("base"
+  '("arguments"
+    "base"
     "fancy-app"
     "reprovide-lang"))
 (define build-deps
-  '("rackunit-doc"
+  '("rackunit-lib"
+    "rackunit-doc"
     "doc-coverage"
     "racket-doc"
     "scribble-lib"
