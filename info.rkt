@@ -3,7 +3,8 @@
 (define scribblings
   '(("scribblings/main.scrbl" (multi-page) (library) "expect")))
 (define deps
-  '("base"
+  '("arguments"
+    "base"
     "fancy-app"
     "reprovide-lang"))
 (define build-deps

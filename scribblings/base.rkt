@@ -1,6 +1,7 @@
 #lang racket/base
 
-(provide (for-label (all-from-out expect
+(provide (for-label (all-from-out arguments
+                                  expect
                                   racket/base
                                   racket/contract
                                   racket/format
@@ -9,7 +10,8 @@
          expect-examples
          source-code-link)
 
-(require (for-label expect
+(require (for-label arguments
+                    expect
                     racket/base
                     racket/contract
                     racket/format
@@ -26,7 +28,7 @@
 
 (define (make-expect-eval)
   (make-base-eval #:lang 'racket/base
-                  '(require expect racket/function racket/list)))
+                  '(require arguments expect racket/function racket/list)))
 
 (define-simple-macro (expect-examples example:expr ...)
   (examples #:eval (make-expect-eval) example ...))
