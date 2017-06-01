@@ -95,6 +95,21 @@ expectations out of simple ones while preserving error message quality.
 
 @section{Procedure Expectations}
 
+@defproc[(expect-call [args arguments?] [call-exp expectation?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a procedure and checks
+ @racket[call-exp] on a thunk wrapping a call to that procedure with
+ @racket[args]. Use with @racket[expect-return] to check the return value of the
+ procedure call and with @racket[expect-raise] or @racket[expect-not-raise] to
+ check how the procedure call behaves with respect to raised errors. The
+ expected procedure's arity is checked to ensure it can be called with
+ @racket[args].
+ @(expect-examples
+   (define exp-addition (expect-call (arguments 3 8) (expect-return 11)))
+   (expect! exp-addition +)
+   (eval:error (expect! exp-addition -))
+   (eval:error (expect! exp-addition (thunk 'wrong-arity)))
+   (eval:error (expect! exp-addition (thunk* (raise 'error)))))}
+
 @defproc[(expect-return [value-exp expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk returns a value,
  then that value is checked against @racket[value-exp].
