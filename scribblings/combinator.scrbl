@@ -95,7 +95,7 @@ expectations out of simple ones while preserving error message quality.
 
 @section{Procedure Expectations}
 
-@defproc[(expect-raise [raise-exp expectation-convertible?] ...) expectation?]{
+@defproc[(expect-raise [raise-exp expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
  a value which is then checked against @racket[raise-exp].
  @(expect-examples
