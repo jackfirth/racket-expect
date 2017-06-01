@@ -107,8 +107,8 @@ expectations out of simple ones while preserving error message quality.
    (eval:error (expect! (expect-raise 'foo) raise-bar)))}
 
 @defthing[expect-not-raise expectation?]{
- An expectation that expects a thunk (a function accepting no arguments) does
- not @racket[raise] any value when called.
+ An expectation that expects a thunk does not @racket[raise] any value when
+ called.
  @(expect-examples
    (expect! expect-not-raise (thunk 'success))
    (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
