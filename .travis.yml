@@ -21,5 +21,4 @@ install:
 
 script:
   - raco test -p expect
-  - raco doc-coverage expect
   - raco cover -f codecov -p expect
