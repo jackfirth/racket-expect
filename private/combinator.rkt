@@ -10,6 +10,7 @@
   [expect-and (rest-> expectation? expectation?)]
   [expect-list (rest-> expectation? expectation?)]
   [expect-vector (rest-> expectation? expectation?)]
+  [expect-return (-> expectation? expectation?)]
   [expect-raise (-> expectation? expectation?)]
   [expect-not-raise expectation?]))
 
@@ -238,3 +239,34 @@
                 (list (fault #:summary "a value raised during procedure call"
                              #:expected raise-any-attribute
                              #:actual the-not-raise-attribute))))
+
+(struct return-context context (value)
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-return-context)
+
+(define (return-context proc)
+  (make-return-context (format "return value of call to ~a" proc) proc))
+
+(define (expect-return exp)
+  (expect-thunk
+   (expectation
+    (λ (proc)
+      (define exp/context (expect/context exp (return-context proc)))
+      (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
+        (expectation-apply/faults exp/context (proc)))))))
+
+(module+ test
+  (define exp-return-foo (expect-return (expect-equal? 'foo)))
+  (check-equal? (expectation-apply/faults exp-return-foo (thunk 'foo)) (list))
+  (define bar-thunk (thunk 'bar))
+  (check-equal? (expectation-apply/faults exp-return-foo bar-thunk)
+                (list (fault #:summary "a different value"
+                             #:expected (equal-attribute 'foo)
+                             #:actual (self-attribute 'bar)
+                             #:contexts (list (return-context bar-thunk)))))
+  (define raise-thunk (thunk (raise 'error)))
+  (check-equal? (expectation-apply/faults exp-return-foo raise-thunk)
+                (list (fault #:summary "no value raised during procedure call"
+                             #:expected the-not-raise-attribute
+                             #:actual (raise-attribute 'error)))))

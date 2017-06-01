@@ -73,3 +73,6 @@
 
 (define/expectation-conversion (expect-raise <convert>)
   (-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-return <convert>)
+  (-> expectation-convertible? expectation?))
