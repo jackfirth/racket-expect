@@ -10,11 +10,13 @@
   [expect-and (rest-> expectation? expectation?)]
   [expect-list (rest-> expectation? expectation?)]
   [expect-vector (rest-> expectation? expectation?)]
+  [expect-call (-> arguments? expectation? expectation?)]
   [expect-return (-> expectation? expectation?)]
   [expect-raise (-> expectation? expectation?)]
   [expect-not-raise expectation?]))
 
-(require fancy-app
+(require arguments
+         fancy-app
          racket/format
          racket/function
          racket/list
@@ -269,3 +271,35 @@
                 (list (fault #:summary "no value raised during procedure call"
                              #:expected the-not-raise-attribute
                              #:actual (raise-attribute 'error)))))
+
+(struct call-context context (args)
+  #:transparent #:omit-define-syntaxes #:constructor-name make-call-context)
+
+(define (call-context args)
+  (make-call-context (format "call with ~v" args) args))
+
+(define (apply/arguments f args)
+  (define kw+vs (hash->list (arguments-keyword args)))
+  (keyword-apply f (map car kw+vs) (map cdr kw+vs) (arguments-positional args)))
+
+(module+ test
+  (define (add/kw a b #:kw c) (+ a b c))
+  (check-equal? (apply/arguments add/kw (arguments 1 2 #:kw 3)) 6))
+
+(define (expect-call args call-exp)
+  (define num-positional (length (arguments-positional args)))
+  (define has-kws? (not (hash-empty? (arguments-keyword args))))
+  (expect-and (expect-pred procedure?)
+              (expect-procedure-arity-includes? num-positional
+                                                #:keywords-okay? has-kws?)
+              (expectation
+               (λ (proc)
+                 (define (call) (apply/arguments proc args))
+                 (define call-exp/context
+                   (expect/context call-exp (call-context args)))
+                 (expectation-apply/faults call-exp/context call)))))
+
+(module+ test
+  (define exp-add
+    (expect-call (arguments 1 2) (expect-return (expect-equal? 3))))
+  (check-equal? (expectation-apply/faults exp-add +) (list)))
