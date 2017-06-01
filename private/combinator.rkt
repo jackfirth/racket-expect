@@ -240,19 +240,18 @@
                              #:expected raise-any-attribute
                              #:actual the-not-raise-attribute))))
 
-(struct return-context context (value)
+(struct return-context context ()
   #:transparent
   #:omit-define-syntaxes
   #:constructor-name make-return-context)
 
-(define (return-context proc)
-  (make-return-context (format "return value of call to ~a" proc) proc))
+(define return-context (make-return-context "return value"))
 
 (define (expect-return exp)
   (expect-thunk
    (expectation
     (λ (proc)
-      (define exp/context (expect/context exp (return-context proc)))
+      (define exp/context (expect/context exp return-context))
       (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
         (expectation-apply/faults exp/context (proc)))))))
 
@@ -264,7 +263,7 @@
                 (list (fault #:summary "a different value"
                              #:expected (equal-attribute 'foo)
                              #:actual (self-attribute 'bar)
-                             #:contexts (list (return-context bar-thunk)))))
+                             #:contexts (list return-context))))
   (define raise-thunk (thunk (raise 'error)))
   (check-equal? (expectation-apply/faults exp-return-foo raise-thunk)
                 (list (fault #:summary "no value raised during procedure call"
