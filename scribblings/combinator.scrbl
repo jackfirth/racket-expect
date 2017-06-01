@@ -105,6 +105,17 @@ expectations out of simple ones while preserving error message quality.
      'foo)
    (eval:error (expect! expect-not-raise not-a-thunk)))}
 
+@defproc[(expect-raise [raise-exp expectation-convertible?] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
+ a value which is then checked against @racket[raise-exp].
+ @(expect-examples
+   (define (raise-foo) (raise 'foo))
+   (expect! (expect-raise 'foo) raise-foo)
+   (define (success) 'success)
+   (eval:error (expect! (expect-raise 'foo) success))
+   (define (raise-bar) (raise 'bar))
+   (eval:error (expect! (expect-raise 'foo) raise-bar)))}
+
 @section{Conversion to Expectations}
 
 @defproc[(expectation-convertible? [v any/c]) boolean?]{

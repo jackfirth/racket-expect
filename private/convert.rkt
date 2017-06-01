@@ -70,3 +70,6 @@
 
 (define/expectation-conversion (expect-vector . <convert>)
   (rest-> expectation-convertible? expectation?))
+
+(define/expectation-conversion (expect-raise <convert>)
+  (-> expectation-convertible? expectation?))

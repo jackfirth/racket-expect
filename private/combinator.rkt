@@ -10,6 +10,7 @@
   [expect-and (rest-> expectation? expectation?)]
   [expect-list (rest-> expectation? expectation?)]
   [expect-vector (rest-> expectation? expectation?)]
+  [expect-raise (-> expectation? expectation?)]
   [expect-not-raise expectation?]))
 
 (require fancy-app
@@ -196,3 +197,44 @@
                 (list (fault #:summary "no value raised during procedure call"
                              #:expected the-not-raise-attribute
                              #:actual (raise-attribute 'foo)))))
+
+(struct raise-context context ()
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-raise-context)
+
+(define (raise-context) (make-raise-context "the raised value"))
+
+(struct raise-any-attribute attribute ()
+  #:transparent
+  #:omit-define-syntaxes
+  #:constructor-name make-raise-any-attribute)
+
+(define raise-any-attribute (make-raise-any-attribute "raised a value"))
+
+(define (expect-raise exp)
+  (expect-thunk
+   (expectation
+    (λ (proc)
+      (define exp/context (expect/context exp (raise-context)))
+      (with-handlers ([(const #t) (expectation-apply/faults exp/context _)])
+        (proc)
+        (list (fault #:summary "a value raised during procedure call"
+                     #:expected raise-any-attribute
+                     #:actual the-not-raise-attribute)))))))
+
+(module+ test
+  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo))
+                                          (thunk (raise 'foo)))
+                (list))
+  (define raise-proc (thunk (raise 'bar)))
+  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo))
+                                          raise-proc)
+                (list (fault #:summary "a different value"
+                             #:expected (equal-attribute 'foo)
+                             #:actual (self-attribute 'bar)
+                             #:contexts (list (raise-context)))))
+  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo)) void)
+                (list (fault #:summary "a value raised during procedure call"
+                             #:expected raise-any-attribute
+                             #:actual the-not-raise-attribute))))
