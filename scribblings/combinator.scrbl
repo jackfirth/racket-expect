@@ -100,7 +100,10 @@ expectations out of simple ones while preserving error message quality.
  not @racket[raise] any value when called.
  @(expect-examples
    (expect! expect-not-raise (thunk 'success))
-   (eval:error (expect! expect-not-raise (thunk (raise 'failure)))))}
+   (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
+   (define (not-a-thunk unexpected-arg)
+     'foo)
+   (eval:error (expect! expect-not-raise not-a-thunk)))}
 
 @section{Conversion to Expectations}
 

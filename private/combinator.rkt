@@ -121,7 +121,7 @@
 (define (arity-includes-attribute num-positional
                                   #:keywords-okay? [kws-okay? #f])
   (make-arity-includes-attribute
-   (format "procedure accepting ~a positional argument~a and ~a keyword arguments"
+   (format "arity including ~a positional argument~a and ~a keyword arguments"
            num-positional
            (if (= num-positional 1) "" "s")
            (if kws-okay? "any" "no"))
@@ -133,7 +133,7 @@
 
 (define (arity-attribute proc)
   (define arity (procedure-arity proc))
-  (make-arity-attribute (format "procedure with arity of ~a" arity) arity))
+  (make-arity-attribute (format "arity of ~a" arity) arity))
 
 (define (expect-procedure-arity-includes? k #:keywords-okay? [kws-okay? #f])
   (define attr (arity-includes-attribute k #:keywords-okay? kws-okay?))
@@ -141,7 +141,7 @@
    (λ (proc)
      (if (procedure-arity-includes? proc k kws-okay?)
          (list)
-         (list (fault #:summary "procedure has unsuitable arity"
+         (list (fault #:summary "a procedure accepting no arguments"
                       #:expected attr
                       #:actual (arity-attribute proc)))))))
 
@@ -152,7 +152,7 @@
   #:transparent #:omit-define-syntaxes #:constructor-name make-raise-attribute)
 
 (define (raise-attribute raised)
-  (make-raise-attribute (format "procedure raised ~v" raised)
+  (make-raise-attribute (format "raised ~v" raised)
                         raised))
 
 (define (raise-fault raised)
