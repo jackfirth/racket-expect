@@ -173,14 +173,18 @@
          #:expected the-not-raise-attribute
          #:actual (raise-attribute raised)))
 
-(define expect-not-raise
+(define (expect-thunk exp)
   (expect-and (expect-pred procedure?)
               (expect-procedure-arity-includes? 0)
-              (expectation
-               (λ (proc)
-                 (with-handlers ([(const #t) (λ (v) (list (raise-fault v)))])
-                   (proc)
-                   (list))))))
+              exp))
+
+(define expect-not-raise
+  (expect-thunk
+   (expectation
+    (λ (proc)
+      (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
+        (proc)
+        (list))))))
 
 (module+ test
   (check-equal? (expectation-apply/faults expect-not-raise void) (list))
