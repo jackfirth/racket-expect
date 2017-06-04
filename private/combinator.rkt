@@ -38,18 +38,18 @@
               #:expected (fault-expected flt)
               #:actual (fault-actual flt)
               #:contexts new-ctxts))
-     (map add-context (expectation-apply/faults exp v)))))
+     (map add-context (expectation-apply exp v)))))
 
 (define (expect/proc exp f)
-  (expectation (λ (v) (expectation-apply/faults exp (f v)))))
+  (expectation (λ (v) (expectation-apply exp (f v)))))
 
 (define (expect-all . exps)
-  (expectation (λ (v) (append-map (expectation-apply/faults _ v) exps))))
+  (expectation (λ (v) (append-map (expectation-apply _ v) exps))))
 
 (define (expect-and . exps)
   (expectation
    (λ (v)
-     (define faults-stream (stream-map (expectation-apply/faults _ v) exps))
+     (define faults-stream (stream-map (expectation-apply _ v) exps))
      (or (for/first ([faults (in-stream faults-stream)]
                      #:unless (empty? faults))
            faults)
@@ -101,7 +101,7 @@
    (λ (vs)
      (define count (min (length-proc vs) (length item-exps)))
      (define combined (apply expect-all (take item-exps count)))
-     (expectation-apply/faults combined vs))))
+     (expectation-apply combined vs))))
 
 (define (expect-list . exps)
   (define item-exps
@@ -191,12 +191,12 @@
         (list))))))
 
 (module+ test
-  (check-equal? (expectation-apply/faults expect-not-raise void) (list))
-  (check-equal? (expectation-apply/faults expect-not-raise identity)
+  (check-equal? (expectation-apply expect-not-raise void) (list))
+  (check-equal? (expectation-apply expect-not-raise identity)
                 (list (fault #:summary "a procedure accepting no arguments"
                              #:expected (arity-includes-attribute 0)
                              #:actual (arity-attribute identity))))
-  (check-equal? (expectation-apply/faults expect-not-raise (thunk (raise 'foo)))
+  (check-equal? (expectation-apply expect-not-raise (thunk (raise 'foo)))
                 (list (fault #:summary "no value raised during procedure call"
                              #:expected the-not-raise-attribute
                              #:actual (raise-attribute 'foo)))))
@@ -220,24 +220,24 @@
    (expectation
     (λ (proc)
       (define exp/context (expect/context exp (raise-context)))
-      (with-handlers ([(const #t) (expectation-apply/faults exp/context _)])
+      (with-handlers ([(const #t) (expectation-apply exp/context _)])
         (proc)
         (list (fault #:summary "a value raised during procedure call"
                      #:expected raise-any-attribute
                      #:actual the-not-raise-attribute)))))))
 
 (module+ test
-  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo))
+  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo))
                                           (thunk (raise 'foo)))
                 (list))
   (define raise-proc (thunk (raise 'bar)))
-  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo))
+  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo))
                                           raise-proc)
                 (list (fault #:summary "a different value"
                              #:expected (equal-attribute 'foo)
                              #:actual (self-attribute 'bar)
                              #:contexts (list (raise-context)))))
-  (check-equal? (expectation-apply/faults (expect-raise (expect-equal? 'foo)) void)
+  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo)) void)
                 (list (fault #:summary "a value raised during procedure call"
                              #:expected raise-any-attribute
                              #:actual the-not-raise-attribute))))
@@ -255,19 +255,19 @@
     (λ (proc)
       (define exp/context (expect/context exp return-context))
       (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
-        (expectation-apply/faults exp/context (proc)))))))
+        (expectation-apply exp/context (proc)))))))
 
 (module+ test
   (define exp-return-foo (expect-return (expect-equal? 'foo)))
-  (check-equal? (expectation-apply/faults exp-return-foo (thunk 'foo)) (list))
+  (check-equal? (expectation-apply exp-return-foo (thunk 'foo)) (list))
   (define bar-thunk (thunk 'bar))
-  (check-equal? (expectation-apply/faults exp-return-foo bar-thunk)
+  (check-equal? (expectation-apply exp-return-foo bar-thunk)
                 (list (fault #:summary "a different value"
                              #:expected (equal-attribute 'foo)
                              #:actual (self-attribute 'bar)
                              #:contexts (list return-context))))
   (define raise-thunk (thunk (raise 'error)))
-  (check-equal? (expectation-apply/faults exp-return-foo raise-thunk)
+  (check-equal? (expectation-apply exp-return-foo raise-thunk)
                 (list (fault #:summary "no value raised during procedure call"
                              #:expected the-not-raise-attribute
                              #:actual (raise-attribute 'error)))))
@@ -297,9 +297,9 @@
                  (define (call) (apply/arguments proc args))
                  (define call-exp/context
                    (expect/context call-exp (call-context args)))
-                 (expectation-apply/faults call-exp/context call)))))
+                 (expectation-apply call-exp/context call)))))
 
 (module+ test
   (define exp-add
     (expect-call (arguments 1 2) (expect-return (expect-equal? 3))))
-  (check-equal? (expectation-apply/faults exp-add +) (list)))
+  (check-equal? (expectation-apply exp-add +) (list)))

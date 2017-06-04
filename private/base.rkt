@@ -7,11 +7,7 @@
   [expect! (-> expectation? any/c void?)]
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
-  [expectation-apply (-> expectation? any/c result?)]
-  [expectation-apply/faults (-> expectation? any/c (listof fault?))]
-  [result? predicate/c]
-  [result-subject (-> result? any/c)]
-  [result-faults (-> result? (listof fault?))]
+  [expectation-apply (-> expectation? any/c (listof fault?))]
   [fault (->* (#:summary string?
                #:actual attribute?
                #:expected attribute?)
@@ -30,7 +26,8 @@
   [struct (exn:fail:expect exn:fail)
     ([message string?]
      [continuation-marks continuation-mark-set?]
-     [result result?])]))
+     [subject any/c]
+     [faults (listof fault?)])]))
 
 (require racket/format
          racket/list
@@ -38,7 +35,6 @@
 
 
 (struct expectation (proc))
-(struct result (subject faults) #:transparent)
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
 
@@ -58,11 +54,9 @@
                #:contexts [contexts (list)])
   (make-fault summary expected actual contexts))
 
-(define (expectation-apply/faults exp v) ((expectation-proc exp) v))
-(define (expectation-apply exp v)
-  (result v (expectation-apply/faults exp v)))
+(define (expectation-apply exp v) ((expectation-proc exp) v))
 
-(struct exn:fail:expect exn:fail (result) #:transparent)
+(struct exn:fail:expect exn:fail (subject faults) #:transparent)
 
 (define (string-indent str indent-str)
   (define replace-str (string-append "\n" indent-str))
@@ -88,31 +82,32 @@
           (list (expected-message (fault-expected flt))
                 (actual-message (fault-actual flt)))))
 
-(define (result-message/singular rslt)
-  (define flt (first (result-faults rslt)))
+(define (result-message/singular subject flt)
   (error-message (format "expected ~a" (fault-summary flt))
-                 (list* (format "subject: ~v" (result-subject rslt))
+                 (list* (format "subject: ~v" subject)
                         (fault-messages flt))))
 
-(define (result-message/plural rslt)
+(define (result-message/plural subject flts)
   (define (fault-message flt)
     (error-message (format "fault: ~a" (fault-summary flt))
                    (fault-messages flt)
                    #:indent-depth 1))
   (error-message "multiple failures"
-                 (list* (format "subject: ~v" (result-subject rslt))
-                        (map fault-message (result-faults rslt)))))
+                 (list* (format "subject: ~v" subject)
+                        (map fault-message flts))))
 
-(define (raise-result rslt)
-  (define num-faults (length (result-faults rslt)))
+(define (raise-result subject flts)
+  (define num-faults (length flts))
   (when (= num-faults 1)
-    (raise (exn:fail:expect (result-message/singular rslt)
+    (raise (exn:fail:expect (result-message/singular subject (first flts))
                             (current-continuation-marks)
-                            (result-faults rslt))))
+                            subject
+                            flts)))
   (when (> num-faults 1)
-    (raise (exn:fail:expect (result-message/plural rslt)
+    (raise (exn:fail:expect (result-message/plural subject flts)
                             (current-continuation-marks)
-                            (result-faults rslt)))))
+                            subject
+                            flts))))
 
 (define (expect! exp v)
-  (raise-result (expectation-apply exp v)))
+  (raise-result v (expectation-apply exp v)))

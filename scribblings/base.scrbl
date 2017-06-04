@@ -28,23 +28,12 @@ use their basic functionalities.
    (define empty-expectation (expectation (λ (v) (list))))
    (expectation-apply empty-expectation 'foo))}
 
-@defproc[(expectation-apply [exp expectation?] [v any/c]) result?]{
- Returns a @result-tech{result} that wraps @racket[v] with a list of faults
- found by @racket[exp]. See also @racket[expectation-apply/faults].
+@defproc[(expectation-apply [exp expectation?] [v any/c]) (listof faults?)]{
+ Checks @racket[v] against @racket[exp] and returns a list of faults found by
+ @racket[exp].
  @(expect-examples
    (expectation-apply (expect-equal? (list 1 2)) (list 1 2))
    (expectation-apply (expect-equal? (list 1 2)) (list 1 'foo)))}
-
-@defproc[(expectation-apply/faults [exp expectation?] [v any/c])
-         (listof faults?)]{
- Like @racket[expectation-apply], but returns only the list of faults found by
- @racket[exp] instead of wrapping the faults and @racket[v] in a
- @result-tech{result structure}. This is intended for when one expectation's
- implementation refers to other expectations, since expectation implementations
- don't return result structures directly.
- @(expect-examples
-   (expectation-apply/faults (expect-equal? (list 1 2)) (list 1 2))
-   (expectation-apply/faults (expect-equal? (list 1 2)) (list 1 'foo)))}
 
 @defproc[(expect! [exp expectation?] [v any/c]) void?]{
  Checks that @racket[v] has no @fault-tech{faults} according to @racket[exp]. If
@@ -55,13 +44,15 @@ use their basic functionalities.
    (expect! list-exp '(1 2))
    (eval:error (expect! list-exp '(1 a b))))}
 
-@defstruct*[(exn:fail:expect exn:fail) ([result result?])]{
+@defstruct*[(exn:fail:expect exn:fail)
+            ([subject any/c] [faults (listof fault?)])]{
  An instance of @racket[exn:fail] that is thrown by @racket[expect!] when a
  value does not live up to an @expectation-tech{expectation}. The
- @racket[result] field includes both the original subject of the expectation and
- the list of @fault-tech{faults} found by the expectation.}
+ @racket[subject] field is the original value checked against the expectation
+ and the @racket[faults] field is the list of @fault-tech{faults} found by the
+ expectation.}
 
-@section{Faults and Results}
+@section{Faults}
 
 @defproc[(fault? [v any/c]) boolean?]{
  Returns @racket[#t] if @racket[v] is a @fault-tech{fault}, returns @racket[#f]
@@ -98,24 +89,6 @@ use their basic functionalities.
    @defproc[(fault-contexts [flt fault?]) (listof context?)])]{
  Accessors for the various fields of a @racket[fault?] structure. See
  @racket[fault] for information about these fields.}
-
-@defproc[(result? [v any/c]) boolean?]{
- Returns @racket[#t] if @racket[v] is a @result-tech{result}, returns
- @racket[#f] otherwise.
- @(expect-examples
-   (result? "asdf")
-   (result? (expectation-apply expect-true 'foo)))}
-
-@deftogether[
- (@defproc[(result-subject [rslt result?]) any/c]
-   @defproc[(result-faults [rslt result?]) (listof fault?)])]{
- Accessors for fields of @result-tech[#:definition? #t]{result} values, which
- are returned by @racket[expectation-apply] to pair the original subject of an
- expectation's assertions with faults the expectation found.
- @(expect-examples
-   (define rslt (expectation-apply expect-true 'foo))
-   (result-subject rslt)
-   (result-faults rslt))}
 
 @section{Contexts and Attributes}
 
