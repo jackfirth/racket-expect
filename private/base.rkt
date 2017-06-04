@@ -103,7 +103,7 @@
 
 (define (result-message/plural subject flts)
   (define (fault-message flt)
-    (error-message (format "fault: ~a" (fault-summary flt))
+    (error-message (format "fault: expected ~a" (fault-summary flt))
                    (fault-messages flt)
                    #:indent-depth 1))
   (error-message "multiple failures"
@@ -136,4 +136,12 @@
   (check-exn exn:fail:expect? expect-foo!)
   (check-exn #rx"expected foo" expect-foo!)
   (check-exn #rx"expected: 'foo" expect-foo!)
-  (check-exn #rx"actual: 'not-foo" expect-foo!))
+  (check-exn #rx"actual: 'not-foo" expect-foo!)
+  (define bar-fault (fault #:summary "bar"
+                           #:expected (self-attribute 'bar)
+                           #:actual (self-attribute 'not-bar)))
+  (define expect-foo+bar (expectation (const (list foo-fault bar-fault))))
+  (define (expect-foo+bar!) (expect! 'any expect-foo+bar))
+  (check-exn #rx"multiple failures" expect-foo+bar!)
+  (check-exn #rx"fault: expected foo" expect-foo+bar!)
+  (check-exn #rx"fault: expected bar" expect-foo+bar!))
