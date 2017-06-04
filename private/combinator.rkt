@@ -112,11 +112,11 @@
                           (expect-items-combined item-exps length))))
 
 (module+ test
-  (define expect-a (expect-list (expect-eq? 'a)))
-  (check-exn #rx"more list items" (thunk (expect! expect-a (list))))
-  (check-exn #rx"fewer list items" (thunk (expect! expect-a (list 'a 'b))))
-  (check-exn #rx"in: list item 0" (thunk (expect! expect-a (list 'b))))
-  (check-exn #rx"list?" (thunk (expect! expect-a 'not-a-list))))
+  (define (expect-a! v) (expect! v (expect-list (expect-eq? 'a))))
+  (check-exn #rx"more list items" (thunk (expect-a! (list))))
+  (check-exn #rx"fewer list items" (thunk (expect-a! (list 'a 'b))))
+  (check-exn #rx"in: list item 0" (thunk (expect-a! (list 'b))))
+  (check-exn #rx"list?" (thunk (expect-a! 'not-a-list))))
 
 (define (expect-vector . exps)
   (define item-exps
@@ -128,12 +128,11 @@
                           (expect-items-combined item-exps vector-length))))
 
 (module+ test
-  (define expect-vec-a (expect-vector (expect-eq? 'a)))
-  (check-exn #rx"more vector items" (thunk (expect! expect-vec-a (vector))))
-  (check-exn #rx"fewer vector items"
-             (thunk (expect! expect-vec-a (vector 'a 'b))))
-  (check-exn #rx"in: vector item 0" (thunk (expect! expect-vec-a (vector 'b))))
-  (check-exn #rx"vector?" (thunk (expect! expect-vec-a 'not-a-vector))))
+  (define (expect-vec-a! v) (expect! v (expect-vector (expect-eq? 'a))))
+  (check-exn #rx"more vector items" (thunk (expect-vec-a! (vector))))
+  (check-exn #rx"fewer vector items" (thunk (expect-vec-a! (vector 'a 'b))))
+  (check-exn #rx"in: vector item 0" (thunk (expect-vec-a! (vector 'b))))
+  (check-exn #rx"vector?" (thunk (expect-vec-a! 'not-a-vector))))
 
 (struct arity-includes-attribute attribute (num-positional kws-okay?)
   #:transparent
