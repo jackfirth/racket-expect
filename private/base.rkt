@@ -4,7 +4,7 @@
 
 (provide
  (contract-out
-  [expect! (-> expectation? any/c void?)]
+  [expect! (-> any/c expectation? void?)]
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c (listof fault?))]
@@ -113,16 +113,16 @@
                             subject
                             flts))))
 
-(define (expect! exp v)
+(define (expect! v exp)
   (raise-result v (expectation-apply exp v)))
 
 (module+ test
-  (check-not-exn (thunk (expect! (expectation (const (list))) 'any)))
+  (check-not-exn (thunk (expect! 'any (expectation (const (list))))))
   (define foo-fault (fault #:summary "foo"
                            #:expected (self-attribute 'foo)
                            #:actual (self-attribute 'not-foo)))
   (define expect-foo (expectation (const (list foo-fault))))
-  (define (expect-foo!) (expect! expect-foo 'any))
+  (define (expect-foo!) (expect! 'any expect-foo))
   (check-exn exn:fail:expect? expect-foo!)
   (check-exn #rx"expected foo" expect-foo!)
   (check-exn #rx"expected: 'foo" expect-foo!)

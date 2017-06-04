@@ -17,7 +17,7 @@ provided by @racketmodname[rackunit].
  contains an @racket[eq-attribute] and a @racket[self-attribute] for the
  expected and actual fields, respectively.
  @(expect-examples
-   (eval:error (expect! (expect-eq? 'foo) 'bar)))}
+   (eval:error (expect! 'bar (expect-eq? 'foo))))}
 
 @defproc[(expect-eqv? [v any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is @racket[eqv?]
@@ -25,7 +25,7 @@ provided by @racketmodname[rackunit].
  contains an @racket[eqv-attribute] and a @racket[self-attribute] for the
  expected and actual fields, respectively.
  @(expect-examples
-   (eval:error (expect! (expect-eqv? 'foo) 'bar)))}
+   (eval:error (expect! 'bar (expect-eqv? 'foo))))}
 
 @defproc[(expect-equal? [v any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is
@@ -39,8 +39,8 @@ provided by @racketmodname[rackunit].
  and the other compound data expectation constructors for details on what faults
  may be returned for these types of values. 
  @(expect-examples
-   (eval:error (expect! (expect-equal? '(1 2 (3 4 5) 6 7))
-                        '(1 foo (bar 4 5 extra) blah 7))))}
+   (eval:error (expect! '(1 foo (bar 4 5 extra) blah 7)
+                        (expect-equal? '(1 2 (3 4 5) 6 7)))))}
 
 @deftogether[
  (@defproc[(eq-attribute? [v any/c]) boolean?]
@@ -79,7 +79,7 @@ provided by @racketmodname[rackunit].
  expectations wrap their expected @attribute-tech{attribute} in
  @racket[not-attribute].
  @(expect-examples
-   (eval:error (expect! (expect-not-equal? '(1 2)) '(1 foo))))}
+   (eval:error (expect! '(1 foo) (expect-not-equal? '(1 2)))))}
 
 @deftogether[
  (@defproc[(not-attribute [attr attribute?]) not-attribute?]
@@ -100,9 +100,9 @@ provided by @racketmodname[rackunit].
  instances of @racket[=-attribute] in their expected field.
  @(expect-examples
    (define exp10 (expect-= 10 0.01))
-   (expect! exp10 10)
-   (eval:error (expect! exp10 25))
-   (expect! exp10 10.0001))}
+   (expect! 10 exp10)
+   (eval:error (expect! 25 exp10))
+   (expect! 10.0001 exp10))}
 
 @deftogether[
  (@defproc[(=-attribute [x real?] [epsilon real?]) =-attribute?]
@@ -130,10 +130,10 @@ provided by @racketmodname[rackunit].
  @racket[expect-not-false] which wraps a @racket[self-attribute] value in a
  @racket[not-attribute] value.
  @(expect-examples
-   (eval:error (expect! expect-true 'foo))
-   (eval:error (expect! expect-false 'foo))
-   (expect! expect-not-false 'foo)
-   (eval:error (expect! expect-not-false #f)))}
+   (eval:error (expect! 'foo expect-true))
+   (eval:error (expect! 'foo expect-false))
+   (expect! 'foo expect-not-false)
+   (eval:error (expect! #f expect-not-false)))}
 
 @defproc[(expect-pred [pred predicate/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value results in
@@ -141,8 +141,8 @@ provided by @racketmodname[rackunit].
  @racket[pred-attribute] values and @racket[self-attribute] values in their
  expected and actual fields respectively.
  @(expect-examples
-   (expect! (expect-pred number?) 10)
-   (eval:error (expect! (expect-pred number?) 'foo)))}
+   (expect! 10 (expect-pred number?))
+   (eval:error (expect! 'foo (expect-pred number?))))}
 
 @deftogether[
  (@defproc[(pred-attribute [pred predicate/c]) pred-attribute?]

@@ -20,10 +20,10 @@ expectations out of simple ones while preserving error message quality.
  @(expect-examples
    (define positive-even
      (expect-all (expect-pred positive?) (expect-pred even?)))
-   (expect! positive-even 4)
-   (eval:error (expect! positive-even 7))
-   (eval:error (expect! positive-even -4))
-   (eval:error (expect! positive-even -7)))}
+   (expect! 4 positive-even)
+   (eval:error (expect! 7 positive-even))
+   (eval:error (expect! -4 positive-even))
+   (eval:error (expect! -7 positive-even)))}
 
 @defproc[(expect-and [exp expectation?] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects everything that each of
@@ -38,10 +38,10 @@ expectations out of simple ones while preserving error message quality.
      (expect-and (expect-pred real?)
                  (expect-pred positive?)
                  (expect-pred small?)))
-   (expect! small-number 5)
-   (eval:error (expect! small-number 20))
-   (eval:error (expect! small-number -4))
-   (eval:error (expect! small-number 'foo)))}
+   (expect! 5 small-number)
+   (eval:error (expect! 20 small-number))
+   (eval:error (expect! -4 small-number))
+   (eval:error (expect! 'foo small-number)))}
 
 @section{Extending Expectations}
 
@@ -53,7 +53,7 @@ expectations out of simple ones while preserving error message quality.
  @(expect-examples
    (struct test-context context () #:transparent)
    (define test-exp (expect/context (expect-eq? 'foo) (test-context "test")))
-   (eval:error (expect! test-exp 5)))}
+   (eval:error (expect! 5 test-exp)))}
 
 @defproc[(expect/proc [exp expectation?] [proc (-> any/c any/c)]) expectation?]{
  Returns an @expectation-tech{expectation} that behaves like @racket[exp] except
@@ -63,8 +63,8 @@ expectations out of simple ones while preserving error message quality.
  when it would break any contracts on @racket[proc].
  @(expect-examples
    (define first-foo (expect/proc (expect-eq? 'foo) first))
-   (expect! first-foo '(foo bar))
-   (eval:error (expect! first-foo '(bar foo))))}
+   (expect! '(foo bar) first-foo)
+   (eval:error (expect! '(bar foo) first-foo)))}
 
 @section{Compound Data Structure Combinators}
 
@@ -77,9 +77,9 @@ expectations out of simple ones while preserving error message quality.
  @(expect-examples
    (define num+string-expectation
      (expect-list (expect-pred number?) (expect-pred string?)))
-   (expect! num+string-expectation '(10 "text"))
-   (eval:error (expect! num+string-expectation '(foo bar)))
-   (eval:error (expect! num+string-expectation '(foo))))}
+   (expect! '(10 "text") num+string-expectation)
+   (eval:error (expect! '(foo bar) num+string-expectation))
+   (eval:error (expect! '(foo) num+string-expectation)))}
 
 @defproc[(expect-vector [item-exp expectation-convertible?] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a vector
@@ -89,9 +89,9 @@ expectations out of simple ones while preserving error message quality.
  checked.
  @(expect-examples
    (define num+foo-vec-expectation (expect-vector (expect-pred number?) 'foo))
-   (expect! num+foo-vec-expectation #(10 foo))
-   (eval:error (expect! num+foo-vec-expectation #(10 bar)))
-   (eval:error (expect! num+foo-vec-expectation #(10))))}
+   (expect! #(10 foo) num+foo-vec-expectation)
+   (eval:error (expect! #(10 bar) num+foo-vec-expectation))
+   (eval:error (expect! #(10) num+foo-vec-expectation)))}
 
 @section{Procedure Expectations}
 
@@ -105,39 +105,39 @@ expectations out of simple ones while preserving error message quality.
  @racket[args].
  @(expect-examples
    (define exp-addition (expect-call (arguments 3 8) (expect-return 11)))
-   (expect! exp-addition +)
-   (eval:error (expect! exp-addition -))
-   (eval:error (expect! exp-addition (thunk 'wrong-arity)))
-   (eval:error (expect! exp-addition (thunk* (raise 'error)))))}
+   (expect! + exp-addition)
+   (eval:error (expect! - exp-addition))
+   (eval:error (expect! (thunk 'wrong-arity) exp-addition))
+   (eval:error (expect! (thunk* (raise 'error)) exp-addition)))}
 
 @defproc[(expect-return [value-exp expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk returns a value,
  then that value is checked against @racket[value-exp].
  @(expect-examples
-   (expect! (expect-return 'foo) (thunk 'foo))
-   (eval:error (expect! (expect-return 'foo) (thunk 'bar)))
-   (eval:error (expect! (expect-return 'foo) (thunk (raise 'error)))))}
+   (expect! (thunk 'foo) (expect-return 'foo))
+   (eval:error (expect! (thunk 'bar) (expect-return 'foo)))
+   (eval:error (expect! (thunk (raise 'error)) (expect-return 'foo))))}
 
 @defproc[(expect-raise [raise-exp expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
  a value which is then checked against @racket[raise-exp].
  @(expect-examples
    (define (raise-foo) (raise 'foo))
-   (expect! (expect-raise 'foo) raise-foo)
+   (expect! raise-foo (expect-raise 'foo))
    (define (success) 'success)
-   (eval:error (expect! (expect-raise 'foo) success))
+   (eval:error (expect! success (expect-raise 'foo)))
    (define (raise-bar) (raise 'bar))
-   (eval:error (expect! (expect-raise 'foo) raise-bar)))}
+   (eval:error (expect! raise-bar (expect-raise 'foo))))}
 
 @defthing[expect-not-raise expectation?]{
  An expectation that expects a thunk does not @racket[raise] any value when
  called.
  @(expect-examples
-   (expect! expect-not-raise (thunk 'success))
-   (eval:error (expect! expect-not-raise (thunk (raise 'failure))))
+   (expect! (thunk 'success) expect-not-raise)
+   (eval:error (expect! (thunk (raise 'failure)) expect-not-raise))
    (define (not-a-thunk unexpected-arg)
      'foo)
-   (eval:error (expect! expect-not-raise not-a-thunk)))}
+   (eval:error (expect! not-a-thunk expect-not-raise)))}
 
 @section{Conversion to Expectations}
 
