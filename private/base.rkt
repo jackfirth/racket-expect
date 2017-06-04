@@ -33,6 +33,10 @@
          racket/list
          racket/string)
 
+(module+ test
+  (require racket/function
+           rackunit))
+
 
 (struct expectation (proc))
 (struct context (description) #:transparent)
@@ -111,3 +115,15 @@
 
 (define (expect! exp v)
   (raise-result v (expectation-apply exp v)))
+
+(module+ test
+  (check-not-exn (thunk (expect! (expectation (const (list))) 'any)))
+  (define foo-fault (fault #:summary "foo"
+                           #:expected (self-attribute 'foo)
+                           #:actual (self-attribute 'not-foo)))
+  (define expect-foo (expectation (const (list foo-fault))))
+  (define (expect-foo!) (expect! expect-foo 'any))
+  (check-exn exn:fail:expect? expect-foo!)
+  (check-exn #rx"expected foo" expect-foo!)
+  (check-exn #rx"expected: 'foo" expect-foo!)
+  (check-exn #rx"actual: 'not-foo" expect-foo!))
