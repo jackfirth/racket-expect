@@ -75,7 +75,7 @@
   #:transparent #:omit-define-syntaxes #:constructor-name make-count-attribute)
 
 (define/contract (count-attribute type count)
-  (-> (or/c 'vector 'list) exact-positive-integer? count-attribute?)
+  (-> (or/c 'vector 'list) exact-nonnegative-integer? count-attribute?)
   (make-count-attribute (format "~a of size ~a" type count) type count))
 
 (define/contract (countable-type vs)
@@ -110,6 +110,11 @@
   (expect-and (expect-pred list?)
               (expect-all (expect-count (length exps) length "list items")
                           (expect-items-combined item-exps length))))
+
+(module+ test
+  (check-exn #rx"more list items"
+             (thunk (expect! (expect-list (expect-eq? 'a)) (list)))))
+
 
 (define (expect-vector . exps)
   (define item-exps
