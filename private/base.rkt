@@ -82,9 +82,19 @@
   (lines-join (list summary (string-indent (lines-join notes) indent-str))))
 
 (define (fault-messages flt)
-  (append (map context-message (reverse (fault-contexts flt)))
+  (append (map context-message (fault-contexts flt))
           (list (expected-message (fault-expected flt))
                 (actual-message (fault-actual flt)))))
+
+(module+ test
+  (struct test-context context () #:transparent)
+  (define flt/ctxts
+    (fault #:summary "foo"
+           #:expected (self-attribute 'foo)
+           #:actual (self-attribute 'bar)
+           #:contexts (list (test-context "outer") (test-context "inner"))))
+  (check-equal? (fault-messages flt/ctxts)
+                (list "in: outer" "in: inner" "expected: 'foo" "actual: 'bar")))
 
 (define (result-message/singular subject flt)
   (error-message (format "expected ~a" (fault-summary flt))
