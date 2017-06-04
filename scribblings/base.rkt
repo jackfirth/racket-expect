@@ -43,5 +43,4 @@
   attribute-tech "fault-attribute"
   context-tech "fault-context"
   expectation-tech "expectation"
-  fault-tech "expectation-fault"
-  result-tech "expectation-result")
+  fault-tech "expectation-fault")
