@@ -112,9 +112,11 @@
                           (expect-items-combined item-exps length))))
 
 (module+ test
-  (check-exn #rx"more list items"
-             (thunk (expect! (expect-list (expect-eq? 'a)) (list)))))
-
+  (define expect-a (expect-list (expect-eq? 'a)))
+  (check-exn #rx"more list items" (thunk (expect! expect-a (list))))
+  (check-exn #rx"fewer list items" (thunk (expect! expect-a (list 'a 'b))))
+  (check-exn #rx"in: list item 0" (thunk (expect! expect-a (list 'b))))
+  (check-exn #rx"list?" (thunk (expect! expect-a 'not-a-list))))
 
 (define (expect-vector . exps)
   (define item-exps
@@ -124,6 +126,14 @@
   (expect-and (expect-pred vector?)
               (expect-all (expect-count num-exps vector-length "vector items")
                           (expect-items-combined item-exps vector-length))))
+
+(module+ test
+  (define expect-vec-a (expect-vector (expect-eq? 'a)))
+  (check-exn #rx"more vector items" (thunk (expect! expect-vec-a (vector))))
+  (check-exn #rx"fewer vector items"
+             (thunk (expect! expect-vec-a (vector 'a 'b))))
+  (check-exn #rx"in: vector item 0" (thunk (expect! expect-vec-a (vector 'b))))
+  (check-exn #rx"vector?" (thunk (expect! expect-vec-a 'not-a-vector))))
 
 (struct arity-includes-attribute attribute (num-positional kws-okay?)
   #:transparent
