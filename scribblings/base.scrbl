@@ -12,8 +12,6 @@ input and an actual attribute. Faults are often scoped to a
 discrepency exists. This section documents each of these structures and how to
 use their basic functionalities.
 
-@section{Expectations}
-
 @defproc[(expectation? [v any/c]) boolean?]{
  Returns @racket[#t] if @racket[v] is an @expectation-tech{expectation}, returns
  @racket[#f] otherwise.
@@ -52,8 +50,6 @@ use their basic functionalities.
  and the @racket[faults] field is the list of @fault-tech{faults} found by the
  expectation.}
 
-@section{Faults}
-
 @defproc[(fault? [v any/c]) boolean?]{
  Returns @racket[#t] if @racket[v] is a @fault-tech{fault}, returns @racket[#f]
  otherwise.
@@ -89,8 +85,6 @@ use their basic functionalities.
    @defproc[(fault-contexts [flt fault?]) (listof context?)])]{
  Accessors for the various fields of a @racket[fault?] structure. See
  @racket[fault] for information about these fields.}
-
-@section{Contexts and Attributes}
 
 @defstruct*[context ([description string?]) #:transparent #:omit-constructor]{
  A structure type for what @context-tech[#:definition? #t]{context} a
