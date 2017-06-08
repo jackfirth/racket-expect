@@ -2,8 +2,7 @@
 
 (provide rest->
          take/chop
-         map/index
-         func-reverse)
+         map/index)
 
 (require racket/contract
          racket/list)
@@ -27,8 +26,3 @@
 
 (module+ test
   (check-equal? (map/index + '(10 10 10)) '(10 11 12)))
-
-(define ((func-reverse f) . vs) (apply f (reverse vs)))
-
-(module+ test
-  (check-equal? ((func-reverse string-append) "aa" "bb" "cc") "ccbbaa"))
