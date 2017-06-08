@@ -87,7 +87,7 @@
   [(expect-all . <convert>) (rest-> cvrt? exp?)]
   [(expect-and . <convert>) (rest-> cvrt? exp?)]
   [(expect-hash-count <convert>) (-> cvrt? exp?)]
-  [(expect-hash-ref k <covert>) (-> any/c cvrt? exp?)]
+  [(expect-hash-ref k <convert>) (-> any/c cvrt? exp?)]
   [(expect-hash-keys <convert>) (-> cvrt? exp?)]
   [(expect-list . <convert>) (rest-> cvrt? exp?)]
   [(expect-list-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
