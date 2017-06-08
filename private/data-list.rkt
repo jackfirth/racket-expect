@@ -24,8 +24,7 @@
 (define (expect-list-ref exp idx)
   (expect/context (expect/proc exp (list-ref _ idx)) (index-context idx)))
 
-(define (expect-list-count exp)
-  (expect/context (expect/proc exp length) count-context))
+(define expect-list-count (expect/count _ length))
 
 (define (expect-list . exps)
   (define (list->items-exp vs)

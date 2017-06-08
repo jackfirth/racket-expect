@@ -24,8 +24,7 @@
 (define (expect-vector-ref exp idx)
   (expect/context (expect/proc exp (vector-ref _ idx)) (index-context idx)))
 
-(define (expect-vector-count exp)
-  (expect/context (expect/proc exp vector-length) count-context))
+(define expect-vector-count (expect/count _ vector-length))
 
 (define (expect-vector . exps)
   (define (vec->items-exp vec)
