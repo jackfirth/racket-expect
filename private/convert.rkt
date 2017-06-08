@@ -28,7 +28,9 @@
 
 
 (define expectation-convertible?
-  (or/c expectation? list? vector? boolean? number? string? symbol? char?))
+  (or/c expectation?
+        list? vector? set? hash?
+        boolean? number? string? symbol? char?))
 
 (define (expectation-convert v)
   (cond
@@ -36,7 +38,10 @@
     [(list? v) (apply expect-list (map expectation-convert v))]
     [(vector? v)
      (apply expect-vector (map expectation-convert (vector->list v)))]
-    [(set? v) (apply expect-set (map expectation-convert (set->list v)))]
+    [(set? v) (apply expect-set (set->list v))]
+    [(hash? v)
+     (define converted (map expectation-convert (hash-values v)))
+     (apply expect-hash (append-map list (hash-keys v) converted))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
 
@@ -45,7 +50,10 @@
     [(list? v) (apply expect-list (map expect-equal?/convert v))]
     [(vector? v)
      (apply expect-vector (map expect-equal?/convert (vector->list v)))]
-    [(set? v) (apply expect-set (map expect-equal?/convert (set->list v)))]
+    [(set? v) (apply expect-set (set->list v))]
+    [(hash? v)
+     (define converted (map expect-equal?/convert (hash-values v)))
+     (apply expect-hash (append-map list (hash-keys v) converted))]
     [else (expect-equal? v)]))
 
 (define-syntax <convert> #f)
