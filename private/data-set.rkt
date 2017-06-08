@@ -8,14 +8,16 @@
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
   [expect-superset (-> set? expectation?)]
-  [expect-set-count (-> expectation? expectation?)]))
+  [expect-set-count (-> expectation? expectation?)]
+  [expect-set (rest-> any/c expectation?)]))
 
 (require fancy-app
          racket/set
          "base.rkt"
          "combinator.rkt"
          "data-collect.rkt"
-         "logic.rkt")
+         "logic.rkt"
+         "util.rkt")
 
 (module+ test
   (require racket/function
@@ -81,3 +83,16 @@
              (thunk (expect! (set 1) (expect-superset (set 1 2 3))))))
 
 (define expect-set-count (expect/count _ set-count))
+
+(module+ test
+  (check-not-exn
+   (thunk (expect! (set 1 2) (expect-set-count (expect-pred even?))))))
+
+(define (expect-set . vs)
+  (define st (list->set vs))
+  (expect-all (expect-subset st) (expect-superset st)))
+
+(module+ test
+  (check-not-exn (thunk (expect! (set 1 2 3) (expect-set 1 2 3))))
+  (check-exn #rx"multiple failures"
+             (thunk (expect! (set 1 'foo) (expect-set 1 2 3)))))
