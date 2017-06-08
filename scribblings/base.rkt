@@ -6,7 +6,8 @@
                                   racket/contract
                                   racket/format
                                   racket/function
-                                  racket/list))
+                                  racket/list
+                                  racket/set))
          expect-examples
          source-code-link)
 
@@ -16,7 +17,8 @@
                     racket/contract
                     racket/format
                     racket/function
-                    racket/list)
+                    racket/list
+                    racket/set)
          scribble/example
          scribble/manual
          scribble/text
@@ -28,7 +30,11 @@
 
 (define (make-expect-eval)
   (make-base-eval #:lang 'racket/base
-                  '(require arguments expect racket/function racket/list)))
+                  '(require arguments
+                            expect
+                            racket/function
+                            racket/list
+                            racket/set)))
 
 (define-simple-macro (expect-examples example:expr ...)
   (examples #:eval (make-expect-eval) example ...))
