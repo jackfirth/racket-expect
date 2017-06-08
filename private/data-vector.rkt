@@ -17,7 +17,7 @@
          "util.rkt")
 
 
-(define (expect-vector-ref idx exp)
+(define (expect-vector-ref exp idx)
   (expect/context (expect/proc exp (vector-ref _ idx)) (index-context idx)))
 
 (define (expect-vector-count exp)
@@ -26,8 +26,7 @@
 (define (expect-vector . exps)
   (define (vec->items-exp vec)
     (apply expect-all
-           (map/index (func-reverse expect-vector-ref)
-                      (take/chop exps (vector->list vec)))))
+           (map/index expect-vector-ref (take/chop exps (vector->list vec)))))
   (expect-and (expect-pred vector?)
               (expect-all (expect-vector-count (expect-equal? (length exps)))
                           (expect/derive vec->items-exp))))

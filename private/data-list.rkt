@@ -20,7 +20,7 @@
   (require rackunit))
 
 
-(define (expect-list-ref idx exp)
+(define (expect-list-ref exp idx)
   (expect/context (expect/proc exp (list-ref _ idx)) (index-context idx)))
 
 (define (expect-list-count exp)
@@ -28,8 +28,7 @@
 
 (define (expect-list . exps)
   (define (list->items-exp vs)
-    (apply expect-all
-           (map/index (func-reverse expect-list-ref) (take/chop exps vs))))
+    (apply expect-all (map/index expect-list-ref (take/chop exps vs))))
   (expect-and (expect-pred list?)
               (expect-all (expect-list-count (expect-equal? (length exps)))
                           (expect/derive list->items-exp))))
