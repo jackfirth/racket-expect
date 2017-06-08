@@ -14,6 +14,7 @@
 (require (for-syntax racket/base
                      racket/syntax)
          racket/function
+         racket/set
          racket/vector
          syntax/parse/define
          "base.rkt"
@@ -35,6 +36,7 @@
     [(list? v) (apply expect-list (map expectation-convert v))]
     [(vector? v)
      (apply expect-vector (map expectation-convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expectation-convert (set->list v)))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
 
@@ -43,6 +45,7 @@
     [(list? v) (apply expect-list (map expect-equal?/convert v))]
     [(vector? v)
      (apply expect-vector (map expect-equal?/convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expect-equal?/convert (set->list v)))]
     [else (expect-equal? v)]))
 
 (define (expect-not-equal?/convert v)
@@ -50,6 +53,7 @@
     [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
     [(vector? v)
      (apply expect-vector (map expect-not-equal?/convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expect-not-equal?/convert (set->list v)))]
     [else (expect-not-equal? v)]))
 
 (define-syntax <convert> #f)

@@ -19,7 +19,8 @@
  @item{Lists are convertible with @racket[expect-list] after first converting
    their contents.}
  @item{Vectors are convertible with @racket[expect-vector] after first
-   converting their contents.}]}
+   converting their contents.}
+ @item{Sets are convertible with @racket[expect-set].}]}
 
 @defproc[(expectation-convert [v expectation-convertible?]) expectation?]{
  Returns an @expectation-tech{expectation} constructed by converting @racket[v]
