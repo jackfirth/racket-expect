@@ -17,5 +17,9 @@ messages.
 @local-table-of-contents[]
 
 @include-section["base.scrbl"]
+@include-section["compare.scrbl"]
+@include-section["logic.scrbl"]
 @include-section["data.scrbl"]
+@include-section["function.scrbl"]
 @include-section["combinator.scrbl"]
+@include-section["convert.scrbl"]

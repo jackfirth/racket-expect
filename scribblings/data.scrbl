@@ -2,156 +2,114 @@
 
 @(require "base.rkt")
 
-@title{Expectation Constructors}
+@title{Data Structure Expectations}
 
-The @racketmodname[expect] library provides several built-in
-@expectation-tech{expectations} and expectation constructors. The provided
-expectations are intended to supplant all the functionality of the checks
-provided by @racketmodname[rackunit].
-
-@section{Equality Expectations}
-
-@defproc[(expect-eq? [v any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value is @racket[eq?]
- to @racket[v], returning a single @fault-tech{fault} otherwise. The fault
- contains an @racket[eq-attribute] and a @racket[self-attribute] for the
- expected and actual fields, respectively.
+@defproc[(expect-list [item-exp expectation-convertible?] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a list whose
+ elements satisfy the @racket[item-exp] expectations. The length of the list is
+ also checked, and only the @racket[item-exp] expectations for lists that
+ contain enough items to include the corresponding @racket[item-exp] are
+ checked.
  @(expect-examples
-   (eval:error (expect! 'bar (expect-eq? 'foo))))}
+   (define num+string-expectation
+     (expect-list (expect-pred number?) (expect-pred string?)))
+   (expect! '(10 "text") num+string-expectation)
+   (eval:error (expect! '(foo bar) num+string-expectation))
+   (eval:error (expect! '(foo) num+string-expectation)))}
 
-@defproc[(expect-eqv? [v any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value is @racket[eqv?]
- to @racket[v], returning a single @fault-tech{fault} otherwise. The fault
- contains an @racket[eqv-attribute] and a @racket[self-attribute] for the
- expected and actual fields, respectively.
+@defproc[(expect-list-ref [item-exp expectation-convertible?]
+                          [index exact-nonnegative-integer?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a list with
+ an item at position @racket[index], then checks that item against
+ @racket[item-exp].
  @(expect-examples
-   (eval:error (expect! 'bar (expect-eqv? 'foo))))}
+   (define expect-second-string? (expect-list-ref (expect-pred string?) 1))
+   (expect! '(10 "text") expect-second-string?)
+   (eval:error (expect! '(10 20) expect-second-string?)))}
 
-@defproc[(expect-equal? [v any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value is
- @racket[equal?] to @racket[v]. Due to the recursive properties of
- @racket[equal?], the expectation may return multiple faults identifying
- specific sub-values that fail to meet the expectation. Most returned faults
- contain @racket[equal-attribute] and @racket[self-attribute] values for their
- expected and actual fields, respectively. However some sub-values may be of the
- wrong type or contain too many items, leading to faults with
- @racket[pred-attribute] or @racket[length-attribute]. See @racket[expect-list]
- and the other compound data expectation constructors for details on what faults
- may be returned for these types of values. 
+@defproc[(expect-list-count [count-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a list, then
+ checks the number of items in the list against @racket[count-exp].
  @(expect-examples
-   (eval:error (expect! '(1 foo (bar 4 5 extra) blah 7)
-                        (expect-equal? '(1 2 (3 4 5) 6 7)))))}
+   (define expect-even-list (expect-list-count (expect-pred even?)))
+   (expect! '(a b) expect-even-list)
+   (eval:error (expect! '(a b c) expect-even-list)))}
 
-@deftogether[
- (@defproc[(eq-attribute? [v any/c]) boolean?]
-   @defproc[(eqv-attribute? [v any/c]) boolean?]
-   @defproc[(equal-attribute? [v any/c]) boolean?])]{
- Predicates for the @racket[eq-attribute], @racket[eqv-attribute], and
- @racket[equal-attribute] structures respectively. Used by @racket[expect-eq?],
- @racket[expect-eqv?], and @racket[expect-equal?].}
-
-@deftogether[
- (@defproc[(eq-attribute [value any/c]) eq-attribute?]
-   @defproc[(eqv-attribute [value any/c]) eqv-attribute?]
-   @defproc[(equal-attribute [value any/c]) equal-attribute?])]{
- Constructors for the @attribute-tech{attributes} used in @fault-tech{faults}
- returned by @racket[eq-attribute], @racket[eqv-attribute], and
- @racket[equal-attribute] respectively. Equality attributes have descriptions
- of the form @racket["<eq-proc> to <value>"], such as @racket["equal? to 'foo"].
+@defproc[(expect-vector [item-exp expectation-convertible?] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector
+ whose elements satisfy the @racket[item-exp] expectations. The length of the
+ vector is also checked, and only the @racket[item-exp] expectations for vectors
+ that contain enough items to include the corresponding @racket[item-exp] are
+ checked.
  @(expect-examples
-   (eqv-attribute 'foo)
-   (equal-attribute 12.5))}
+   (define num+foo-vec-expectation (expect-vector (expect-pred number?) 'foo))
+   (expect! #(10 foo) num+foo-vec-expectation)
+   (eval:error (expect! #(10 bar) num+foo-vec-expectation))
+   (eval:error (expect! #(10) num+foo-vec-expectation)))}
 
-@deftogether[
- (@defproc[(eq-attribute-value [eq-attr eq-attribute?]) any/c]
-   @defproc[(eqv-attribute-value [eqv-attr eqv-attribute?]) any/c]
-   @defproc[(equal-attribute-value [equal-attr equal-attribute?]) any/c])]{
- Accessors for the value originally used to construct the respective attribute.
-@(expect-examples
-  (eq-attribute-value (eq-attribute 12)))}
-
-@deftogether[
- (@defproc[(expect-not-eq? [v any/c]) expectation?]
-   @defproc[(expect-not-eqv? [v any/c]) expectation?]
-   @defproc[(expect-not-equal? [v any/c]) expectation?])]{
- Negated variants of @racket[expect-eq?], @racket[expect-eqv?], and
- @racket[expect-equal?] respectively. @fault-tech{Faults} returned by these
- expectations wrap their expected @attribute-tech{attribute} in
- @racket[not-attribute].
+@defproc[(expect-vector-ref [item-exp expectation-convertible?]
+                            [index exact-nonnegative-integer?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector with
+ an item at position @racket[index], then checks that item against
+ @racket[item-exp].
  @(expect-examples
-   (eval:error (expect! '(1 foo) (expect-not-equal? '(1 2)))))}
+   (define expect-second-string? (expect-vector-ref (expect-pred string?) 1))
+   (expect! #(10 "text") expect-second-string?)
+   (eval:error (expect! #(10 20) expect-second-string?)))}
 
-@deftogether[
- (@defproc[(not-attribute [attr attribute?]) not-attribute?]
-   @defproc[(not-attribute? [v any/c]) boolean?]
-   @defproc[(not-attribute-negated [not-attr not-attribute?]) attribute?])]{
- Constructor, predicate, and field accessor for the @attribute-tech{attribute}
- returned by @racket[expect-not-eq?], @racket[expect-not-eqv?], and
- @racket[expect-not-equal?].
+@defproc[(expect-vector-count [count-exp expectation-convertible?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector,
+ then checks the number of items in the vector against @racket[count-exp].
  @(expect-examples
-   (define not-foo (not-attribute (eq-attribute 'foo)))
-   not-foo
-   (not-attribute? not-foo)
-   (not-attribute-negated not-foo))}
+   (define expect-even-vector (expect-vector-count (expect-pred even?)))
+   (expect! #(a b) expect-even-vector)
+   (eval:error (expect! #(a b c) expect-even-vector)))}
 
-@defproc[(expect-= [x real?] [epsilon real?]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value is a number
- within @racket[epsilon] of @racket[x]. Returned @fault-tech{faults} have
- instances of @racket[=-attribute] in their expected field.
+@defproc[(expect-set [v any/c] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ contains exactly the given @racket[v] values and no other values. The
+ expectation finds one @fault-tech{fault} for each extra item and for each
+ missing item in the checked set.
  @(expect-examples
-   (define exp10 (expect-= 10 0.01))
-   (expect! 10 exp10)
-   (eval:error (expect! 25 exp10))
-   (expect! 10.0001 exp10))}
+   (expect! (set 1 2 3) (expect-set 1 2 3))
+   (eval:error (expect! (set 1 'foo) (expect-set 1 2 3))))}
 
-@deftogether[
- (@defproc[(=-attribute [x real?] [epsilon real?]) =-attribute?]
-   @defproc[(=-attribute? [v any/c]) boolean?]
-   @defproc[(=-attribute-value [=-attr =-attribute?]) real?]
-   @defproc[(=-attribute-epsilon [=-attr =-attribute?]) real?])]{
- Constructor, predicate, and field accessors for the @attribute-tech{attribute}
- returned by @racket[expect-=].
+@defproc[(expect-set-member? [v any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set
+ containing @racket[v].
  @(expect-examples
-   (define =10 (=-attribute 10 0.01))
-   =10
-   (=-attribute? =10)
-   (=-attribute-value =10)
-   (=-attribute-epsilon =10))}
+   (expect! (set 1 2) (expect-set-member? 1))
+   (eval:error (expect! (set 1 2) (expect-set-member? 'foo))))}
 
-@section{Boolean Expectations}
-
-@deftogether[
- (@defthing[expect-true expectation?]
-   @defthing[expect-false expectation?]
-   @defthing[expect-not-false expectation?])]{
- @expectation-tech{Expectations} that expect a value is either @racket[#t],
- @racket[#f], or not @racket[#f] respectively. Returned @fault-tech{faults} have
- @racket[self-attribute] values in the expected field, except for
- @racket[expect-not-false] which wraps a @racket[self-attribute] value in a
- @racket[not-attribute] value.
+@defproc[(expect-set-not-member? [v any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ does not contain @racket[v].
  @(expect-examples
-   (eval:error (expect! 'foo expect-true))
-   (eval:error (expect! 'foo expect-false))
-   (expect! 'foo expect-not-false)
-   (eval:error (expect! #f expect-not-false)))}
+   (expect! (set 1 2) (expect-set-not-member? 'foo))
+   (eval:error (expect! (set 1 2) (expect-set-not-member? 1))))}
 
-@defproc[(expect-pred [pred predicate/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value results in
- @racket[(pred v)] returning @racket[#t]. Returned @fault-tech{faults} have
- @racket[pred-attribute] values and @racket[self-attribute] values in their
- expected and actual fields respectively.
+@defproc[(expect-subset [st set?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ is a subset of @racket[st]. The expectation finds one @fault-tech{fault} for
+ each unexpected item.
  @(expect-examples
-   (expect! 10 (expect-pred number?))
-   (eval:error (expect! 'foo (expect-pred number?))))}
+   (expect! (set 1 2) (expect-subset (set 1 2 3)))
+   (eval:error (expect! (set 1 2 'foo 'bar) (expect-subset (set 1 2 3)))))}
 
-@deftogether[
- (@defproc[(pred-attribute [pred predicate/c]) pred-attribute?]
-   @defproc[(pred-attribute? [v any/c]) boolean?]
-   @defproc[(pred-attribute-value [pred-attr pred-attribute?]) predicate/c])]{
- Constructor, predicate, and field accessor for the @attribute-tech{attribute}
- returned by @racket[expect-pred].
+@defproc[(expect-superset [st set?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ is a superset of @racket[st]. The expectation finds one @fault-tech{fault} for
+ each item in @racket[st] not found in the checked set.
  @(expect-examples
-   (define number-attr (pred-attribute number?))
-   number-attr
-   (pred-attribute? number-attr)
-   (pred-attribute-value number-attr))}
+   (expect! (set 1 2 3) (expect-superset (set 1 2)))
+   (eval:error (expect! (set 'foo) (expect-superset (set 1 2)))))}
+
+@defproc[(expect-set-count [count-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set whose
+ number of elements is then checked against @racket[count-exp]
+ @(expect-examples
+   (expect! (set 'foo 'bar) (expect-set-count 2))
+   (eval:error (expect! (set 1 2 3) (expect-set-count (expect-pred even?)))))}

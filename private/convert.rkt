@@ -14,11 +14,16 @@
 (require (for-syntax racket/base
                      racket/syntax)
          racket/function
+         racket/set
          racket/vector
          syntax/parse/define
          "base.rkt"
-         "combinator.rkt"
-         "data.rkt"
+         "compare.rkt"
+         "data-list.rkt"
+         "data-set.rkt"
+         "data-vector.rkt"
+         "function.rkt"
+         "logic.rkt"
          "util.rkt")
 
 
@@ -31,8 +36,25 @@
     [(list? v) (apply expect-list (map expectation-convert v))]
     [(vector? v)
      (apply expect-vector (map expectation-convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expectation-convert (set->list v)))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
+
+(define (expect-equal?/convert v)
+  (cond
+    [(list? v) (apply expect-list (map expect-equal?/convert v))]
+    [(vector? v)
+     (apply expect-vector (map expect-equal?/convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expect-equal?/convert (set->list v)))]
+    [else (expect-equal? v)]))
+
+(define (expect-not-equal?/convert v)
+  (cond
+    [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
+    [(vector? v)
+     (apply expect-vector (map expect-not-equal?/convert (vector->list v)))]
+    [(set? v) (apply expect-set (map expect-not-equal?/convert (set->list v)))]
+    [else (expect-not-equal? v)]))
 
 (define-syntax <convert> #f)
 
@@ -55,28 +77,21 @@
        (define (converted arg.id ...) (id arg.expr ...))
        (provide (contract-out (rename converted id contract-expr))))])
 
-(define (expect-equal?/convert v)
-  (cond
-    [(list? v) (apply expect-list (map expect-equal?/convert v))]
-    [(vector? v)
-     (apply expect-vector (map expect-equal?/convert (vector->list v)))]
-    [else (expect-equal? v)]))
+(define-simple-macro (define-conversions [header contract] ...)
+  (begin (define/expectation-conversion header contract) ...))
 
-(define (expect-not-equal?/convert v)
-  (cond
-    [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
-    [(vector? v)
-     (apply expect-vector (map expect-not-equal?/convert (vector->list v)))]
-    [else (expect-not-equal? v)]))
+(define exp? expectation?)
+(define cvrt? expectation-convertible?)
 
-(define/expectation-conversion (expect-list . <convert>)
-  (rest-> expectation-convertible? expectation?))
-
-(define/expectation-conversion (expect-vector . <convert>)
-  (rest-> expectation-convertible? expectation?))
-
-(define/expectation-conversion (expect-raise <convert>)
-  (-> expectation-convertible? expectation?))
-
-(define/expectation-conversion (expect-return <convert>)
-  (-> expectation-convertible? expectation?))
+(define-conversions
+  [(expect-all . <convert>) (rest-> cvrt? exp?)]
+  [(expect-and . <convert>) (rest-> cvrt? exp?)]
+  [(expect-list . <convert>) (rest-> cvrt? exp?)]
+  [(expect-list-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
+  [(expect-list-count <convert>) (-> cvrt? exp?)]
+  [(expect-set-count <convert>) (-> cvrt? exp?)]
+  [(expect-vector . <convert>) (rest-> cvrt? exp?)]
+  [(expect-vector-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
+  [(expect-vector-count <convert>) (-> cvrt? exp?)]
+  [(expect-raise <convert>) (-> cvrt? exp?)]
+  [(expect-return <convert>) (-> cvrt? exp?)])
