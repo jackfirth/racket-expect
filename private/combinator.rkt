@@ -23,15 +23,13 @@
 
 
 (define (expect/context exp ctxt)
-  (expectation
-   (λ (v)
-     (define (add-context flt)
-       (define new-ctxts (cons ctxt (fault-contexts flt)))
-       (fault #:summary (fault-summary flt)
-              #:expected (fault-expected flt)
-              #:actual (fault-actual flt)
-              #:contexts new-ctxts))
-     (map add-context (expectation-apply exp v)))))
+  (define (add-context flt)
+    (define new-ctxts (cons ctxt (fault-contexts flt)))
+    (fault #:summary (fault-summary flt)
+           #:expected (fault-expected flt)
+           #:actual (fault-actual flt)
+           #:contexts new-ctxts))
+  (expectation (λ (v) (map add-context (expectation-apply exp v)))))
 
 (define (expect/proc exp f)
   (expectation (λ (v) (expectation-apply exp (f v)))))
