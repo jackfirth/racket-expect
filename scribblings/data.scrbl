@@ -67,3 +67,49 @@
    (define expect-even-vector (expect-vector-count (expect-pred even?)))
    (expect! #(a b) expect-even-vector)
    (eval:error (expect! #(a b c) expect-even-vector)))}
+
+@defproc[(expect-set [v any/c] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ contains exactly the given @racket[v] values and no other values. The
+ expectation finds one @fault-tech{fault} for each extra item and for each
+ missing item in the checked set.
+ @(expect-examples
+   (expect! (set 1 2 3) (expect-set 1 2 3))
+   (eval:error (expect! (set 1 'foo) (expect-set 1 2 3))))}
+
+@defproc[(expect-set-member? [v any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set
+ containing @racket[v].
+ @(expect-examples
+   (expect! (set 1 2) (expect-set-member? 1))
+   (eval:error (expect! (set 1 2) (expect-set-member? 'foo))))}
+
+@defproc[(expect-set-not-member? [v any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ does not contain @racket[v].
+ @(expect-examples
+   (expect! (set 1 2) (expect-set-not-member? 'foo))
+   (eval:error (expect! (set 1 2) (expect-set-not-member? 1))))}
+
+@defproc[(expect-subset [st set?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ is a subset of @racket[st]. The expectation finds one @fault-tech{fault} for
+ each unexpected item.
+ @(expect-examples
+   (expect! (set 1 2) (expect-subset (set 1 2 3)))
+   (eval:error (expect! (set 1 2 'foo 'bar) (expect-subset (set 1 2 3)))))}
+
+@defproc[(expect-superset [st set?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ is a superset of @racket[st]. The expectation finds one @fault-tech{fault} for
+ each item in @racket[st] not found in the checked set.
+ @(expect-examples
+   (expect! (set 1 2 3) (expect-superset (set 1 2)))
+   (eval:error (expect! (set 'foo) (expect-superset (set 1 2)))))}
+
+@defproc[(expect-set-count [count-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set whose
+ number of elements is then checked against @racket[count-exp]
+ @(expect-examples
+   (expect! (set 'foo 'bar) (expect-set-count 2))
+   (eval:error (expect! (set 1 2 3) (expect-set-count (expect-pred even?)))))}
