@@ -56,13 +56,12 @@
 
 (define (expect-procedure-arity-includes? k #:keywords-okay? [kws-okay? #f])
   (define attr (arity-includes-attribute k #:keywords-okay? kws-okay?))
-  (expectation
-   (λ (proc)
-     (if (procedure-arity-includes? proc k kws-okay?)
-         (list)
-         (list (fault #:summary "a procedure accepting no arguments"
-                      #:expected attr
-                      #:actual (arity-attribute proc)))))))
+  (define (make-fault proc)
+    (and (not (procedure-arity-includes? proc k kws-okay?))
+         (fault #:summary "a procedure accepting no arguments"
+                #:expected attr
+                #:actual (arity-attribute proc))))
+  (expect/singular make-fault))
 
 (struct not-raise-attribute attribute () #:transparent)
 (define the-not-raise-attribute (not-raise-attribute "no value raised"))
@@ -71,8 +70,7 @@
   #:transparent #:omit-define-syntaxes #:constructor-name make-raise-attribute)
 
 (define (raise-attribute raised)
-  (make-raise-attribute (format "raised ~v" raised)
-                        raised))
+  (make-raise-attribute (format "raised ~v" raised) raised))
 
 (define (raise-fault raised)
   (fault #:summary "no value raised during procedure call"
@@ -84,13 +82,10 @@
               (expect-procedure-arity-includes? 0)
               exp))
 
-(define expect-not-raise
-  (expect-thunk
-   (expectation
-    (λ (proc)
-      (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
-        (proc)
-        (list))))))
+(define (make-not-raise-fault proc)
+  (with-handlers ([(const #t) raise-fault]) (proc) #f))
+
+(define expect-not-raise (expect-thunk (expect/singular make-not-raise-fault)))
 
 (module+ test
   (check-equal? (expectation-apply expect-not-raise void) (list))
@@ -152,10 +147,10 @@
 (define return-context (make-return-context "return value"))
 
 (define (expect-return exp)
+  (define exp/context (expect/context exp return-context))
   (expect-thunk
    (expectation
     (λ (proc)
-      (define exp/context (expect/context exp return-context))
       (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
         (expectation-apply exp/context (proc)))))))
 
