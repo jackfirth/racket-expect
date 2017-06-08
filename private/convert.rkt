@@ -26,6 +26,9 @@
          "logic.rkt"
          "util.rkt")
 
+(module+ test
+  (require rackunit))
+
 
 (define expectation-convertible?
   (or/c expectation?
@@ -44,6 +47,21 @@
      (apply expect-hash (append-map list (hash-keys v) converted))]
     [(boolean? v) (if v expect-true expect-false)]
     [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
+
+(module+ test
+  (check-pred expectation? (expectation-convert 'foo))
+  (check-pred expectation? (expectation-convert #t))
+  (check-pred expectation? (expectation-convert expect-true))
+  (check-pred expectation? (expectation-convert (list 1 2 3)))
+  (check-pred expectation? (expectation-convert (vector 1 2 3)))
+  (check-pred expectation? (expectation-convert (hash 'a 1)))
+  (check-pred expectation? (expectation-convert (set 1 2 3)))
+  (check-pred expectation?
+              (expectation-convert
+               (hash 'a (list 1 2 3)
+                     'b (vector "foo" "bar")
+                     'c (set 'a 'b 'c)
+                     'd #f))))
 
 (define (expect-equal?/convert v)
   (cond
