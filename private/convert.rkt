@@ -14,11 +14,13 @@
 (require (for-syntax racket/base
                      racket/syntax)
          racket/function
+         racket/list
          racket/set
          racket/vector
          syntax/parse/define
          "base.rkt"
          "compare.rkt"
+         "data-hash.rkt"
          "data-list.rkt"
          "data-set.rkt"
          "data-vector.rkt"
@@ -83,9 +85,20 @@
 (define exp? expectation?)
 (define cvrt? expectation-convertible?)
 
+(define (expect-hash/convert . k+vs)
+  (define converted (map expectation-convert (slice k+vs #:start 1 #:step 2)))
+  (apply expect-hash (append-map list (slice k+vs #:step 2) converted)))
+
+(provide
+ (contract-out
+  [rename expect-hash/convert expect-hash (rest->* (list any/c cvrt?) exp?)]))
+
 (define-conversions
   [(expect-all . <convert>) (rest-> cvrt? exp?)]
   [(expect-and . <convert>) (rest-> cvrt? exp?)]
+  [(expect-hash-count <convert>) (-> cvrt? exp?)]
+  [(expect-hash-ref k <covert>) (-> any/c cvrt? exp?)]
+  [(expect-hash-keys <convert>) (-> cvrt? exp?)]
   [(expect-list . <convert>) (rest-> cvrt? exp?)]
   [(expect-list-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
   [(expect-list-count <convert>) (-> cvrt? exp?)]
