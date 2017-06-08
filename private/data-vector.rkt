@@ -29,4 +29,4 @@
            (map/index expect-vector-ref (take/chop exps (vector->list vec)))))
   (expect-and (expect-pred vector?)
               (expect-all (expect-vector-count (expect-equal? (length exps)))
-                          (expect/derive vec->items-exp))))
+                          (expect/dependent vec->items-exp))))

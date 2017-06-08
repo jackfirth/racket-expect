@@ -31,4 +31,4 @@
     (apply expect-all (map/index expect-list-ref (take/chop exps vs))))
   (expect-and (expect-pred list?)
               (expect-all (expect-list-count (expect-equal? (length exps)))
-                          (expect/derive list->items-exp))))
+                          (expect/dependent list->items-exp))))

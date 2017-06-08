@@ -5,9 +5,9 @@
 (provide
  (contract-out
   [expect/context (-> expectation? context? expectation?)]
-  [expect/derive (-> (-> any/c expectation?) expectation?)]
+  [expect/dependent (-> (-> any/c expectation?) expectation?)]
   [expect/proc (-> expectation? (-> any/c any/c) expectation?)]
-  [expect/single-fault (-> (-> any/c (or/c fault? #f)) expectation?)]))
+  [expect/singular (-> (-> any/c (or/c fault? #f)) expectation?)]))
 
 (require arguments
          fancy-app
@@ -36,9 +36,9 @@
 (define (expect/proc exp f)
   (expectation (λ (v) (expectation-apply exp (f v)))))
 
-(define (expect/derive exp-func)
+(define (expect/dependent exp-func)
   (expectation (λ (v) (expectation-apply (exp-func v) v))))
 
-(define (expect/single-fault maybe-fault-func)
+(define (expect/singular maybe-fault-func)
   (expectation
    (λ (v) (define flt (maybe-fault-func v)) (if flt (list flt) (list)))))

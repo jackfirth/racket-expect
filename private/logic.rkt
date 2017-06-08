@@ -36,7 +36,7 @@
          #:actual (self-attribute v)))
 
 (define expect-true
-  (expect/single-fault (λ (v) (and (not (equal? v #t)) (true-fault v)))))
+  (expect/singular (λ (v) (and (not (equal? v #t)) (true-fault v)))))
 
 (module+ test
   (check-exn #rx"expected true" (thunk (expect! 'foo expect-true))))
@@ -47,7 +47,7 @@
          #:actual (self-attribute v)))
 
 (define expect-false
-  (expect/single-fault (λ (v) (and v (false-fault v)))))
+  (expect/singular (λ (v) (and v (false-fault v)))))
 
 (module+ test
   (check-exn #rx"expected false" (thunk (expect! 'foo expect-false))))
@@ -64,7 +64,7 @@
          #:actual (self-attribute v)))
 
 (define expect-not-false
-  (expect/single-fault (λ (v) (and (not v) (not-false-fault v)))))
+  (expect/singular (λ (v) (and (not v) (not-false-fault v)))))
 
 (module+ test
   (check-exn #rx"expected not false" (thunk (expect! #f expect-not-false))))
@@ -83,7 +83,7 @@
          #:actual (self-attribute v)))
 
 (define (expect-pred pred)
-  (expect/single-fault (λ (v) (and (not (pred v)) (pred-fault pred v)))))
+  (expect/singular (λ (v) (and (not (pred v)) (pred-fault pred v)))))
 
 (module+ test
   (check-exn #rx"expected a different kind of value"
