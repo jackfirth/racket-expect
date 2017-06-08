@@ -1,6 +1,7 @@
 #lang racket/base
 
 (provide rest->
+         rest->*
          take/chop
          map/index)
 
@@ -12,6 +13,12 @@
 
 
 (define (rest-> arg/c result/c) (->* () #:rest (listof arg/c) result/c))
+
+(define (rest->* args/c result/c)
+  (define (rest/c)
+    (define (nonempty) (foldr cons/c (rest/c) args/c))
+    (recursive-contract (or/c empty? (nonempty)) #:list-contract?))
+  (->* () #:rest (rest/c) result/c))
 
 (define (take/chop vs list-to-match)
   (take vs (min (length vs) (length list-to-match))))
