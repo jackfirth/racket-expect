@@ -7,8 +7,6 @@
           [expectation-convert (-> expectation-convertible? expectation?)]
           [expectation-convertible? predicate/c]
           [rename expect-equal?/convert expect-equal?
-                  (-> any/c expectation?)]
-          [rename expect-not-equal?/convert expect-not-equal?
                   (-> any/c expectation?)]))
 
 (require (for-syntax racket/base
@@ -49,14 +47,6 @@
      (apply expect-vector (map expect-equal?/convert (vector->list v)))]
     [(set? v) (apply expect-set (map expect-equal?/convert (set->list v)))]
     [else (expect-equal? v)]))
-
-(define (expect-not-equal?/convert v)
-  (cond
-    [(list? v) (apply expect-list (map expect-not-equal?/convert v))]
-    [(vector? v)
-     (apply expect-vector (map expect-not-equal?/convert (vector->list v)))]
-    [(set? v) (apply expect-set (map expect-not-equal?/convert (set->list v)))]
-    [else (expect-not-equal? v)]))
 
 (define-syntax <convert> #f)
 
