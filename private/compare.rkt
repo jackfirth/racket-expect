@@ -29,7 +29,11 @@
          racket/format
          racket/function
          "base.rkt"
+         "combinator.rkt"
          "logic.rkt")
+
+(module+ test
+  (require rackunit))
 
 
 ;; Equivalence constructors
@@ -51,28 +55,43 @@
 (define (equal-attribute v) (comp-attr make-equal-attribute "equal?" v))
 
 (define (expect-compare comparison attr e)
-  (expectation
-   (λ (v)
-     (if (comparison e v)
-         (list)
-         (list (fault #:summary "a different value"
-                      #:expected (attr e)
-                      #:actual (self-attribute v)))))))
+  (define (make-fault v)
+    (and (not (comparison e v))
+         (fault #:summary "a different value"
+                #:expected (attr e)
+                #:actual (self-attribute v))))
+  (expect/singular make-fault))
 
-(define (expect-eq? e) (expect-compare eq? eq-attribute e))
-(define (expect-eqv? e) (expect-compare eqv? eqv-attribute e))
-(define (expect-equal? e) (expect-compare equal? equal-attribute e))
+(define expect-eq? (expect-compare eq? eq-attribute _))
+(define expect-eqv? (expect-compare eqv? eqv-attribute _))
+(define expect-equal? (expect-compare equal? equal-attribute _))
+
+(module+ test
+  (check-exn #rx"expected a different value"
+             (thunk (expect! 'foo (expect-eq? 'bar))))
+  (check-exn #rx"expected: eqv\\? to 'bar"
+             (thunk (expect! 'foo (expect-eqv? 'bar))))
+  (check-exn #rx"actual: 'foo"
+             (thunk (expect! 'foo (expect-equal? 'bar))))
+  (check-not-exn (thunk (expect! 'foo (expect-eq? 'foo)))))
 
 (define ((negate-attribute attr-proc) v) (not-attribute (attr-proc v)))
 
-(define (expect-not-eq? e)
-  (expect-compare (negate eq?) (negate-attribute eq-attribute) e))
+(define (expect-not-compare comparison attr e)
+  (expect-compare (negate comparison) (negate-attribute attr) e))
 
-(define (expect-not-eqv? e)
-  (expect-compare (negate eqv?) (negate-attribute eqv-attribute) e))
+(define expect-not-eq? (expect-not-compare eq? eq-attribute _))
+(define expect-not-eqv? (expect-not-compare eqv? eqv-attribute _))
+(define expect-not-equal? (expect-not-compare equal? equal-attribute _))
 
-(define (expect-not-equal? e)
-  (expect-compare (negate equal?) (negate-attribute equal-attribute) e))
+(module+ test
+  (check-exn #rx"expected a different value"
+             (thunk (expect! 'foo (expect-not-eq? 'foo))))
+  (check-exn #rx"expected: not eqv\\? to 'foo"
+             (thunk (expect! 'foo (expect-not-eqv? 'foo))))
+  (check-exn #rx"actual: 'foo"
+             (thunk (expect! 'foo (expect-not-equal? 'foo))))
+  (check-not-exn (thunk (expect! 'foo (expect-not-eq? 'bar)))))
 
 (struct =-attribute attribute (value epsilon)
   #:transparent #:omit-define-syntaxes #:constructor-name make-=-attribute)
@@ -84,10 +103,19 @@
 (define (expect-= e tolerance)
   (define lower (- e tolerance))
   (define upper (+ e tolerance))
-  (expectation
-   (λ (v)
-     (if (<= lower v upper)
-         (list)
-         (list (fault #:summary "a different number"
-                      #:expected (=-attribute e tolerance)
-                      #:actual (self-attribute v)))))))
+  (define (make-fault v)
+    (and (not (<= lower v upper))
+         (fault #:summary "a different number"
+                #:expected (=-attribute e tolerance)
+                #:actual (self-attribute v))))
+  (expect/singular make-fault))
+
+(module+ test
+  (check-exn #rx"expected a different number"
+             (thunk (expect! 10 (expect-= 15 0.1))))
+  (check-exn #rx"expected: = to 15 \\(within a tolerance of 0\\.1\\)"
+             (thunk (expect! 10 (expect-= 15 0.1))))
+  (check-exn #rx"actual: 10"
+             (thunk (expect! 10 (expect-= 15 0.1))))
+  (check-not-exn (thunk (expect! 10 (expect-= 10 0.1))))
+  (check-not-exn (thunk (expect! 10.0001 (expect-= 10 0.1)))))
