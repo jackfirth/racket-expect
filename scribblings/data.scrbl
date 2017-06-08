@@ -47,3 +47,23 @@
    (expect! #(10 foo) num+foo-vec-expectation)
    (eval:error (expect! #(10 bar) num+foo-vec-expectation))
    (eval:error (expect! #(10) num+foo-vec-expectation)))}
+
+@defproc[(expect-vector-ref [item-exp expectation-convertible?]
+                            [index exact-nonnegative-integer?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector with
+ an item at position @racket[index], then checks that item against
+ @racket[item-exp].
+ @(expect-examples
+   (define expect-second-string? (expect-vector-ref (expect-pred string?) 1))
+   (expect! #(10 "text") expect-second-string?)
+   (eval:error (expect! #(10 20) expect-second-string?)))}
+
+@defproc[(expect-vector-count [count-exp expectation-convertible?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a vector,
+ then checks the number of items in the vector against @racket[count-exp].
+ @(expect-examples
+   (define expect-even-vector (expect-vector-count (expect-pred even?)))
+   (expect! #(a b) expect-even-vector)
+   (eval:error (expect! #(a b c) expect-even-vector)))}
