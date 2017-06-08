@@ -7,11 +7,14 @@
   [expect-set-member? (-> any/c expectation?)]
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
-  [expect-superset (-> set? expectation?)]))
+  [expect-superset (-> set? expectation?)]
+  [expect-set-count (-> expectation? expectation?)]))
 
-(require racket/set
+(require fancy-app
+         racket/set
          "base.rkt"
          "combinator.rkt"
+         "data-collect.rkt"
          "logic.rkt")
 
 (module+ test
@@ -76,3 +79,5 @@
   (check-not-exn (thunk (expect! (set 1 2 3) (expect-superset (set 1 2)))))
   (check-exn #rx"multiple failures"
              (thunk (expect! (set 1) (expect-superset (set 1 2 3))))))
+
+(define expect-set-count (expect/count _ set-count))
