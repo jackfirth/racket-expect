@@ -19,6 +19,7 @@
          "base.rkt"
          "compare.rkt"
          "data-list.rkt"
+         "data-set.rkt"
          "data-vector.rkt"
          "function.rkt"
          "logic.rkt"
@@ -84,6 +85,7 @@
   [(expect-list . <convert>) (rest-> cvrt? exp?)]
   [(expect-list-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
   [(expect-list-count <convert>) (-> cvrt? exp?)]
+  [(expect-set-count <convert>) (-> cvrt? exp?)]
   [(expect-vector . <convert>) (rest-> cvrt? exp?)]
   [(expect-vector-ref <convert> v) (-> cvrt? exact-nonnegative-integer? exp?)]
   [(expect-vector-count <convert>) (-> cvrt? exp?)]
