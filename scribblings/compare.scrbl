@@ -72,7 +72,8 @@
  expectations wrap their expected @attribute-tech{attribute} in
  @racket[not-attribute].
  @(expect-examples
-   (eval:error (expect! '(1 foo) (expect-not-equal? '(1 2)))))}
+   (expect! '(1 foo) (expect-not-equal? '(1 2)))
+   (eval:error (expect! 'a (expect-not-eq? 'a))))}
 
 @deftogether[
  (@defproc[(not-attribute [attr attribute?]) not-attribute?]

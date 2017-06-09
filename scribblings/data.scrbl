@@ -113,3 +113,38 @@
  @(expect-examples
    (expect! (set 'foo 'bar) (expect-set-count 2))
    (eval:error (expect! (set 1 2 3) (expect-set-count (expect-pred even?)))))}
+
+@defproc[(expect-hash [k any/c] [value-exp expectation-convertible?] ... ...)
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a hash that
+ contains exactly the given @racket[k] keys and, for each key, contains a value
+ that is then checked against the corresponding @racket[value-exp]. Extra or
+ missing keys result in @fault-tech{faults}.
+ @(expect-examples
+   (expect! (hash 'a 1 'b 2) (expect-hash 'a 1 'b 2))
+   (eval:error (expect! (hash 'a 1 'c 3) (expect-hash 'a 1 'b 2)))
+   (eval:error (expect! (hash 'a 1 'b 1000) (expect-hash 'a 1 'b 2))))}
+
+@defproc[(expect-hash-ref [k any/c] [value-exp expectation-convertible?])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a hash that
+ contains @racket[k], then checks the value for @racket[k] against
+ @racket[value-exp].
+ @(expect-examples
+   (expect! (hash 'a 1 'b 2) (expect-hash-ref 'a 1))
+   (eval:error (expect! (hash 'a 100) (expect-hash-ref 'a 1)))
+   (eval:error (expect! (hash 'b 2) (expect-hash-ref 'a 1))))}
+
+@defproc[(expect-hash-count [count-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a hash whose
+ number of key-value pairs is then checked against @racket[count-exp].
+ @(expect-examples
+   (expect! (hash 'a 1 'b 2) (expect-hash-count 2))
+   (eval:error (expect! (hash 'a 1) (expect-hash-count (expect-pred even?)))))}
+
+@defproc[(expect-hash-keys [set-exp expectation-convertible?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a hash whose
+ set of keys is then checked against @racket[set-exp].
+ @(expect-examples
+   (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
+   (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
