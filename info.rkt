@@ -6,10 +6,10 @@
   '("arguments"
     "base"
     "fancy-app"
+    ("rackunit-lib" #:version "1.7")
     "reprovide-lang"))
 (define build-deps
-  '("rackunit-lib"
-    "rackunit-doc"
+  '("rackunit-doc"
     "doc-coverage"
     "racket-doc"
     "scribble-lib"
