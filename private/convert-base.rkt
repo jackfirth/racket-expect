@@ -17,12 +17,12 @@
          racket/set
          syntax/parse/define
          "base.rkt"
-         "compare.rkt"
-         "data-hash.rkt"
-         "data-list.rkt"
          "data-set.rkt"
-         "data-vector.rkt"
-         "logic.rkt")
+         "logic.rkt"
+         (submod "compare.rkt" no-conversion)
+         (submod "data-hash.rkt" no-conversion)
+         (submod "data-list.rkt" no-conversion)
+         (submod "data-vector.rkt" no-conversion))
 
 (module+ test
   (require rackunit))

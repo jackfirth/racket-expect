@@ -16,15 +16,16 @@
          racket/vector
          syntax/parse/define
          "base.rkt"
-         "compare.rkt"
          "convert-base.rkt"
-         "data-hash.rkt"
-         "data-list.rkt"
          "data-set.rkt"
-         "data-vector.rkt"
-         "function.rkt"
-         "logic.rkt"
-         "util.rkt")
+         "util.rkt"
+         (submod "compare.rkt" no-conversion)
+         (submod "data-hash.rkt" no-conversion)
+         (submod "data-list.rkt" no-conversion)
+         (submod "data-set.rkt" no-conversion)
+         (submod "data-vector.rkt" no-conversion)
+         (submod "function.rkt" no-conversion)
+         (submod "logic.rkt" no-conversion))
 
 (module+ test
   (require rackunit))
