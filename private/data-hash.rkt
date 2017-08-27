@@ -2,22 +2,24 @@
 
 (require racket/contract)
 
-(provide
- (contract-out
-  [expect-hash (rest->* (list any/c expectation?) expectation?)]
-  [expect-hash-count (-> expectation? expectation?)]
-  [expect-hash-keys (-> expectation? expectation?)]
-  [expect-hash-ref (-> any/c expectation? expectation?)]))
+(module+ no-conversion
+  (provide
+   (contract-out
+    [expect-hash (rest->* (list any/c expectation?) expectation?)]
+    [expect-hash-count (-> expectation? expectation?)]
+    [expect-hash-keys (-> expectation? expectation?)]
+    [expect-hash-ref (-> any/c expectation? expectation?)])))
 
 (require fancy-app
          racket/set
          "base.rkt"
          "combinator.rkt"
-         "compare.rkt"
          "data-collect.rkt"
          "data-set.rkt"
          "logic.rkt"
-         "util.rkt")
+         "util.rkt"
+         (submod "data-set.rkt" no-conversion)
+         (submod "logic.rkt" no-conversion))
 
 (module+ test
   (require racket/function
@@ -27,6 +29,7 @@
 (define expect-hash-count (expect/count _ hash-count))
 
 (module+ test
+  (require (submod "compare.rkt" no-conversion))
   (check-not-exn
    (thunk (expect! (hash 'a 1 'b 2) (expect-hash-count (expect-equal? 2))))))
 
@@ -77,7 +80,6 @@
   (expect-and (expect-pred hash?)
               (expect-all (expect-hash-keys (apply expect-set keys))
                           (expect/dependent present-keys-exp))))
-
 
 (module+ test
   (define expect-foo1-bar2!

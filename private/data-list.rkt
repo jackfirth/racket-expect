@@ -2,18 +2,20 @@
 
 (require racket/contract)
 
-(provide
- (contract-out
-  [expect-list (rest-> expectation? expectation?)]
-  [expect-list-ref (-> expectation? exact-nonnegative-integer? expectation?)]
-  [expect-list-count (-> expectation? expectation?)]))
+(module+ no-conversion
+  (provide
+   (contract-out
+    [expect-list (rest-> expectation? expectation?)]
+    [expect-list-ref (-> expectation? exact-nonnegative-integer? expectation?)]
+    [expect-list-count (-> expectation? expectation?)])))
 
 (require fancy-app
          "base.rkt"
          "combinator.rkt"
-         "compare.rkt"
+         (submod "compare.rkt" no-conversion)
          "data-collect.rkt"
          "logic.rkt"
+         (submod "logic.rkt" no-conversion)
          "util.rkt")
 
 (module+ test

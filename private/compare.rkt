@@ -8,7 +8,6 @@
   [expect-not-eq? (-> any/c expectation?)]
   [expect-eqv? (-> any/c expectation?)]
   [expect-not-eqv? (-> any/c expectation?)]
-  [expect-equal? (-> any/c expectation?)]
   [expect-not-equal? (-> any/c expectation?)]
   [expect-= (-> real? real? expectation?)]
   [eq-attribute? predicate/c]
@@ -24,6 +23,9 @@
   [=-attribute? predicate/c]
   [=-attribute-value (-> =-attribute? real?)]
   [=-attribute-epsilon (-> =-attribute? real?)]))
+
+(module+ no-conversion
+  (provide (contract-out [expect-equal? (-> any/c expectation?)])))
 
 (require fancy-app
          racket/format

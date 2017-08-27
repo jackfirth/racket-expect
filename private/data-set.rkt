@@ -8,8 +8,12 @@
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
   [expect-superset (-> set? expectation?)]
-  [expect-set-count (-> expectation? expectation?)]
   [expect-set (rest-> any/c expectation?)]))
+
+(module+ no-conversion
+  (provide
+   (contract-out
+    [expect-set-count (-> expectation? expectation?)])))
 
 (require fancy-app
          racket/set
@@ -17,6 +21,7 @@
          "combinator.rkt"
          "data-collect.rkt"
          "logic.rkt"
+         (submod "logic.rkt" no-conversion)
          "util.rkt")
 
 (module+ test

@@ -5,10 +5,13 @@
 (provide
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
-  [expect-return (-> expectation? expectation?)]
-  [expect-raise (-> expectation? expectation?)]
   [expect-not-raise expectation?]))
 
+(module+ no-conversion
+  (provide
+   (contract-out
+    [expect-return (-> expectation? expectation?)]
+    [expect-raise (-> expectation? expectation?)])))
 
 (require arguments
          fancy-app
@@ -16,10 +19,12 @@
          "base.rkt"
          "combinator.rkt"
          "compare.rkt"
-         "logic.rkt")
+         "logic.rkt"
+         (submod "logic.rkt" no-conversion))
 
 (module+ test
-  (require rackunit))
+  (require rackunit
+           (submod "compare.rkt" no-conversion)))
 
 
 (struct arity-includes-attribute attribute (num-positional kws-okay?)

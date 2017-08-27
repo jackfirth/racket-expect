@@ -8,14 +8,18 @@
   [expect-false expectation?]
   [expect-not-false expectation?]
   [expect-pred (-> predicate/c expectation?)]
-  [expect-all (rest-> expectation? expectation?)]
-  [expect-and (rest-> expectation? expectation?)]
   [not-attribute? predicate/c]
   [not-attribute (-> attribute? not-attribute?)]
   [not-attribute-negated (-> not-attribute? attribute?)]
   [pred-attribute (-> predicate/c pred-attribute?)]
   [pred-attribute? predicate/c]
   [pred-attribute-value (-> pred-attribute? predicate/c)]))
+
+(module+ no-conversion
+  (provide
+   (contract-out
+    [expect-all (rest-> expectation? expectation?)]
+    [expect-and (rest-> expectation? expectation?)])))
 
 (require fancy-app
          racket/function
