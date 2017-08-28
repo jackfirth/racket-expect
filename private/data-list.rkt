@@ -12,11 +12,10 @@
 (require fancy-app
          "base.rkt"
          "combinator.rkt"
-         (submod "compare.rkt" no-conversion)
          "data-collect.rkt"
          "logic.rkt"
-         (submod "logic.rkt" no-conversion)
-         "util.rkt")
+         "util.rkt"
+         (submod "compare.rkt" no-conversion))
 
 (module+ test
   (require racket/function
