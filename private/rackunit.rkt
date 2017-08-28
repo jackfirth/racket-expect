@@ -12,14 +12,24 @@
          "base.rkt"
          "convert-base.rkt")
 
-(define-check (check-expect v exp)
+(module+ for-custom-checks
+  (provide check-expect*))
+
+(define-check (check-expect v exp) (check-expect* v exp))
+
+(define (check-expect* v exp)
   (match (expectation-apply (expectation-convert exp) v)
     [(list) (void)]
     [(list flt) (fail-check-expect/singular v flt)]
     [(list* flts) (fail-check-expect/plural v flts)]))
 
 (define (fail-check-expect/singular v flt)
-  (with-check-info* (fault-infos flt)
+  (define infos (fault-infos flt))
+  (define infos/subject
+    (if (member 'context (map check-info-name infos))
+        (cons (make-check-info 'subject v) infos)
+        infos))
+  (with-check-info* infos/subject
     (thunk (fail-check (format "Expected ~a" (fault-summary flt))))))
 
 (define (fail-check-expect/plural v flts)
