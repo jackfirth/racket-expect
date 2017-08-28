@@ -2,6 +2,7 @@
 
 (provide (for-label (all-from-out arguments
                                   expect
+                                  expect/rackunit
                                   racket/base
                                   racket/contract
                                   racket/format
@@ -13,6 +14,7 @@
 
 (require (for-label arguments
                     expect
+                    expect/rackunit
                     racket/base
                     racket/contract
                     racket/format
@@ -34,6 +36,7 @@
   (make-base-eval #:lang 'racket/base
                   '(require arguments
                             expect
+                            expect/rackunit
                             racket/function
                             racket/list
                             racket/set)))
