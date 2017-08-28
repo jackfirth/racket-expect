@@ -2,5 +2,7 @@
 
 (module+ test
   (require doc-coverage
-           expect)
-  (check-all-documented 'expect))
+           expect
+           expect/rackunit)
+  (check-all-documented 'expect)
+  (check-all-documented 'expect/rackunit))
