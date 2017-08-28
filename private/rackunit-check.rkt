@@ -26,6 +26,6 @@
   [(check-true v) v expect-true]
   [(check-false v) v expect-false]
   [(check-not-false v) v expect-not-false]
-  [(check-exn p f) f (expect-raise p)]
   [(check-not-exn p f) f expect-not-raise]
+  [(check-exn p f) f (expect-raise (expect-pred p))]
   [(check op a b) op (expect-call (arguments a b) (expect-return #t))])
