@@ -26,3 +26,19 @@ from RackUnit.
    (check-expect 'foo (expect-pred number?))
    (check-expect #hash((a . (1 WRONG 3)) (b . (4 5 WRONG)))
                  (expect-equal? #hash((a . (1 2 3)) (b . (4 5 6))))))}
+
+@(define-simple-macro (defchecks check-id:id ...+ pre-flow:expr ...)
+   (deftogether ((defthing check-id procedure?) ...) pre-flow ...))
+
+@defchecks[check-eq? check-eqv? check-equal?
+           check-not-eq? check-not-eqv? check-not-equal?
+           check-pred check-=
+           check-true check-false check-not-false
+           check-exn check-not-exn
+           check]{
+ Custom checks that are equivalent to their corresponding
+ @racketmodname[rackunit] checks except that they are defined in terms of
+ @expectation-tech{expectations}, and provide better error messages for most
+ failures.
+ @(expect-examples
+   (check-equal? '(1 2 3 foo 5) '(1 2 3 4 5)))}

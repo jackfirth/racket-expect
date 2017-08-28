@@ -9,6 +9,7 @@
                                   racket/function
                                   racket/list
                                   racket/set))
+         (all-from-out syntax/parse/define)
          expect-examples
          source-code-link)
 
