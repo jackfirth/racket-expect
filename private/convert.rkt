@@ -10,11 +10,8 @@
 
 (require (for-syntax racket/base
                      racket/syntax)
-         racket/function
          racket/list
          racket/set
-         racket/vector
-         syntax/parse/define
          "base.rkt"
          "convert-base.rkt"
          "data-set.rkt"
@@ -24,8 +21,7 @@
          (submod "data-list.rkt" no-conversion)
          (submod "data-set.rkt" no-conversion)
          (submod "data-vector.rkt" no-conversion)
-         (submod "function.rkt" no-conversion)
-         (submod "logic.rkt" no-conversion))
+         (submod "function.rkt" no-conversion))
 
 (module+ test
   (require rackunit))
@@ -50,8 +46,6 @@
   (apply expect-hash (append-map list (slice k+vs #:step 2) converted)))
 
 (define-conversions
-  [(expect-all . <convert>) (rest-> cvrt? exp?)]
-  [(expect-and . <convert>) (rest-> cvrt? exp?)]
   [(expect-hash-count <convert>) (-> cvrt? exp?)]
   [(expect-hash-ref k <convert>) (-> any/c cvrt? exp?)]
   [(expect-hash-keys <convert>) (-> cvrt? exp?)]

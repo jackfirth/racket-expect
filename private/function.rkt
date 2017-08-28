@@ -19,8 +19,7 @@
          "base.rkt"
          "combinator.rkt"
          "compare.rkt"
-         "logic.rkt"
-         (submod "logic.rkt" no-conversion))
+         "logic.rkt")
 
 (module+ test
   (require rackunit

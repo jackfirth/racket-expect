@@ -18,8 +18,7 @@
          "data-set.rkt"
          "logic.rkt"
          "util.rkt"
-         (submod "data-set.rkt" no-conversion)
-         (submod "logic.rkt" no-conversion))
+         (submod "data-set.rkt" no-conversion))
 
 (module+ test
   (require racket/function

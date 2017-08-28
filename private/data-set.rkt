@@ -21,7 +21,6 @@
          "combinator.rkt"
          "data-collect.rkt"
          "logic.rkt"
-         (submod "logic.rkt" no-conversion)
          "util.rkt")
 
 (module+ test

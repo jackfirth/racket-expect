@@ -1,18 +1,8 @@
 #lang racket/base
 
-(require (only-in rackunit define-check)
-         arguments
+(require arguments
          expect
-         syntax/parse/define
          (submod "rackunit.rkt" for-custom-checks))
-
-(define-simple-macro
-  (define-expect-checks [(id:id arg:id ...+) subject:expr expectation:expr] ...+)
-  (begin
-    (begin
-      (define-check (id arg ...) (check-expect* subject expectation))
-      (provide id))
-    ...))
 
 (define-expect-checks
   [(check-eq? a b) a (expect-eq? b)]
@@ -26,6 +16,6 @@
   [(check-true v) v expect-true]
   [(check-false v) v expect-false]
   [(check-not-false v) v expect-not-false]
-  [(check-exn p f) f (expect-raise p)]
-  [(check-not-exn p f) f expect-not-raise]
+  [(check-exn p f) f (expect-raise (expect-pred p))]
+  [(check-not-exn f) f expect-not-raise]
   [(check op a b) op (expect-call (arguments a b) (expect-return #t))])

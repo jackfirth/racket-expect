@@ -10,6 +10,7 @@
                                   racket/list
                                   racket/set))
          (all-from-out syntax/parse/define)
+         defchecks
          expect-examples
          source-code-link)
 
@@ -50,3 +51,6 @@
   context-tech "fault-context"
   expectation-tech "expectation"
   fault-tech "expectation-fault")
+
+(define-simple-macro (defchecks check-id:id ...+ pre-flow:expr ...)
+  (deftogether ((defthing check-id procedure?) ...) pre-flow ...))

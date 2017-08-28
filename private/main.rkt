@@ -7,5 +7,6 @@
 "combinator.rkt"
 "compare.rkt"
 "logic.rkt"
+"meta.rkt"
 "function.rkt"
 "data-set.rkt"

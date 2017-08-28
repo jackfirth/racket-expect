@@ -9,11 +9,22 @@
          racket/contract
          rackunit
          rackunit/log
+         syntax/parse/define
          "base.rkt"
          "convert-base.rkt")
 
 (module+ for-custom-checks
-  (provide check-expect*))
+  (provide define-expect-checks
+           check-expect*))
+
+
+(define-simple-macro
+  (define-expect-checks [(id:id arg:id ...+) subject:expr expectation:expr] ...+)
+  (begin
+    (begin
+      (define-check (id arg ...) (check-expect* subject expectation))
+      (provide id))
+    ...))
 
 (define-check (check-expect v exp) (check-expect* v exp))
 
