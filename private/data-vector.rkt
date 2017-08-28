@@ -15,7 +15,6 @@
          (submod "compare.rkt" no-conversion)
          "data-collect.rkt"
          "logic.rkt"
-         (submod "logic.rkt" no-conversion)
          "util.rkt")
 
 (module+ test

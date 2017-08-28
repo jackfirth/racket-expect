@@ -2,17 +2,21 @@
 
 (provide (for-label (all-from-out arguments
                                   expect
+                                  expect/rackunit
                                   racket/base
                                   racket/contract
                                   racket/format
                                   racket/function
                                   racket/list
                                   racket/set))
+         (all-from-out syntax/parse/define)
+         defchecks
          expect-examples
          source-code-link)
 
 (require (for-label arguments
                     expect
+                    expect/rackunit
                     racket/base
                     racket/contract
                     racket/format
@@ -34,6 +38,7 @@
   (make-base-eval #:lang 'racket/base
                   '(require arguments
                             expect
+                            expect/rackunit
                             racket/function
                             racket/list
                             racket/set)))
@@ -46,3 +51,6 @@
   context-tech "fault-context"
   expectation-tech "expectation"
   fault-tech "expectation-fault")
+
+(define-simple-macro (defchecks check-id:id ...+ pre-flow:expr ...)
+  (deftogether ((defthing check-id procedure?) ...) pre-flow ...))
