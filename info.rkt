@@ -3,7 +3,7 @@
 (define scribblings
   '(("scribblings/main.scrbl" (multi-page) (library) "expect")))
 (define deps
-  '("arguments"
+  '(("arguments" #:version "1.1")
     "base"
     "fancy-app"
     ("rackunit-lib" #:version "1.7")

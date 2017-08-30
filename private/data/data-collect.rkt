@@ -13,8 +13,8 @@
   [index-context-value (-> index-context? exact-nonnegative-integer?)]))
 
 (require fancy-app
-         "base.rkt"
-         "combinator.rkt")
+         expect/private/base
+         expect/private/combinator)
 
 (module+ test
   (require rackunit))

@@ -2,7 +2,7 @@
 
 (require racket/contract)
 
-(module+ no-conversion
+(module+ for-conversion
   (provide
    (contract-out
     [expect-hash (rest->* (list any/c expectation?) expectation?)]
@@ -12,26 +12,16 @@
 
 (require fancy-app
          racket/set
-         "base.rkt"
-         "combinator.rkt"
+         expect/private/base
+         expect/private/combinator
+         expect/private/logic
+         expect/private/util
          "data-collect.rkt"
          "data-set.rkt"
-         "logic.rkt"
-         "util.rkt"
-         (submod "data-set.rkt" no-conversion))
-
-(module+ test
-  (require racket/function
-           rackunit))
+         (submod "compare.rkt" for-conversion))
 
 
 (define expect-hash-count (expect/count _ hash-count))
-
-(module+ test
-  (require (submod "compare.rkt" no-conversion))
-  (check-not-exn
-   (thunk (expect! (hash 'a 1 'b 2) (expect-hash-count (expect-equal? 2))))))
-
 
 (struct key-context context (value)
   #:transparent
@@ -44,11 +34,6 @@
 (define (expect-hash-ref k value-exp)
   (expect/context (expect/proc value-exp (hash-ref _ k)) (key-context k)))
 
-(module+ test
-  (check-exn #rx"in: value for key 'foo"
-             (thunk (expect! (hash 'foo 1)
-                             (expect-hash-ref 'foo (expect-equal? 2))))))
-
 (struct key-set-context context ()
   #:transparent
   #:omit-define-syntaxes
@@ -59,13 +44,6 @@
 (define (expect-hash-keys set-exp)
   (expect/context (expect/proc set-exp (λ (h) (list->set (hash-keys h))))
                   key-set-context))
-
-(module+ test
-  (check-not-exn
-   (thunk (expect! (hash 'foo 1) (expect-hash-keys (expect-set-member? 'foo)))))
-  (check-exn #rx"in: the set of hash keys"
-             (thunk (expect! (hash 'foo 1)
-                             (expect-hash-keys (expect-set-member? 'bar))))))
 
 (define (expect-hash . k+exps)
   (define keys (slice k+exps #:step 2))
@@ -79,14 +57,3 @@
   (expect-and (expect-pred hash?)
               (expect-all (expect-hash-keys (apply expect-set keys))
                           (expect/dependent present-keys-exp))))
-
-(module+ test
-  (define expect-foo1-bar2!
-    (expect! _ (expect-hash 'foo (expect-equal? 1) 'bar (expect-equal? 2))))
-  (check-not-exn  (thunk (expect-foo1-bar2! (hash 'foo 1 'bar 2))))
-  (check-exn exn:fail:expect?
-             (thunk (expect-foo1-bar2! (hash 'foo 1 'bar 2 'baz 3))))
-  (check-exn exn:fail:expect?
-             (thunk (expect-foo1-bar2! (hash 'foo 1))))
-  (check-exn exn:fail:expect?
-             (thunk (expect-foo1-bar2! (hash 'foo 1 'bar 5)))))

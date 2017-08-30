@@ -3,10 +3,9 @@
 ;; These submodules are re-exported by convert.rkt with conversion
 ;; logic attached.
 "base.rkt"
-"convert.rkt"
 "combinator.rkt"
-"compare.rkt"
+"data/main.rkt"
+"fail.rkt"
 "logic.rkt"
 "meta.rkt"
 "function.rkt"
-"data-set.rkt"

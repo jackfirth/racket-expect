@@ -4,26 +4,25 @@
 
 (provide
  (contract-out
-  [expect-exp-faults (-> any/c expectation-convertible? expectation?)]
+  [expect-exp-faults
+   (-> any/c (or/c (listof (or/c fault? expectation?)) expectation?)
+       expectation?)]
   [expect-exp-no-faults (-> any/c expectation?)]
-  [expect-exp-one-fault (->* (any/c) (expectation-convertible?) expectation?)]
+  [expect-exp-one-fault (->* (any/c) ((or/c fault? expectation?)) expectation?)]
   [expect-fault (->* ()
-                     (#:summary expectation-convertible?
-                      #:expected expectation-convertible?
-                      #:actual expectation-convertible?
-                      #:contexts expectation-convertible?)
+                     (#:summary (or/c string? expectation?)
+                      #:expected (or/c attribute? expectation?)
+                      #:actual (or/c attribute? expectation?)
+                      #:contexts (or/c list? expectation?))
                      expectation?)]
-  [expect-attribute (->* () (expectation-convertible?) expectation?)]))
+  [expect-attribute (->* () ((or/c string? expectation?)) expectation?)]))
 
 (require racket/list
-         racket/function
-         syntax/parse/define
          "base.rkt"
          "combinator.rkt"
-         "convert-base.rkt"
+         "data/main.rkt"
          "logic.rkt"
-         "util-context.rkt"
-         (submod "data-list.rkt" no-conversion))
+         "util-context.rkt")
 
 
 (struct faults-context context (input) #:transparent)
@@ -34,17 +33,17 @@
 (define (expect/proc+context exp proc ctxt)
   (expect/context (expect/proc exp proc) ctxt))
 
-(define (expect-exp-faults input exp)
+(define (expect-exp-faults input v)
+  (define exp (->expectation v))
   (define (apply e) (expectation-apply e input))
-  (define exp* (expectation-convert exp))
   (expect-and (expect-pred expectation?)
               (expect/proc+context exp apply (make-faults-context input))))
 
 (define (expect-exp-no-faults input)
   (expect-exp-faults input (expect-pred empty?)))
 
-(define (expect-exp-one-fault input [exp expect-any])
-  (expect-exp-faults input (expect-list exp)))
+(define (expect-exp-one-fault input [v expect-any])
+  (expect-exp-faults input (expect-list v)))
 
 (define-singleton-contexts
   fault-summary-context "the summary field of the fault"
@@ -57,10 +56,10 @@
                       #:actual [act expect-any]
                       #:expected [exp expect-any]
                       #:contexts [ctxs expect-any])
-  (define sum* (expectation-convert sum))
-  (define exp* (expectation-convert exp))
-  (define act* (expectation-convert act))
-  (define ctxs* (expectation-convert ctxs))
+  (define sum* (->expectation sum))
+  (define exp* (->expectation exp))
+  (define act* (->expectation act))
+  (define ctxs* (->expectation ctxs))
   (define fields-exp
     (expect-all
      (expect/proc+context sum* fault-summary fault-summary-context)
@@ -71,6 +70,6 @@
 
 (define (expect-attribute [attr expect-any])
   (expect-and (expect-pred attribute?)
-              (expect/proc+context (expectation-convert attr)
+              (expect/proc+context (->expectation attr)
                                    attribute-description
                                    attribute-description-context)))

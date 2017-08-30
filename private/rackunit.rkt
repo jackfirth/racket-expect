@@ -3,15 +3,13 @@
 (provide check-expect)
 
 (require fancy-app
+         expect
          racket/function
          racket/list
          racket/match
          racket/contract
          rackunit
-         rackunit/log
-         syntax/parse/define
-         "base.rkt"
-         "convert-base.rkt")
+         syntax/parse/define)
 
 (module+ for-custom-checks
   (provide define-expect-checks
@@ -29,7 +27,7 @@
 (define-check (check-expect v exp) (check-expect* v exp))
 
 (define (check-expect* v exp)
-  (match (expectation-apply (expectation-convert exp) v)
+  (match (expectation-apply (->expectation exp) v)
     [(list) (void)]
     [(list flt) (fail-check-expect/singular v flt)]
     [(list* flts) (fail-check-expect/plural v flts)]))

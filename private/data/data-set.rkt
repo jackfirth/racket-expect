@@ -10,22 +10,18 @@
   [expect-superset (-> set? expectation?)]
   [expect-set (rest-> any/c expectation?)]))
 
-(module+ no-conversion
+(module+ for-conversion
   (provide
    (contract-out
     [expect-set-count (-> expectation? expectation?)])))
 
 (require fancy-app
          racket/set
-         "base.rkt"
-         "combinator.rkt"
+         expect/private/base
+         expect/private/combinator
+         expect/private/logic
          "data-collect.rkt"
-         "logic.rkt"
-         "util.rkt")
-
-(module+ test
-  (require racket/function
-           rackunit))
+         expect/private/util)
 
 
 (struct member-attribute attribute (value)
@@ -44,13 +40,6 @@
                 #:actual (self-attribute st))))
   (expect/singular make-fault))
 
-(module+ test
-  (check-not-exn (thunk (expect! (set 1 2 3) (expect-set-member? 1))))
-  (check-exn #rx"expected a set containing a specific value"
-             (thunk (expect! (set 1 2 3) (expect-set-member? 'foo))))
-  (check-exn #rx"expected: set containing 'foo"
-             (thunk (expect! (set 1 2 3) (expect-set-member? 'foo)))))
-
 (define (expect-set-not-member? v)
   (define (make-fault st)
     (and (set-member? st v)
@@ -59,13 +48,6 @@
                 #:actual (self-attribute st))))
   (expect/singular make-fault))
 
-(module+ test
-  (check-not-exn (thunk (expect! (set 1 2 3) (expect-set-not-member? 'foo))))
-  (check-exn #rx"expected a set not containing a specific value"
-             (thunk (expect! (set 1 2 3) (expect-set-not-member? 1))))
-  (check-exn #rx"expected: not set containing 1"
-             (thunk (expect! (set 1 2 3) (expect-set-not-member? 1)))))
-
 (define (expect-subset big-st)
   (define (make-expectation-from-extras little-st)
     (apply expect-all
@@ -73,30 +55,11 @@
                 (set->list (set-subtract little-st big-st)))))
   (expect/dependent make-expectation-from-extras))
 
-(module+ test
-  (check-not-exn (thunk (expect! (set 1 2) (expect-subset (set 1 2 3)))))
-  (check-exn #rx"multiple failures"
-             (thunk (expect! (set 1 2 'foo 'bar) (expect-subset (set 1 2 3))))))
-
 (define (expect-superset little-st)
   (apply expect-all (map expect-set-member? (set->list little-st))))
 
-(module+ test
-  (check-not-exn (thunk (expect! (set 1 2 3) (expect-superset (set 1 2)))))
-  (check-exn #rx"multiple failures"
-             (thunk (expect! (set 1) (expect-superset (set 1 2 3))))))
-
 (define expect-set-count (expect/count _ set-count))
-
-(module+ test
-  (check-not-exn
-   (thunk (expect! (set 1 2) (expect-set-count (expect-pred even?))))))
 
 (define (expect-set . vs)
   (define st (list->set vs))
   (expect-all (expect-subset st) (expect-superset st)))
-
-(module+ test
-  (check-not-exn (thunk (expect! (set 1 2 3) (expect-set 1 2 3))))
-  (check-exn #rx"multiple failures"
-             (thunk (expect! (set 1 'foo) (expect-set 1 2 3)))))

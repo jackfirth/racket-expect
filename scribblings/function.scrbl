@@ -19,17 +19,19 @@
    (eval:error (expect! (thunk 'wrong-arity) exp-addition))
    (eval:error (expect! (thunk* (raise 'error)) exp-addition)))}
 
-@defproc[(expect-return [value-exp expectation-convertible?]) expectation?]{
+@defproc[(expect-return [value-exp any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk returns a value,
- then that value is checked against @racket[value-exp].
+ then that value is checked against @racket[value-exp]. The given
+ @racket[value-exp] is converted to an expectation with @racket[->expectation].
  @(expect-examples
    (expect! (thunk 'foo) (expect-return 'foo))
    (eval:error (expect! (thunk 'bar) (expect-return 'foo)))
    (eval:error (expect! (thunk (raise 'error)) (expect-return 'foo))))}
 
-@defproc[(expect-raise [raise-exp expectation-convertible?]) expectation?]{
+@defproc[(expect-raise [raise-exp any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
- a value which is then checked against @racket[raise-exp].
+ a value which is then checked against @racket[raise-exp]. The given
+ @racket[raise-exp] is converted to an expectation with @racket[->expectation].
  @(expect-examples
    (define (raise-foo) (raise 'foo))
    (expect! raise-foo (expect-raise 'foo))
