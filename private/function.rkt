@@ -5,25 +5,20 @@
 (provide
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
-  [expect-not-raise expectation?]))
-
-(module+ no-conversion
-  (provide
-   (contract-out
-    [expect-return (-> expectation? expectation?)]
-    [expect-raise (-> expectation? expectation?)])))
+  [expect-not-raise expectation?]
+  [expect-raise (-> any/c expectation?)]
+  [expect-return (-> any/c expectation?)]))
 
 (require arguments
          fancy-app
          racket/function
          "base.rkt"
          "combinator.rkt"
-         "compare.rkt"
+         "data/main.rkt"
          "logic.rkt")
 
 (module+ test
-  (require rackunit
-           (submod "compare.rkt" no-conversion)))
+  (require rackunit))
 
 
 (struct arity-includes-attribute attribute (num-positional kws-okay?)
@@ -116,7 +111,8 @@
 
 (define raise-any-attribute (make-raise-any-attribute "raised a value"))
 
-(define (expect-raise exp)
+(define (expect-raise v)
+  (define exp (->expectation v))
   (expect-thunk
    (expectation
     (λ (proc)
@@ -128,17 +124,15 @@
                      #:actual the-not-raise-attribute)))))))
 
 (module+ test
-  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo))
-                                          (thunk (raise 'foo)))
+  (check-equal? (expectation-apply (expect-raise 'foo) (thunk (raise 'foo)))
                 (list))
   (define raise-proc (thunk (raise 'bar)))
-  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo))
-                                          raise-proc)
+  (check-equal? (expectation-apply (expect-raise 'foo) raise-proc)
                 (list (fault #:summary "a different value"
                              #:expected (equal-attribute 'foo)
                              #:actual (self-attribute 'bar)
                              #:contexts (list (raise-context)))))
-  (check-equal? (expectation-apply (expect-raise (expect-equal? 'foo)) void)
+  (check-equal? (expectation-apply (expect-raise 'foo) void)
                 (list (fault #:summary "a value raised during procedure call"
                              #:expected raise-any-attribute
                              #:actual the-not-raise-attribute))))
@@ -150,8 +144,8 @@
 
 (define return-context (make-return-context "return value"))
 
-(define (expect-return exp)
-  (define exp/context (expect/context exp return-context))
+(define (expect-return v)
+  (define exp/context (expect/context (->expectation v) return-context))
   (expect-thunk
    (expectation
     (λ (proc)
@@ -159,7 +153,7 @@
         (expectation-apply exp/context (proc)))))))
 
 (module+ test
-  (define exp-return-foo (expect-return (expect-equal? 'foo)))
+  (define exp-return-foo (expect-return 'foo))
   (check-equal? (expectation-apply exp-return-foo (thunk 'foo)) (list))
   (define bar-thunk (thunk 'bar))
   (check-equal? (expectation-apply exp-return-foo bar-thunk)
@@ -178,10 +172,6 @@
 
 (define (call-context args)
   (make-call-context (format "call with ~v" args) args))
-
-(define (apply/arguments f args)
-  (define kw+vs (hash->list (arguments-keyword args)))
-  (keyword-apply f (map car kw+vs) (map cdr kw+vs) (arguments-positional args)))
 
 (module+ test
   (define (add/kw a b #:kw c) (+ a b c))
@@ -202,5 +192,5 @@
 
 (module+ test
   (define exp-add
-    (expect-call (arguments 1 2) (expect-return (expect-equal? 3))))
+    (expect-call (arguments 1 2) (expect-return 3)))
   (check-equal? (expectation-apply exp-add +) (list)))

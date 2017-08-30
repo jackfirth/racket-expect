@@ -2,7 +2,7 @@
 
 (require racket/contract)
 
-(module+ no-conversion
+(module+ for-conversion
   (provide
    (contract-out
     [expect-list (rest-> expectation? expectation?)]
@@ -10,12 +10,12 @@
     [expect-list-count (-> expectation? expectation?)])))
 
 (require fancy-app
-         "base.rkt"
-         "combinator.rkt"
+         expect/private/base
+         expect/private/combinator
+         expect/private/logic
+         expect/private/util
          "data-collect.rkt"
-         "logic.rkt"
-         "util.rkt"
-         (submod "compare.rkt" no-conversion))
+         (submod "compare.rkt" for-conversion))
 
 (module+ test
   (require racket/function

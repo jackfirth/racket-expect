@@ -15,4 +15,3 @@
 
 (define-simple-macro (define-singleton-contexts (~seq id:id format:str) ...+)
   (begin (define-singleton-context id format) ...))
-
