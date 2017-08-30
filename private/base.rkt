@@ -5,6 +5,7 @@
 (provide
  (contract-out
   [expect! (-> any/c expectation? void?)]
+  [expect-any expectation?]
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c (listof fault?))]
@@ -30,12 +31,12 @@
      [faults (listof fault?)])]))
 
 (require racket/format
+         racket/function
          racket/list
          racket/string)
 
 (module+ test
-  (require racket/function
-           rackunit))
+  (require rackunit))
 
 
 (struct expectation (proc))
@@ -123,11 +124,13 @@
                             subject
                             flts))))
 
+(define expect-any (expectation (const '())))
+
 (define (expect! v exp)
   (raise-result v (expectation-apply exp v)))
 
 (module+ test
-  (check-not-exn (thunk (expect! 'any (expectation (const (list))))))
+  (check-not-exn (thunk (expect! 'any expect-any)))
   (define foo-fault (fault #:summary "foo"
                            #:expected (self-attribute 'foo)
                            #:actual (self-attribute 'not-foo)))

@@ -40,8 +40,6 @@
   (expect-and (expect-pred expectation?)
               (expect/proc+context exp apply (make-faults-context input))))
 
-(define expect-any (expectation (const '())))
-
 (define (expect-exp-no-faults input)
   (expect-exp-faults input (expect-pred empty?)))
 
