@@ -21,6 +21,7 @@ messages.
 @include-section["compare.scrbl"]
 @include-section["logic.scrbl"]
 @include-section["data.scrbl"]
+@include-section["struct.scrbl"]
 @include-section["function.scrbl"]
 @include-section["combinator.scrbl"]
 @include-section["meta.scrbl"]
