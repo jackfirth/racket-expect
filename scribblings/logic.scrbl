@@ -71,3 +71,25 @@
    (eval:error (expect! 20 small-number))
    (eval:error (expect! -4 small-number))
    (eval:error (expect! 'foo small-number)))}
+
+@defproc[(expect-conjoin [pred predicate/c] ...) expectation?]{
+ Equivalent to @racket[(expect-and (expect-pred pred) ...)].}
+
+@defproc[(expect-disjoin [pred predicate/c] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value that satisfies
+ at least one of the given @racket[pred] functions. If no @racket[pred] returns
+ @racket[#t] for the checked value, a single @fault-tech{fault} is found with an
+ @racket[or-attribute] value containing a list of @racket[pred-attribute] values
+ in @racket[or-attribute-cases].
+
+ @(expect-examples
+   (define exp-str-or-sym (expect-disjoin string? symbol?))
+   (expect! "foo" exp-str-or-sym)
+   (expect! 'foo exp-str-or-sym)
+   (eval:error (expect! 42 exp-str-or-sym)))}
+
+@defstruct*[(or-attribute attribute) ([cases (listof attribute?)])
+            #:transparent #:omit-constructor]{
+ An @attribute-tech{attribute} that describes at least one of @racket[cases]. A
+ @fault-tech{fault} might use this to describe that it expected one of multiple
+ possible values.}
