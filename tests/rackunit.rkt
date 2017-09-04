@@ -3,6 +3,7 @@
 (require arguments
          expect
          expect/rackunit
+         racket/function
          (only-in rackunit test-case)
          "util.rkt")
 
@@ -53,4 +54,5 @@
   (check-fail check-exn (arguments number? raise-foo))
   (check-fail check-exn (arguments symbol? void))
   (check-not-exn void)
-  (check-fail check-not-exn (arguments raise-foo)))
+  (check-fail check-not-exn (arguments raise-foo))
+  (check-exn #rx"contract" (thunk (+ "foo"))))
