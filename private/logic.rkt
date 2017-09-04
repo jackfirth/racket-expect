@@ -102,7 +102,7 @@
   (or-attribute msg cases))
 
 (define (expect-conjoin . preds)
-  (expect-and (map expect-pred preds)))
+  (apply expect-and (map expect-pred preds)))
 
 (define (expect-disjoin . preds)
   (expect/singular
