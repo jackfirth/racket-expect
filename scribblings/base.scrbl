@@ -33,14 +33,14 @@ use their basic functionalities.
    (expectation-apply (expect-equal? (list 1 2)) (list 1 2))
    (expectation-apply (expect-equal? (list 1 2)) (list 1 'foo)))}
 
-@defproc[(expect! [v any/c] [exp expectation?]) void?]{
+@defproc[(expect! [v any/c] [exp any/c]) void?]{
  Checks that @racket[v] has no @fault-tech{faults} according to @racket[exp]. If
  it does, an instance of @racket[exn:fail:expect] is raised with a message
- detailing the faults.
+ detailing the faults. If @racket[exp] is not an expectation, it is converted to
+ one with @racket[->expectation].
  @(expect-examples
-   (define list-exp (expect-equal? (list 1 2)))
-   (expect! '(1 2) list-exp)
-   (eval:error (expect! '(1 a b) list-exp)))}
+   (expect! '(1 2) '(1 2))
+   (eval:error (expect! '(1 a b) '(1 2))))}
 
 @defstruct*[(exn:fail:expect exn:fail)
             ([subject any/c] [faults (listof fault?)])]{
