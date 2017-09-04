@@ -10,9 +10,15 @@
   [expect-pred (-> predicate/c expectation?)]
   [expect-all (rest-> expectation? expectation?)]
   [expect-and (rest-> expectation? expectation?)]
+  [expect-conjoin (rest-> predicate/c expectation?)]
+  [expect-disjoin (rest-> predicate/c expectation?)]
   [not-attribute? predicate/c]
   [not-attribute (-> attribute? not-attribute?)]
   [not-attribute-negated (-> not-attribute? attribute?)]
+  [struct (or-attribute attribute)
+    ([description string?] [cases (listof attribute?)])
+    #:omit-constructor]
+  [make-or-attribute (-> (listof attribute?) or-attribute?)]
   [pred-attribute (-> predicate/c pred-attribute?)]
   [pred-attribute? predicate/c]
   [pred-attribute-value (-> pred-attribute? predicate/c)]))
@@ -21,6 +27,7 @@
          racket/function
          racket/list
          racket/stream
+         racket/string
          "base.rkt"
          "combinator.rkt"
          "util.rkt")
@@ -87,3 +94,21 @@
                      #:unless (empty? faults))
            faults)
          (list)))))
+
+(struct or-attribute attribute (cases) #:transparent)
+
+(define (make-or-attribute cases)
+  (define msg (string-join (map attribute-description cases) ", or "))
+  (or-attribute msg cases))
+
+(define (expect-conjoin . preds)
+  (apply expect-and (map expect-pred preds)))
+
+(define (expect-disjoin . preds)
+  (expect/singular
+   (λ (v)
+     (define (app pred) (pred v))
+     (and (not (ormap app preds))
+          (fault #:summary "a different kind of value"
+                 #:expected (make-or-attribute (map pred-attribute preds))
+                 #:actual (self-attribute v))))))

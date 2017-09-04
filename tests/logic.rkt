@@ -1,24 +1,36 @@
 #lang racket/base
 
 (require expect
+         expect/rackunit
          racket/function
-         rackunit)
+         (only-in rackunit define-check test-case))
 
-(check-exn #rx"expected true" (thunk (expect! 'foo expect-true)))
+(define-check (check-fault exp input fault-exp)
+  (check-expect exp (expect-exp-one-fault input fault-exp)))
 
-(check-exn #rx"expected false" (thunk (expect! 'foo expect-false)))
+(check-fault expect-true 'foo (expect-fault #:summary "true"))
+(check-fault expect-false 'foo (expect-fault #:summary "false"))
+(check-fault expect-not-false #f (expect-fault #:summary "not false"))
 
-(check-exn #rx"expected not false" (thunk (expect! #f expect-not-false)))
+(check-fault (expect-pred number?) 'foo
+             (expect-fault #:summary "a different kind of value"
+                           #:expected
+                           (expect-struct attribute
+                                          [attribute-description
+                                           "value satisfying number?"])))
 
-(check-exn #rx"expected a different kind of value"
-           (thunk (expect! 'foo (expect-pred number?))))
-(check-exn #rx"expected: value satisfying number?"
-           (thunk (expect! 'foo (expect-pred number?))))
+(check-expect (expect-all (expect-pred number?) (expect-pred symbol?))
+              (expect-exp-faults "neither" (expect-list-count 2)))
 
-(test-case "expect-all"
-  (define all/num+sym? (expect-all (expect-pred number?) (expect-pred symbol?)))
-  (check-equal? (length (expectation-apply all/num+sym? "neither")) 2)
-  (define and/num+sym? (expect-and (expect-pred number?) (expect-pred symbol?)))
-  (check-equal? (length (expectation-apply and/num+sym? "neither")) 1)
-  (define pos-num? (expect-and (expect-pred number?) (expect-pred positive?)))
-  (check-not-exn (thunk (expect! 4 pos-num?))))
+(check-expect (expect-and (expect-pred number?) (expect-pred symbol?))
+              (expect-exp-faults "neither" (expect-list-count 1)))
+
+(check-expect (expect-conjoin number? symbol?)
+              (expect-exp-faults "neither" (expect-list-count 1)))
+
+(check-fault (expect-disjoin number? symbol?) "neither"
+             (expect-fault #:summary "a different kind of value"
+                           #:expected
+                           (expect-struct or-attribute
+                                          [or-attribute-cases
+                                           (expect-list-count 2)])))
