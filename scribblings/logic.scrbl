@@ -93,3 +93,8 @@
  An @attribute-tech{attribute} that describes at least one of @racket[cases]. A
  @fault-tech{fault} might use this to describe that it expected one of multiple
  possible values.}
+
+@defproc[(make-or-attribute [cases (listof attribute?)]) or-attribute?]{
+ Returns an @racket[or-attribute] value with a default
+ @racket[attribute-description] generated from the descriptions of the given
+ @racket[cases].}
