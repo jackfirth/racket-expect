@@ -19,14 +19,29 @@
    (eval:error (expect! (thunk 'wrong-arity) exp-addition))
    (eval:error (expect! (thunk* (raise 'error)) exp-addition)))}
 
-@defproc[(expect-return [value-exp any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a thunk returns a value,
- then that value is checked against @racket[value-exp]. The given
- @racket[value-exp] is converted to an expectation with @racket[->expectation].
+@defproc[(expect-return [value-exp any/c] ...) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a thunk that returns one
+ value for each @racket[value-exp]. Then, each returned value is checked against
+ the corresponding @racket[value-exp]. Each @racket[value-exp] is converted to
+ an expectation with @racket[->expectation]. To assert properties about the list
+ of values as a whole, see @racket[expect-return*].
  @(expect-examples
    (expect! (thunk 'foo) (expect-return 'foo))
    (eval:error (expect! (thunk 'bar) (expect-return 'foo)))
-   (eval:error (expect! (thunk (raise 'error)) (expect-return 'foo))))}
+   (eval:error (expect! (thunk (raise 'error)) (expect-return 'foo)))
+   (expect! (thunk (values 'foo 'bar)) (expect-return 'foo 'bar)))}
+
+@defproc[(expect-return* [values-exp (or/c list? expectation?)]) expectation?]{
+ Like @racket[expect-return], but returns an @expectation-tech{expectation} that
+ expects a thunk, then calls that thunk and checks the list of values returned
+ against @racket[values-exp]. If @racket[values-exp] is a list, it is converted
+ to an expectation with @racket[->expectation].
+ @(expect-examples
+   (define expect-even-values
+     (expect-return* (expect-list-count (expect-pred even?))))
+   (expect! (thunk (values)) expect-even-values)
+   (expect! (thunk (values 'foo 'bar)) expect-even-values)
+   (eval:error (expect! (thunk 'foo) expect-even-values)))}
 
 @defproc[(expect-raise [raise-exp any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
@@ -49,3 +64,68 @@
    (define (not-a-thunk unexpected-arg)
      'foo)
    (eval:error (expect! not-a-thunk expect-not-raise)))}
+
+@section{Procedure Context Structures}
+
+@deftogether[
+ (@defstruct*[(return-context context) () #:transparent #:omit-constructor]
+   @defthing[the-return-context return-context?])]{
+ A @context-tech{context} that represents the list of return values in a
+ procedure call.}
+
+@deftogether[
+ (@defstruct*[(raise-context context) () #:transparent #:omit-constructor]
+   @defthing[the-raise-context raise-context?])]{
+ A @context-tech{context} that represents the value that was given to
+ @racket[raise] in a procedure call that aborted.}
+
+@deftogether[
+ (@defstruct*[(call-context context) ([args arguments?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-call-context [args arguments?]) call-context?])]{
+ A @context-tech{context} and its constructor that represents a call to a
+ procedure with @racket[args] passed as the procedure's arguments.}
+
+@section{Procedure Attribute Structures}
+
+@deftogether[
+ (@defstruct*[(arity-attribute attribute) ([value procedure-arity?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-arity-attribute [arity procedure-arity?]) arity-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents the arity of
+ a procedure.}
+
+@deftogether[
+ (@defstruct*[(arity-includes-attribute attribute) ([value procedure-arity?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-arity-includes-attribute [arity procedure-arity?])
+            arity-includes-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents an arity that
+ a procedure includes, in the sense of @racket[arity-includes?]. This is
+ distinct from @racket[arity-attribute] in that the procedure's actual arity may
+ not be @racket[arity=?] to the @racket[value] arity.}
+
+@deftogether[
+ (@defstruct*[(not-raise-attribute attribute) ()
+              #:transparent #:omit-constructor]
+   @defthing[the-not-raise-attribute not-raise-attribute?])]{
+ An @attribute-tech{attribute} that represents a procedure not aborting. Used in
+ @fault-tech{faults} returned by @racket[expect-return] and similar expectations
+ when the procedure they're given raises a value unexpectedly.}
+
+@deftogether[
+ (@defstruct*[(raise-attribute attribute) ([value any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-raise-attribute [raised any/c]) raise-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents the raised
+ value of a procedure. Used in @fault-tech{faults} returned by
+ @racket[expect-return] to describe what a procedure they're given unexpectedly
+ raised.}
+
+@deftogether[
+ (@defstruct*[(raise-any-attribute attribute) ()
+              #:transparent #:omit-constructor]
+   @defthing[the-raise-any-attribute raise-any-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents a proceduer
+ that raises any value at all. Used by @racket[expect-raise] when a given
+ procedure fails to raise a value.}
