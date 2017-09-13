@@ -22,7 +22,11 @@
   [struct attribute ([description string?]) #:omit-constructor]
   [struct (self-attribute attribute) ([description string?] [value any/c])
     #:omit-constructor]
-  [make-self-attribute (-> any/c self-attribute?)]))
+  [make-self-attribute (-> any/c self-attribute?)]
+  [struct (any-attribute attribute) ([description string?]) #:omit-constructor]
+  [the-any-attribute any-attribute?]
+  [struct (none-attribute attribute) ([description string?]) #:omit-constructor]
+  [the-none-attribute none-attribute?]))
 
 (require racket/format
          racket/function
@@ -39,6 +43,10 @@
 
 (struct self-attribute attribute (value) #:transparent)
 (define (make-self-attribute v) (self-attribute (~v v) v))
+(struct any-attribute attribute () #:transparent)
+(define the-any-attribute (any-attribute "anything"))
+(struct none-attribute attribute () #:transparent)
+(define the-none-attribute (none-attribute "nothing"))
 
 (struct fault (summary expected actual contexts)
   #:transparent #:omit-define-syntaxes #:constructor-name make-fault)

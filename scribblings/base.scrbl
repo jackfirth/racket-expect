@@ -119,3 +119,14 @@ use their basic functionalities.
  value referred to by the @context-tech{context} of a @fault-tech{fault}.
  @(expect-examples
    (make-self-attribute 'foo))}
+
+@deftogether[
+ (@defstruct*[(any-attribute attribute) () #:transparent #:omit-constructor]
+   @defstruct*[(none-attribute attribute) () #:transparent #:omit-constructor]
+   @defthing[the-any-attribute any-attribute?]
+   @defthing[the-none-attribute none-attribute?])]{
+ These @attribute-tech{attributes} are used by @fault-tech{faults} to express
+ that they expected or found any value at all or no value at all. This is
+ typically for faults with a @context-tech{context} that may not be present on
+ all values. For a concrete example of their uses, see @racket[expect-raise] and
+ @racket[expect-return].}
