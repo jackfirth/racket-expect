@@ -8,30 +8,40 @@
   [expect-not-raise expectation?]
   [expect-raise (-> any/c expectation?)]
   [expect-return (rest-> any/c expectation?)]
-  [expect-return* (-> any/c expectation?)]
-  [struct (arity-includes-attribute attribute)
-    ([description string?]
-     [num-positional exact-nonnegative-integer?]
-     [kws-okay? boolean?])
-    #:omit-constructor]
-  [struct (arity-attribute attribute)
-    ([description string?] [value procedure-arity?]) #:omit-constructor]
-  [struct (not-raise-attribute attribute)
-    ([description string?]) #:omit-constructor]
-  [struct (raise-attribute attribute)
-    ([description string?] [value any/c]) #:omit-constructor]
-  [struct (raise-any-attribute attribute)
-    ([description string?]) #:omit-constructor]
-  [struct (raise-context context)
-    ([description string?]) #:omit-constructor]
+  [expect-return* (-> (or/c list? expectation?) expectation?)]
   [struct (return-context context)
     ([description string?]) #:omit-constructor]
+  [the-return-context return-context?]
+  [struct (raise-context context)
+    ([description string?]) #:omit-constructor]
+  [the-raise-context raise-context?]
   [struct (call-context context)
-    ([description string?] [args arguments?]) #:omit-constructor]))
+    ([description string?] [args arguments?]) #:omit-constructor]
+  [make-call-context (-> arguments? call-context?)]
+  [struct (arity-attribute attribute)
+    ([description string?] [value procedure-arity?]) #:omit-constructor]
+  [make-arity-attribute (-> procedure? arity-attribute?)]
+  [struct (arity-includes-attribute attribute)
+    ([description string?] [value procedure-arity?])
+    #:omit-constructor]
+  [make-arity-includes-attribute (-> procedure-arity?
+                                     arity-includes-attribute?)]
+  [struct (not-raise-attribute attribute)
+    ([description string?]) #:omit-constructor]
+  [the-not-raise-attribute not-raise-attribute?]
+  [struct (raise-attribute attribute)
+    ([description string?] [value any/c]) #:omit-constructor]
+  [make-raise-attribute (-> any/c raise-attribute?)]
+  [struct (raise-any-attribute attribute)
+    ([description string?]) #:omit-constructor]
+  [the-raise-any-attribute raise-any-attribute?]))
 
 (require arguments
          fancy-app
+         racket/format
          racket/function
+         racket/match
+         racket/string
          "base.rkt"
          "combinator.rkt"
          "data/main.rkt"
@@ -42,21 +52,46 @@
   (require rackunit))
 
 
-(struct arity-includes-attribute attribute (num-positional kws-okay?)
-  #:transparent)
-(define (make-arity-includes-attribute num-positional
-                                       #:keywords-okay? [kws-okay? #f])
-  (arity-includes-attribute
-   (format "arity including ~a positional argument~a and ~a keyword arguments"
-           num-positional
-           (if (= num-positional 1) "" "s")
-           (if kws-okay? "any" "no"))
-   num-positional
-   kws-okay?))
+(define (plural-s n) (if (equal? n 1) "" "s"))
+
+(struct arity-includes-attribute attribute (value) #:transparent)
+(define (make-arity-includes-attribute arity)
+  (define msg
+    (match (normalize-arity arity)
+      [(list) "the impossible arity (empty case-lambda)"]
+      [(? exact-nonnegative-integer? n)
+       (format "arity accepting ~a argument~a" n (plural-s n))]
+      [(arity-at-least n)
+       (format "arity accepting at least ~a argument~a" n (plural-s n))]
+      [(list (? exact-nonnegative-integer? n) ...)
+       (format "arity accepting ~a arguments"
+               (string-join (map ~a n) ", " #:before-last ", or "))]
+      [(list (? exact-nonnegative-integer? n) ... (arity-at-least m))
+       (format "arity accepting ~a, or at least ~a arguments"
+               (string-join (map ~a n) ", ") m)]))
+  (arity-includes-attribute msg arity))
+
+(module+ test
+  (define (arity-attr-description v)
+    (attribute-description (make-arity-includes-attribute v)))
+  (check-equal? (arity-attr-description 1) "arity accepting 1 argument")
+  (check-equal? (arity-attr-description 5) "arity accepting 5 arguments")
+  (check-equal? (arity-attr-description 0) "arity accepting 0 arguments")
+  (check-equal? (arity-attr-description (list))
+                "the impossible arity (empty case-lambda)")
+  (check-equal? (arity-attr-description (arity-at-least 1))
+                "arity accepting at least 1 argument")
+  (check-equal? (arity-attr-description (arity-at-least 3))
+                "arity accepting at least 3 arguments")
+  (check-equal? (arity-attr-description (arity-at-least 0))
+                "arity accepting at least 0 arguments")
+  (check-equal? (arity-attr-description (list 1 3 5))
+                "arity accepting 1, 3, or 5 arguments")
+  (check-equal? (arity-attr-description (list 1 3 5 (arity-at-least 7)))
+                "arity accepting 1, 3, 5, or at least 7 arguments"))
 
 (struct arity-attribute attribute (value) #:transparent)
-(define (make-arity-attribute proc)
-  (define arity (procedure-arity proc))
+(define (make-arity-attribute arity)
   (arity-attribute (format "arity of ~a" arity) arity))
 
 (struct not-raise-attribute attribute () #:transparent)
@@ -79,15 +114,13 @@
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
 
-(define (expect-procedure-arity-includes? args)
-  (define k (length (arguments-positional args)))
-  (define kws-okay? (not (hash-empty? (arguments-keyword args))))
-  (define attr (make-arity-includes-attribute k #:keywords-okay? kws-okay?))
+(define (expect-arity-includes? arity)
   (define (make-fault proc)
-    (and (not (procedure-arity-includes? proc k kws-okay?))
-         (fault #:summary "a procedure accepting no arguments"
-                #:expected attr
-                #:actual (make-arity-attribute proc))))
+    (define proc-ar (procedure-arity proc))
+    (and (not (arity-includes? proc-ar arity))
+         (fault #:summary "a procedure with a different arity"
+                #:expected (make-arity-includes-attribute arity)
+                #:actual (make-arity-attribute proc-ar))))
   (expect-and (expect-pred procedure?) (expect/singular make-fault)))
 
 (define (raise-fault raised)
@@ -96,7 +129,7 @@
          #:actual (make-raise-attribute raised)))
 
 (define (expect-thunk exp)
-  (expect-and (expect-procedure-arity-includes? (arguments)) exp))
+  (expect-and (expect-arity-includes? 0) exp))
 
 (define (make-not-raise-fault proc)
   (with-handlers ([(const #t) raise-fault]) (proc) #f))
@@ -129,7 +162,7 @@
         (expectation-apply exp/context results))))))
 
 (define (expect-call args call-exp)
-  (expect-and (expect-procedure-arity-includes? args)
+  (expect-and (expect-arity-includes? (length (arguments-positional args)))
               (expectation
                (λ (proc)
                  (define (call) (apply/arguments proc args))
