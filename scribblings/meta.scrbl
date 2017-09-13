@@ -63,11 +63,12 @@ expectations.
    (expect! flt (expect-fault #:actual (make-self-attribute 'bar)))
    (eval:error (expect! flt (expect-fault #:summary "not test fault"))))}
 
-@defproc[(expect-attribute [attr-exp any/c expect-any])
+@defproc[(expect-attribute [desc-exp any/c expect-any])
          expectation?]{
  Returns an @expectation-tech{expectation} that expects an
  @attribute-tech{attribute} whose description is then checked against
- @racket[expect-any].
+ @racket[desc-exp]. The given @racket[desc-exp] is converted to an expectation
+ with @racket[->expectation].
 
  @(expect-examples
    (struct test-attribute attribute () #:transparent)
