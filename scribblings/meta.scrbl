@@ -57,10 +57,10 @@ expectations.
  @(expect-examples
    (define flt
      (fault #:summary "test fault"
-            #:expected (self-attribute 'foo)
-            #:actual (self-attribute 'bar)))
+            #:expected (make-self-attribute 'foo)
+            #:actual (make-self-attribute 'bar)))
    (expect! flt (expect-fault))
-   (expect! flt (expect-fault #:actual (expect-equal? (self-attribute 'bar))))
+   (expect! flt (expect-fault #:actual (make-self-attribute 'bar)))
    (eval:error (expect! flt (expect-fault #:summary "not test fault"))))}
 
 @defproc[(expect-attribute [attr-exp any/c expect-any])

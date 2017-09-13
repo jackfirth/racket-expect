@@ -20,9 +20,9 @@
   [fault-contexts (-> fault? (listof context?))]
   [struct context ([description string?]) #:omit-constructor]
   [struct attribute ([description string?]) #:omit-constructor]
-  [self-attribute (-> any/c self-attribute?)]
-  [self-attribute? predicate/c]
-  [self-attribute-value (-> self-attribute? any/c)]))
+  [struct (self-attribute attribute) ([description string?] [value any/c])
+    #:omit-constructor]
+  [make-self-attribute (-> any/c self-attribute?)]))
 
 (require racket/format
          racket/function
@@ -37,10 +37,8 @@
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
 
-(struct self-attribute attribute (value)
-  #:transparent
-  #:omit-define-syntaxes
-  #:constructor-name make-self-attribute)
+(struct self-attribute attribute (value) #:transparent)
+(define (make-self-attribute v) (self-attribute (~v v) v))
 
 (struct fault (summary expected actual contexts)
   #:transparent #:omit-define-syntaxes #:constructor-name make-fault)
@@ -51,6 +49,5 @@
                #:contexts [contexts (list)])
   (make-fault summary expected actual contexts))
 
-(define (self-attribute v) (make-self-attribute (~v v) v))
 (define (expectation-apply exp v) ((expectation-proc exp) v))
 (define expect-any (expectation (const '())))

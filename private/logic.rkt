@@ -39,16 +39,16 @@
 
 (define (true-fault v)
   (fault #:summary "true"
-         #:expected (self-attribute #t)
-         #:actual (self-attribute v)))
+         #:expected (make-self-attribute #t)
+         #:actual (make-self-attribute v)))
 
 (define expect-true
   (expect/singular (λ (v) (and (not (equal? v #t)) (true-fault v)))))
 
 (define (false-fault v)
   (fault #:summary "false"
-         #:expected (self-attribute #f)
-         #:actual (self-attribute v)))
+         #:expected (make-self-attribute #f)
+         #:actual (make-self-attribute v)))
 
 (define expect-false
   (expect/singular (λ (v) (and v (false-fault v)))))
@@ -61,8 +61,8 @@
 
 (define (not-false-fault v)
   (fault #:summary "not false"
-         #:expected (not-attribute (self-attribute #f))
-         #:actual (self-attribute v)))
+         #:expected (not-attribute (make-self-attribute #f))
+         #:actual (make-self-attribute v)))
 
 (define expect-not-false
   (expect/singular (λ (v) (and (not v) (not-false-fault v)))))
@@ -78,7 +78,7 @@
 (define (pred-fault pred v)
   (fault #:summary "a different kind of value"
          #:expected (pred-attribute pred)
-         #:actual (self-attribute v)))
+         #:actual (make-self-attribute v)))
 
 (define (expect-pred pred)
   (expect/singular (λ (v) (and (not (pred v)) (pred-fault pred v)))))
@@ -111,4 +111,4 @@
      (and (not (ormap app preds))
           (fault #:summary "a different kind of value"
                  #:expected (make-or-attribute (map pred-attribute preds))
-                 #:actual (self-attribute v))))))
+                 #:actual (make-self-attribute v))))))

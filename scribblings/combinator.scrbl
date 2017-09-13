@@ -55,7 +55,7 @@ expectations out of simple ones while preserving error message quality.
      (and (not (<= 0 v 9))
           (fault #:summary "a single digit positive integer"
                  #:expected (single-digit-attribute "integer between 0 and 9")
-                 #:actual (self-attribute v))))
+                 #:actual (make-self-attribute v))))
    (define expect-single-digit (expect/singular single-digit-fault))
    (expect! 5 expect-single-digit)
    (eval:error (expect! 123 expect-single-digit)))}
