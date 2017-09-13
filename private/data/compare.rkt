@@ -57,7 +57,7 @@
     (and (not (comparison e v))
          (fault #:summary "a different value"
                 #:expected (attr e)
-                #:actual (self-attribute v))))
+                #:actual (make-self-attribute v))))
   (expect/singular make-fault))
 
 (define expect-eq? (expect-compare eq? eq-attribute _))
@@ -87,5 +87,5 @@
     (and (not (<= lower v upper))
          (fault #:summary "a different number"
                 #:expected (=-attribute e tolerance)
-                #:actual (self-attribute v))))
+                #:actual (make-self-attribute v))))
   (expect/singular make-fault))

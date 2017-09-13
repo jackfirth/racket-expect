@@ -37,7 +37,7 @@
      (define converted (map ->expectation (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
     [(boolean? v) (if v expect-true expect-false)]
-    [((disjoin number? string? symbol? char?) v) (expect-equal? v)]))
+    [else (expect-equal? v)]))
 
 (define-syntax <convert> #f)
 

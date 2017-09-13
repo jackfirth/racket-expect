@@ -16,7 +16,7 @@
 
 (define test-fault
   (fault #:summary "some fault"
-         #:actual (self-attribute 'foo)
+         #:actual (make-self-attribute 'foo)
          #:expected test-attr))
 
 (test-case "expect-fault"

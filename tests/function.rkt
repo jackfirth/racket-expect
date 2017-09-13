@@ -15,9 +15,9 @@
 (define (raise-foo) (raise 'foo))
 
 (check-expect void expect-not-raise)
-(check-expect expect-not-raise (expect-expects raise-foo "no value raised"))
+(check-expect expect-not-raise (expect-expects raise-foo "nothing"))
 (check-expect raise-foo (expect-raise 'foo))
-(check-return (expect-raise 'foo) (expect-expects void "raised a value"))
+(check-return (expect-raise 'foo) (expect-expects void "anything"))
 (check-return (expect-raise 'bar) (expect-expects raise-foo "equal? to 'bar"))
 (check-expect (thunk 'foo) (expect-return 'foo))
 (check-expect values (expect-return))
@@ -26,4 +26,4 @@
               (expect-expects (thunk 'bar) "equal? to 'foo"))
 (check-expect (expect-return 'foo)
               (expect-expects identity "arity accepting 0 arguments"))
-(check-expect (expect-return 'foo) (expect-expects raise-foo "no value raised"))
+(check-expect (expect-return 'foo) (expect-expects raise-foo "nothing"))

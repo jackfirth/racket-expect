@@ -37,7 +37,7 @@
     (and (not (set-member? st v))
          (fault #:summary "a set containing a specific value"
                 #:expected (member-attribute v)
-                #:actual (self-attribute st))))
+                #:actual (make-self-attribute st))))
   (expect/singular make-fault))
 
 (define (expect-set-not-member? v)
@@ -45,7 +45,7 @@
     (and (set-member? st v)
          (fault #:summary "a set not containing a specific value"
                 #:expected (not-attribute (member-attribute v))
-                #:actual (self-attribute st))))
+                #:actual (make-self-attribute st))))
   (expect/singular make-fault))
 
 (define (expect-subset big-st)

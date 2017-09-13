@@ -48,8 +48,8 @@
   (struct test-context context () #:transparent)
   (define flt/ctxts
     (fault #:summary "foo"
-           #:expected (self-attribute 'foo)
-           #:actual (self-attribute 'bar)
+           #:expected (make-self-attribute 'foo)
+           #:actual (make-self-attribute 'bar)
            #:contexts (list (test-context "outer") (test-context "inner"))))
   (check-equal? (fault-messages flt/ctxts)
                 (list "in: outer" "in: inner" "expected: 'foo" "actual: 'bar")))
@@ -89,8 +89,8 @@
   (check-not-exn (thunk (expect! 1 1)))
   (check-exn exn:fail:expect? (thunk (expect! 1 2)))
   (define foo-fault (fault #:summary "foo"
-                           #:expected (self-attribute 'foo)
-                           #:actual (self-attribute 'not-foo)))
+                           #:expected (make-self-attribute 'foo)
+                           #:actual (make-self-attribute 'not-foo)))
   (define expect-foo (expectation (const (list foo-fault))))
   (define (expect-foo!) (expect! 'any expect-foo))
   (check-exn exn:fail:expect? expect-foo!)
@@ -98,8 +98,8 @@
   (check-exn #rx"expected: 'foo" expect-foo!)
   (check-exn #rx"actual: 'not-foo" expect-foo!)
   (define bar-fault (fault #:summary "bar"
-                           #:expected (self-attribute 'bar)
-                           #:actual (self-attribute 'not-bar)))
+                           #:expected (make-self-attribute 'bar)
+                           #:actual (make-self-attribute 'not-bar)))
   (define expect-foo+bar (expectation (const (list foo-fault bar-fault))))
   (define (expect-foo+bar!) (expect! 'any expect-foo+bar))
   (check-exn #rx"multiple failures" expect-foo+bar!)

@@ -61,8 +61,8 @@ use their basic functionalities.
  @(expect-examples
    (fault? 6)
    (fault? (fault #:summary "test fault"
-                  #:expected (self-attribute 'foo)
-                  #:actual (self-attribute 'bar))))}
+                  #:expected (make-self-attribute 'foo)
+                  #:actual (make-self-attribute 'bar))))}
 
 @defproc[(fault [#:summary summary string?]
                 [#:expected expected attribute?]
@@ -74,12 +74,12 @@ use their basic functionalities.
  specific; see @racket[expect-list] for an example of proper use of contexts.
  @(expect-examples
    (fault #:summary "test fault"
-          #:expected (self-attribute 'foo)
-          #:actual (self-attribute 'bar))
+          #:expected (make-self-attribute 'foo)
+          #:actual (make-self-attribute 'bar))
    (struct test-context context () #:transparent)
    (fault #:summary "test fault with contexts"
-          #:expected (self-attribute 'foo)
-          #:actual (self-attribute 'bar)
+          #:expected (make-self-attribute 'foo)
+          #:actual (make-self-attribute 'bar)
           #:contexts (list (test-context "test context")
                            (test-context "nested test context"))))}
 
@@ -111,23 +111,22 @@ use their basic functionalities.
  not provided so the only way to create attributes is with a subtype. See
  @racket[self-attribute] for a trivial implementation.}
 
-@defproc[(self-attribute? [v any/c]) boolean?]{
- Returns @racket[#t] if @racket[v] is an @attribute-tech{attribute} returned by
- @racket[self-attribute], returns @racket[#f] otherwise.
+@deftogether[
+ (@defstruct*[(self-attribute attribute) ([value any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-self-attribute [v any/c]) self-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that directly represents the
+ value referred to by the @context-tech{context} of a @fault-tech{fault}.
  @(expect-examples
-   (self-attribute? 'nope)
-   (self-attribute? (self-attribute 'yup)))}
+   (make-self-attribute 'foo))}
 
-@defproc[(self-attribute [value any/c]) self-attribute?]{
- Constructs an @attribute-tech{attribute} whose description is
- @racket[(~v value)]. The @racket[value] used to construct the attribute can be
- retrieved later with @racket[self-attribute-value].
- @(expect-examples
-   (self-attribute 'foo)
-   (attribute-description (self-attribute 'foo)))}
-
-@defproc[(self-attribute-value [self-attr self-attribute?]) any/c]{
- Returns the original value used to construct @racket[self-attr] with
- @racket[self-attribute].
- @(expect-examples
-   (self-attribute-value (self-attribute 'foo)))}
+@deftogether[
+ (@defstruct*[(any-attribute attribute) () #:transparent #:omit-constructor]
+   @defstruct*[(none-attribute attribute) () #:transparent #:omit-constructor]
+   @defthing[the-any-attribute any-attribute?]
+   @defthing[the-none-attribute none-attribute?])]{
+ These @attribute-tech{attributes} are used by @fault-tech{faults} to express
+ that they expected or found any value at all or no value at all. This is
+ typically for faults with a @context-tech{context} that may not be present on
+ all values. For a concrete example of their uses, see @racket[expect-raise] and
+ @racket[expect-return].}
