@@ -86,14 +86,13 @@
  A @context-tech{context} and its constructor that represents a call to a
  procedure with @racket[args] passed as the procedure's arguments.}
 
-@section{Procedure Attribute Structures}
-
 @deftogether[
- (@defstruct*[(arity-attribute attribute) ([value procedure-arity?])
-              #:transparent #:omit-constructor]
-   @defproc[(make-arity-attribute [arity procedure-arity?]) arity-attribute?])]{
- An @attribute-tech{attribute} and its constructor that represents the arity of
- a procedure.}
+ (@defstruct*[(arity-context context) () #:transparent #:omit-constructor]
+   @defthing[the-arity-context arity-context?])]{
+ A @context-tech{context} that represents the arity of a procedure, as returned
+ by @racket[procedure-arity].}
+
+@section{Procedure Attribute Structures}
 
 @deftogether[
  (@defstruct*[(arity-includes-attribute attribute) ([value procedure-arity?])
@@ -104,28 +103,3 @@
  a procedure includes, in the sense of @racket[arity-includes?]. This is
  distinct from @racket[arity-attribute] in that the procedure's actual arity may
  not be @racket[arity=?] to the @racket[value] arity.}
-
-@deftogether[
- (@defstruct*[(not-raise-attribute attribute) ()
-              #:transparent #:omit-constructor]
-   @defthing[the-not-raise-attribute not-raise-attribute?])]{
- An @attribute-tech{attribute} that represents a procedure not aborting. Used in
- @fault-tech{faults} returned by @racket[expect-return] and similar expectations
- when the procedure they're given raises a value unexpectedly.}
-
-@deftogether[
- (@defstruct*[(raise-attribute attribute) ([value any/c])
-              #:transparent #:omit-constructor]
-   @defproc[(make-raise-attribute [raised any/c]) raise-attribute?])]{
- An @attribute-tech{attribute} and its constructor that represents the raised
- value of a procedure. Used in @fault-tech{faults} returned by
- @racket[expect-return] to describe what a procedure they're given unexpectedly
- raised.}
-
-@deftogether[
- (@defstruct*[(raise-any-attribute attribute) ()
-              #:transparent #:omit-constructor]
-   @defthing[the-raise-any-attribute raise-any-attribute?])]{
- An @attribute-tech{attribute} and its constructor that represents a proceduer
- that raises any value at all. Used by @racket[expect-raise] when a given
- procedure fails to raise a value.}

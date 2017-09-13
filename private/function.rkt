@@ -18,23 +18,13 @@
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
-  [struct (arity-attribute attribute)
-    ([description string?] [value procedure-arity?]) #:omit-constructor]
-  [make-arity-attribute (-> procedure? arity-attribute?)]
+  [struct (arity-context context) ([description string?]) #:omit-constructor]
+  [the-arity-context arity-context?]
   [struct (arity-includes-attribute attribute)
     ([description string?] [value procedure-arity?])
     #:omit-constructor]
   [make-arity-includes-attribute (-> procedure-arity?
-                                     arity-includes-attribute?)]
-  [struct (not-raise-attribute attribute)
-    ([description string?]) #:omit-constructor]
-  [the-not-raise-attribute not-raise-attribute?]
-  [struct (raise-attribute attribute)
-    ([description string?] [value any/c]) #:omit-constructor]
-  [make-raise-attribute (-> any/c raise-attribute?)]
-  [struct (raise-any-attribute attribute)
-    ([description string?]) #:omit-constructor]
-  [the-raise-any-attribute raise-any-attribute?]))
+                                     arity-includes-attribute?)]))
 
 (require arguments
          fancy-app
@@ -90,19 +80,8 @@
   (check-equal? (arity-attr-description (list 1 3 5 (arity-at-least 7)))
                 "arity accepting 1, 3, 5, or at least 7 arguments"))
 
-(struct arity-attribute attribute (value) #:transparent)
-(define (make-arity-attribute arity)
-  (arity-attribute (format "arity of ~a" arity) arity))
-
-(struct not-raise-attribute attribute () #:transparent)
-(define the-not-raise-attribute (not-raise-attribute "no value raised"))
-
-(struct raise-attribute attribute (value) #:transparent)
-(define (make-raise-attribute raised)
-  (raise-attribute (format "raised ~v" raised) raised))
-
-(struct raise-any-attribute attribute () #:transparent)
-(define the-raise-any-attribute (raise-any-attribute "raised a value"))
+(struct arity-context context () #:transparent)
+(define the-arity-context (arity-context "the procedure's arity"))
 
 (struct raise-context context () #:transparent)
 (define the-raise-context (raise-context "the raised value"))
@@ -114,22 +93,27 @@
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
 
+(define (expect-proc-arity arity-exp)
+  (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
+
 (define (expect-arity-includes? arity)
-  (define (make-fault proc)
-    (define proc-ar (procedure-arity proc))
-    (and (not (arity-includes? proc-ar arity))
-         (fault #:summary "a procedure with a different arity"
+  (define (make-fault actual-arity)
+    (and (not (arity-includes? actual-arity arity))
+         (fault #:summary "a more inclusive arity"
                 #:expected (make-arity-includes-attribute arity)
-                #:actual (make-arity-attribute proc-ar))))
-  (expect-and (expect-pred procedure?) (expect/singular make-fault)))
+                #:actual (make-self-attribute actual-arity))))
+  (expect-and (expect-pred procedure-arity?) (expect/singular make-fault)))
 
 (define (raise-fault raised)
-  (fault #:summary "no value raised during procedure call"
-         #:expected the-not-raise-attribute
-         #:actual (make-raise-attribute raised)))
+  (fault #:summary "no value raised"
+         #:expected the-none-attribute
+         #:actual (make-self-attribute raised)
+         #:contexts (list the-raise-context)))
 
 (define (expect-thunk exp)
-  (expect-and (expect-arity-includes? 0) exp))
+  (expect-and (expect-pred procedure?)
+              (expect-proc-arity (expect-arity-includes? 0))
+              exp))
 
 (define (make-not-raise-fault proc)
   (with-handlers ([(const #t) raise-fault]) (proc) #f))
@@ -137,9 +121,10 @@
 (define expect-not-raise (expect-thunk (expect/singular make-not-raise-fault)))
 
 (define exp-raise-any-fault
-  (fault #:summary "a value raised during procedure call"
-         #:expected the-raise-any-attribute
-         #:actual the-not-raise-attribute))
+  (fault #:summary "any value raised"
+         #:expected the-any-attribute
+         #:actual the-none-attribute
+         #:contexts (list the-raise-context)))
 
 (define (expect-raise v)
   (define exp/context (expect/context (->expectation v) the-raise-context))
@@ -162,7 +147,9 @@
         (expectation-apply exp/context results))))))
 
 (define (expect-call args call-exp)
-  (expect-and (expect-arity-includes? (length (arguments-positional args)))
+  (define num-pos (length (arguments-positional args)))
+  (expect-and (expect-pred procedure?)
+              (expect-proc-arity (expect-arity-includes? num-pos))
               (expectation
                (λ (proc)
                  (define (call) (apply/arguments proc args))
