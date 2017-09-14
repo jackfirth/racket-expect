@@ -87,7 +87,12 @@
 (define expect-any (expectation-rename (expectation (const '())) 'any))
 
 (module+ test
-  (check-equal? (object-name expect-any) 'any)
-  (check-equal? (~a expect-any) "#<expectation:any>")
-  (check-equal? (~v expect-any) (~a expect-any))
-  (check-equal? (~s expect-any) (~a expect-any)))
+  (test-case "named-expectation"
+    (check-equal? (object-name expect-any) 'any)
+    (check-equal? (~a expect-any) "#<expectation:any>")
+    (check-equal? (~v expect-any) (~a expect-any))
+    (check-equal? (~s expect-any) (~a expect-any)))
+  (test-case "anonymous-expectation"
+    (define anon (expectation (const '())))
+    (check-equal? (object-name anon) #f)
+    (check-equal? (~a anon) "#<expectation>")))
