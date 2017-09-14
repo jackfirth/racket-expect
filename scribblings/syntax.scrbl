@@ -33,8 +33,9 @@
  Like @racket[expect-expand], but calls @racket[expand-once] on the input syntax
  object instead of @racket[expand].}
 
-@defproc[(expect-syntax-exn [msg-exp (or/c string? regexp? expectation?)]
-                            [#:namespace ns namespace? (current-namespace)])
+@defproc[(expect-syntax-exn
+          [msg-exp (or/c string? regexp? expectation?) expect-any]
+          [#:namespace ns namespace? (current-namespace)])
          expectation?]{
  Returns an @expectation-tech{expectation} that expects a syntax object and
  expects that expanding that syntax object raises an @racket[exn:fail:syntax]

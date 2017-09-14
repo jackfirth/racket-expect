@@ -9,8 +9,9 @@
   [expect-expand-once (->* (expectation?)
                            (#:namespace namespace?)
                            expectation?)]
-  [expect-syntax-exn (->* ((or/c string? regexp? expectation?))
-                          (#:namespace namespace?)
+  [expect-syntax-exn (->* ()
+                          ((or/c string? regexp? expectation?)
+                           #:namespace namespace?)
                           expectation?)]
   [struct (datum-context context) ([description string?]) #:omit-constructor]
   [the-datum-context datum-context?]))
