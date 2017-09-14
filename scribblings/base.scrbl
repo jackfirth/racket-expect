@@ -19,11 +19,14 @@ use their basic functionalities.
    (expectation? 6)
    (expectation? expect-true))}
 
-@defproc[(expectation [proc (-> any/c (listof fault?))]) expectation?]{
+@defproc[(expectation [proc (-> any/c (listof fault?))]
+                      [#:name name (or/c symbol? #f) #f]) expectation?]{
  Returns an @expectation-tech{expectation} whose implementation is
- @racket[proc].
+ @racket[proc] and whose name (in the sense of @racket[object-name]) is
+ @racket[name].
  @(expect-examples
-   (define empty-expectation (expectation (λ (v) (list))))
+   (define empty-expectation (expectation (λ (v) (list)) #:name 'empty))
+   empty-expectation
    (expectation-apply empty-expectation 'foo))}
 
 @defproc[(expectation-apply [exp expectation?] [v any/c]) (listof faults?)]{
@@ -49,6 +52,17 @@ use their basic functionalities.
  @racket[subject] field is the original value checked against the expectation
  and the @racket[faults] field is the list of @fault-tech{faults} found by the
  expectation.}
+
+@defproc[(expectation-rename [exp expectation?] [name (or/c symbol? #f)])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that is like @racket[exp], but with
+ its name (as returned by @racket[object-name]) set to @racket[name]. An
+ expectation's printed form inludes its name in the format
+ @litchar{#<expectation:} @racket[name] @litchar{>}.
+ @(expect-examples
+   expect-any
+   (expectation-rename expect-any 'anything-at-all)
+   (expectation-rename expect-any #f))}
 
 @defthing[expect-any expectation?]{
  The empty expectation. Finds no @fault-tech{faults} in any value. Not very
