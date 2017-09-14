@@ -147,12 +147,11 @@
         (expectation-apply exp/context results))))))
 
 (define (expect-call args call-exp)
+  (define call-exp* (expect/context call-exp (make-call-context args)))
   (define num-pos (length (arguments-positional args)))
   (expect-and (expect-pred procedure?)
               (expect-proc-arity (expect-arity-includes? num-pos))
               (expectation
                (λ (proc)
                  (define (call) (apply/arguments proc args))
-                 (define call-exp/context
-                   (expect/context call-exp (make-call-context args)))
-                 (expectation-apply call-exp/context call)))))
+                 (expectation-apply call-exp* call)))))
