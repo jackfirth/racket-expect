@@ -52,8 +52,8 @@ use their basic functionalities.
 
 @defthing[expect-any expectation?]{
  The empty expectation. Finds no @fault-tech{faults} in any value. Not very
- useful on it's own, but this is sometimes useful in higher order contexts (such
- as a default argument).}
+ useful on it's own, but this is sometimes useful in higher order contexts such
+ as a default argument.}
 
 @defproc[(fault? [v any/c]) boolean?]{
  Returns @racket[#t] if @racket[v] is a @fault-tech{fault}, returns @racket[#f]
