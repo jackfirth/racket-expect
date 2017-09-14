@@ -34,7 +34,7 @@
 (define here-ns (namespace-anchor->namespace here))
 
 ;; shorthands
-(define red-fish-passes (expect-exp-no-faults (fish 'red 5)))
+(define red-fish-passes (expect-exp-faults (fish 'red 5)))
 (define (expect-syntax-exn/here msg-exp)
   (expect-syntax-exn msg-exp #:namespace here-ns))
 
@@ -47,7 +47,7 @@
   (test-case "accessor-optional"
     (check-expect (expect-struct fish [fish-color 'red]) red-fish-passes))
   (test-case "predicate"
-    (check-expect (expect-struct fish) (expect-exp-one-fault 5)))
+    (check-expect (expect-struct fish) (expect-exp-faults 5 expect-any)))
   (test-case "subtype"
     (test-case "subtype-field"
       (check-expect (shark 'red 5 100) (expect-struct shark [shark-teeth 100])))

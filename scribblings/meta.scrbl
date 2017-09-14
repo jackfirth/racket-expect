@@ -8,40 +8,36 @@ These functions construct @expectation-tech{expectations} for asserting
 properties of other expectations. This is especially useful when testing custom
 expectations.
 
-@defproc[(expect-exp-faults
-          [v any/c]
-          [exp (or/c expectation? (listof (or/c expectation? fault?)))])
+@defproc[(expect-exp-faults [input any/c]
+                            [fault-exp (or/c expectation? fault?)] ...)
          expectation?]{
  Returns an @expectation-tech{expectation} that expects a value that is itself
- an expectation. Additionally, that expectation is applied to @racket[v] and the
- list of @fault-tech{faults} it returns is checked against @racket[exp]. The
- given @racket[exp] is converted to an expectation with @racket[->expectation],
- and it must accept a list of faults as an input.
+ an expectation. That expectation is applied to @racket[input] and is expected
+ to return one @fault-tech{fault} for each @racket[fault-exp]. Each returned
+ fault is checked against the corresponding @racket[exp]. If any @racket[exp] is
+ not an expectation, it is converted to one with @racket[->expectation]. See
+ also @racket[expect-exp-faults*].
 
  @(expect-examples
-   (expect! expect-true (expect-exp-faults #f (expect-list-count 1))))}
+   (expect! expect-true (expect-exp-faults #f expect-any))
+   (eval:error (expect! expect-true (expect-exp-faults #f))))}
 
-@defproc[(expect-exp-no-faults [v any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value that is itself
- an expectation. Additionally, that expectation must not return any
- @fault-tech{faults} when applied to @racket[v].
-
- @(expect-examples
-   (expect! expect-true (expect-exp-no-faults #t))
-   (eval:error (expect! expect-true (expect-exp-no-faults #f))))}
-
-@defproc[(expect-exp-one-fault [v any/c]
-                               [exp (or/c fault? expectation?) expect-any])
+@defproc[(expect-exp-faults* [input any/c]
+                             [fault-exp* (or/c expectation?
+                                               (listof (or/c fault?
+                                                             expectation?)))])
          expectation?]{
- Returns an @expectation-tech{expectation} that expects a value that is itself
- an expectation. Additionally, that expectation is applied to @racket[v] and it
- must return one @fault-tech{fault} which is then checked against @racket[exp].
- If @racket[exp] is a fault, it is converted to an expectation with
- @racket[->expectation].
+ Like @racket[expect-exp-faults], but the entire list of faults returned by
+ applying a subject expectation to @racket[input] is checked against
+ @racket[fault-exp*].
 
  @(expect-examples
-   (expect! expect-true (expect-exp-one-fault #f))
-   (eval:error (expect! expect-true (expect-exp-one-fault #t))))}
+   (define (expect-exp-even-faults input)
+     (expect-exp-faults* input (expect-list-count (expect-pred even?))))
+   (define exp-ab (expect-list 1 2))
+   (expect! exp-ab (expect-exp-even-faults '(1 2)))
+   (expect! exp-ab (expect-exp-even-faults '(a b)))
+   (eval:error (expect! exp-ab (expect-exp-even-faults '(1 foo)))))}
 
 @defproc[(expect-fault
           [#:summary summary-exp any/c expect-any]

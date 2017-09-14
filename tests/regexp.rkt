@@ -8,4 +8,5 @@
 (check-expect "12x4x6"
               (expect-regexp-match #rx"x." (list (expect-equal? "x4"))))
 (check-expect "12x4x6" (expect-regexp-match #rx"x." (expect-list "x4")))
-(check-expect (expect-regexp-match #rx"y.") (expect-exp-one-fault "12x4x6"))
+(check-expect (expect-regexp-match #rx"y.")
+              (expect-exp-faults "12x4x6" expect-any))
