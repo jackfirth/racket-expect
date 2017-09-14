@@ -15,11 +15,9 @@
  @fault-tech{faults}. Accessors may be provided in any order.
 
  The @racket[id] must have a transformer binding to a @racket[struct-info?]
- value, and that value must supply the structure type's predicate. @bold{Parent
-  struct accessors are not currently supported}, but you may combine multiple
- uses of @racket[expect-struct] using @racket[expect-and] to achieve the same
- result. Faults found by the expectation in accessed fields have a
- @racket[struct-accessor-context] value added to their
+ value, and that value must supply the structure type's predicate. Accessors of
+ the struct's supertypes are allowed. Faults found by the expectation in
+ accessed fields have a @racket[struct-accessor-context] value added to their
  @context-tech{contexts}.
 
  @(expect-examples
