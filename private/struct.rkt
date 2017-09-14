@@ -60,11 +60,13 @@
   #:fail-when (check-all-accessor #'(accessor-id ...) (attribute id.info))
   (format "not known to be field accessor for struct ~a"
           (identifier-binding-symbol #'id))
-  (expect-and (expect-pred id.predicate-id)
-              (expect-all
-               (expect/context (expect/proc (->expectation exp) accessor-id)
-                               (make-struct-accessor-context #'accessor-id))
-               ...)))
+  (expectation-rename
+   (expect-and (expect-pred id.predicate-id)
+               (expect-all
+                (expect/context (expect/proc (->expectation exp) accessor-id)
+                                (make-struct-accessor-context #'accessor-id))
+                ...))
+   'id))
 
 (begin-for-syntax
   (define (format-expect-id id-stx)

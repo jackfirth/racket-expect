@@ -31,15 +31,19 @@
 (define the-datum-context (datum-context "the syntax's datum"))
 
 (define (expect-syntax exp)
-  (expect-and (expect-pred syntax?)
-              (expect/context (expect/proc (->expectation exp) syntax->datum)
-                              the-datum-context)))
+  (define anon-exp
+    (expect-and (expect-pred syntax?)
+                (expect/context (expect/proc (->expectation exp) syntax->datum)
+                                the-datum-context)))
+  (expectation-rename anon-exp 'syntax))
 
 (define (expect-expand* f exp ns)
   (define (around thnk) (parameterize ([current-namespace ns]) (thnk)))
-  (expect-and (expect-pred syntax?)
-              (expect/proc (expect/around (expect-apply f exp) around)
-                           arguments)))
+  (define anon-exp
+    (expect-and (expect-pred syntax?)
+                (expect/proc (expect/around (expect-apply f exp) around)
+                             arguments)))
+  (expectation-rename anon-exp (object-name f)))
 
 (define (expect-expand exp #:namespace [ns (current-namespace)])
   (expect-expand* expand exp ns))
@@ -55,4 +59,4 @@
         (->expectation msg-exp)))
   (define raise-exp
     (expect-raise (expect-struct exn:fail:syntax [exn-message msg-exp*])))
-  (expect-expand raise-exp #:namespace ns))
+  (expectation-rename (expect-expand raise-exp #:namespace ns) 'syntax-exn))

@@ -24,11 +24,13 @@
 
 
 (define (expect-regexp-match pattern [result-exp expect-any])
-  (expect-and (expect-disjoin string? bytes? path? input-port?)
-              (expect-regexp-match? pattern)
-              (expect/context (expect/proc (->expectation result-exp)
-                                           (regexp-match pattern _))
-                              (make-regexp-match-context pattern))))
+  (define anon-exp
+    (expect-and (expect-disjoin string? bytes? path? input-port?)
+                (expect-regexp-match? pattern)
+                (expect/context (expect/proc (->expectation result-exp)
+                                             (regexp-match pattern _))
+                                (make-regexp-match-context pattern))))
+  (expectation-rename anon-exp 'regexp-match))
 
 ;; not provided because calling expect-regexp-match with a default result-exp
 ;; is equivalent to calling this

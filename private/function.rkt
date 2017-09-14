@@ -126,7 +126,9 @@
 (define (make-not-raise-fault proc)
   (with-handlers ([(const #t) raise-fault]) (proc) #f))
 
-(define expect-not-raise (expect-thunk (expect/singular make-not-raise-fault)))
+(define expect-not-raise
+  (expectation-rename (expect-thunk (expect/singular make-not-raise-fault))
+                      'not-raise))
 
 (define exp-raise-any-fault
   (fault #:summary "any value raised"
@@ -136,38 +138,47 @@
 
 (define (expect-raise v)
   (define exp/context (expect/context (->expectation v) the-raise-context))
-  (expect-thunk
-   (expectation
-    (λ (proc)
-      (with-handlers ([(const #t) (expectation-apply exp/context _)])
-        (proc)
-        (list exp-raise-any-fault))))))
+  (define anon-exp
+    (expect-thunk
+     (expectation
+      (λ (proc)
+        (with-handlers ([(const #t) (expectation-apply exp/context _)])
+          (proc)
+          (list exp-raise-any-fault))))))
+  (expectation-rename anon-exp 'raise))
 
-(define (expect-return . vs) (expect-return* (apply expect-list vs)))
+(define (expect-return . vs)
+  (expectation-rename (expect-return* (apply expect-list vs)) 'return))
 
 (define (expect-return* v)
   (define exp/context (expect/context (->expectation v) the-return-context))
-  (expect-thunk
-   (expectation
-    (λ (proc)
-      (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
-        (define results (call-with-values proc list))
-        (expectation-apply exp/context results))))))
+  (define anon-exp
+    (expect-thunk
+     (expectation
+      (λ (proc)
+        (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
+          (define results (call-with-values proc list))
+          (expectation-apply exp/context results))))))
+  (expectation-rename anon-exp 'return*))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))
   (define num-pos (length (arguments-positional args)))
-  (expect-and (expect-pred procedure?)
-              (expect-proc-arity (expect-arity-includes? num-pos))
-              (expectation
-               (λ (proc)
-                 (define (call) (apply/arguments proc args))
-                 (expectation-apply call-exp* call)))))
+  (define anon-exp
+    (expect-and (expect-pred procedure?)
+                (expect-proc-arity (expect-arity-includes? num-pos))
+                (expectation
+                 (λ (proc)
+                   (define (call) (apply/arguments proc args))
+                   (expectation-apply call-exp* call)))))
+  (expectation-rename anon-exp 'call))
 
 (define (expect-apply proc call-exp)
   (define call-exp* (expect/context call-exp (make-apply-context proc)))
-  (expect-and (expect-pred arguments?)
-              (expectation
-               (λ (args)
-                 (define (call) (apply/arguments proc args))
-                 (expectation-apply call-exp* call)))))
+  (define anon-exp
+    (expect-and (expect-pred arguments?)
+                (expectation
+                 (λ (args)
+                   (define (call) (apply/arguments proc args))
+                   (expectation-apply call-exp* call)))))
+  (expectation-rename anon-exp 'apply))

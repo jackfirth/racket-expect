@@ -21,7 +21,8 @@
          (submod "compare.rkt" for-conversion))
 
 
-(define expect-hash-count (expect/count _ hash-count))
+(define (expect-hash-count exp)
+  (expectation-rename (expect/count exp hash-count) 'hash-count))
 
 (struct key-context context (value)
   #:transparent
@@ -32,7 +33,9 @@
   (make-key-context (format "value for key ~v" k) k))
 
 (define (expect-hash-ref k value-exp)
-  (expect/context (expect/proc value-exp (hash-ref _ k)) (key-context k)))
+  (define exp
+    (expect/context (expect/proc value-exp (hash-ref _ k)) (key-context k)))
+  (expectation-rename exp 'hash-ref))
 
 (struct key-set-context context ()
   #:transparent
@@ -42,8 +45,10 @@
 (define key-set-context (make-key-set-context "the set of hash keys"))
 
 (define (expect-hash-keys set-exp)
-  (expect/context (expect/proc set-exp (λ (h) (list->set (hash-keys h))))
-                  key-set-context))
+  (define (hash-key-set h) (list->set (hash-keys h)))
+  (expectation-rename (expect/context (expect/proc set-exp hash-key-set)
+                                      key-set-context)
+                      'hash-keys))
 
 (define (expect-hash . k+exps)
   (define keys (slice k+exps #:step 2))
@@ -54,6 +59,8 @@
     (apply expect-all
            (for/list ([k (in-set present-keys)])
              (expect-hash-ref k (hash-ref key-exp-hash k)))))
-  (expect-and (expect-pred hash?)
-              (expect-all (expect-hash-keys (apply expect-set keys))
-                          (expect/dependent present-keys-exp))))
+  (define exp
+    (expect-and (expect-pred hash?)
+                (expect-all (expect-hash-keys (apply expect-set keys))
+                            (expect/dependent present-keys-exp))))
+  (expectation-rename exp 'hash))
