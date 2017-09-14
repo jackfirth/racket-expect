@@ -8,11 +8,12 @@
   [expectation (-> (-> any/c (listof fault?)) expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c (listof fault?))]
-  [fault (->* (#:summary string?
-               #:actual attribute?
-               #:expected attribute?)
-              (#:contexts (listof context?))
-              fault?)]
+  [rename make-fault fault
+          (->* (#:summary string?
+                #:actual attribute?
+                #:expected attribute?)
+               (#:contexts (listof context?))
+               fault?)]
   [fault? predicate/c]
   [fault-summary (-> fault? string?)]
   [fault-actual (-> fault? attribute?)]
@@ -27,6 +28,9 @@
   [the-any-attribute any-attribute?]
   [struct (none-attribute attribute) ([description string?]) #:omit-constructor]
   [the-none-attribute none-attribute?]))
+
+(module+ for-meta
+  (provide (struct-out fault)))
 
 (require racket/format
          racket/function
@@ -48,14 +52,13 @@
 (struct none-attribute attribute () #:transparent)
 (define the-none-attribute (none-attribute "nothing"))
 
-(struct fault (summary expected actual contexts)
-  #:transparent #:omit-define-syntaxes #:constructor-name make-fault)
+(struct fault (summary expected actual contexts) #:transparent)
 
-(define (fault #:summary summary
-               #:expected expected
-               #:actual actual
-               #:contexts [contexts (list)])
-  (make-fault summary expected actual contexts))
+(define (make-fault #:summary summary
+                    #:expected expected
+                    #:actual actual
+                    #:contexts [contexts (list)])
+  (fault summary expected actual contexts))
 
 (define (expectation-apply exp v) ((expectation-proc exp) v))
 (define expect-any (expectation (const '())))

@@ -22,6 +22,7 @@
          "combinator.rkt"
          "data/main.rkt"
          "logic.rkt"
+         "struct.rkt"
          "util-context.rkt")
 
 
@@ -52,24 +53,7 @@
   fault-contexts-context "the contexts field of the fault"
   attribute-description-context "the description field of the attribute")
 
-(define (expect-fault #:summary [sum expect-any]
-                      #:actual [act expect-any]
-                      #:expected [exp expect-any]
-                      #:contexts [ctxs expect-any])
-  (define sum* (->expectation sum))
-  (define exp* (->expectation exp))
-  (define act* (->expectation act))
-  (define ctxs* (->expectation ctxs))
-  (define fields-exp
-    (expect-all
-     (expect/proc+context sum* fault-summary fault-summary-context)
-     (expect/proc+context act* fault-actual fault-actual-context)
-     (expect/proc+context exp* fault-expected fault-expected-context)
-     (expect/proc+context ctxs* fault-contexts fault-contexts-context)))
-  (expect-and (expect-pred fault?) fields-exp))
+(define-struct-expectation fault)
 
 (define (expect-attribute [attr expect-any])
-  (expect-and (expect-pred attribute?)
-              (expect/proc+context (->expectation attr)
-                                   attribute-description
-                                   attribute-description-context)))
+  (expect-struct attribute [attribute-description attr]))
