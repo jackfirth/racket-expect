@@ -5,9 +5,12 @@
 (provide
  (contract-out
   [expect-any expectation?]
-  [expectation (-> (-> any/c (listof fault?)) expectation?)]
+  [expectation (->* ((-> any/c (listof fault?)))
+                    (#:name (or/c symbol? #f))
+                    expectation?)]
   [expectation? predicate/c]
   [expectation-apply (-> expectation? any/c (listof fault?))]
+  [expectation-rename (-> expectation? (or/c symbol? #f) expectation?)]
   [rename make-fault fault
           (->* (#:summary string?
                 #:actual attribute?
@@ -32,16 +35,36 @@
 (module+ for-meta
   (provide (struct-out fault)))
 
-(require racket/format
+(require (for-syntax racket/base
+                     syntax/parse/lib/function-header)
+         racket/format
          racket/function
          racket/list
-         racket/string)
+         racket/string
+         syntax/parse/define)
 
 (module+ test
   (require rackunit))
 
 
-(struct expectation (proc))
+(define (expectation-print exp port mode)
+  (define n (object-name exp))
+  (if n
+      (fprintf port "#<expectation:~a>" n)
+      (fprintf port "#<expectation>")))
+
+(struct expectation (proc name)
+  #:omit-define-syntaxes
+  #:constructor-name make-expectation
+  #:property prop:object-name (struct-field-index name)
+  #:methods gen:custom-write
+  [(define write-proc expectation-print)])
+
+(define (expectation proc #:name [name #f]) (make-expectation proc name))
+
+(define (expectation-rename exp name)
+  (make-expectation (expectation-proc exp) name))
+
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
 
@@ -61,4 +84,15 @@
   (fault summary expected actual contexts))
 
 (define (expectation-apply exp v) ((expectation-proc exp) v))
-(define expect-any (expectation (const '())))
+(define expect-any (expectation-rename (expectation (const '())) 'any))
+
+(module+ test
+  (test-case "named-expectation"
+    (check-equal? (object-name expect-any) 'any)
+    (check-equal? (~a expect-any) "#<expectation:any>")
+    (check-equal? (~v expect-any) (~a expect-any))
+    (check-equal? (~s expect-any) (~a expect-any)))
+  (test-case "anonymous-expectation"
+    (define anon (expectation (const '())))
+    (check-equal? (object-name anon) #f)
+    (check-equal? (~a anon) "#<expectation>")))

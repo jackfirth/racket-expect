@@ -19,14 +19,19 @@
 
 
 (define (expect-vector-ref exp idx)
-  (expect/context (expect/proc exp (vector-ref _ idx)) (index-context idx)))
+  (define anon-exp
+    (expect/context (expect/proc exp (vector-ref _ idx)) (index-context idx)))
+  (expectation-rename anon-exp 'vector-ref))
 
-(define expect-vector-count (expect/count _ vector-length))
+(define (expect-vector-count exp)
+  (expectation-rename (expect/count exp vector-length) 'vector-count))
 
 (define (expect-vector . exps)
   (define (vec->items-exp vec)
     (apply expect-all
            (map/index expect-vector-ref (take/chop exps (vector->list vec)))))
-  (expect-and (expect-pred vector?)
-              (expect-all (expect-vector-count (expect-equal? (length exps)))
-                          (expect/dependent vec->items-exp))))
+  (define exp
+    (expect-and (expect-pred vector?)
+                (expect-all (expect-vector-count (expect-equal? (length exps)))
+                            (expect/dependent vec->items-exp))))
+  (expectation-rename exp 'vector))

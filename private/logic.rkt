@@ -38,20 +38,20 @@
 ;; Booleans
 
 (define (true-fault v)
-  (fault #:summary "true"
-         #:expected (make-self-attribute #t)
-         #:actual (make-self-attribute v)))
+  (and (not (equal? v #t))
+       (fault #:summary "true"
+              #:expected (make-self-attribute #t)
+              #:actual (make-self-attribute v))))
 
-(define expect-true
-  (expect/singular (λ (v) (and (not (equal? v #t)) (true-fault v)))))
+(define expect-true (expectation-rename (expect/singular true-fault) 'true))
 
 (define (false-fault v)
-  (fault #:summary "false"
-         #:expected (make-self-attribute #f)
-         #:actual (make-self-attribute v)))
+  (and v
+       (fault #:summary "false"
+              #:expected (make-self-attribute #f)
+              #:actual (make-self-attribute v))))
 
-(define expect-false
-  (expect/singular (λ (v) (and v (false-fault v)))))
+(define expect-false (expectation-rename (expect/singular false-fault) 'false))
 
 (struct not-attribute attribute (negated)
   #:transparent #:omit-define-syntaxes #:constructor-name make-not-attribute)
@@ -60,12 +60,13 @@
   (make-not-attribute (format "not ~a" (attribute-description negated)) negated))
 
 (define (not-false-fault v)
-  (fault #:summary "not false"
-         #:expected (not-attribute (make-self-attribute #f))
-         #:actual (make-self-attribute v)))
+  (and (not v)
+       (fault #:summary "not false"
+              #:expected (not-attribute (make-self-attribute #f))
+              #:actual (make-self-attribute v))))
 
 (define expect-not-false
-  (expect/singular (λ (v) (and (not v) (not-false-fault v)))))
+  (expectation-rename (expect/singular not-false-fault) 'not-false))
 
 ;; Logical / predicate combinators
 
@@ -76,24 +77,27 @@
   (make-pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
 
 (define (pred-fault pred v)
-  (fault #:summary "a different kind of value"
-         #:expected (pred-attribute pred)
-         #:actual (make-self-attribute v)))
+  (and (not (pred v))
+       (fault #:summary "a different kind of value"
+              #:expected (pred-attribute pred)
+              #:actual (make-self-attribute v))))
 
 (define (expect-pred pred)
-  (expect/singular (λ (v) (and (not (pred v)) (pred-fault pred v)))))
+  (expectation-rename (expect/singular (pred-fault pred _))
+                      (object-name pred)))
 
 (define (expect-all . exps)
-  (expectation (λ (v) (append-map (expectation-apply _ v) exps))))
+  (define (apply-all v) (append-map (expectation-apply _ v) exps))
+  (expectation apply-all #:name 'all))
 
 (define (expect-and . exps)
-  (expectation
-   (λ (v)
-     (define faults-stream (stream-map (expectation-apply _ v) exps))
-     (or (for/first ([faults (in-stream faults-stream)]
-                     #:unless (empty? faults))
-           faults)
-         (list)))))
+  (define (apply-and v)
+    (define faults-stream (stream-map (expectation-apply _ v) exps))
+    (or (for/first ([faults (in-stream faults-stream)]
+                    #:unless (empty? faults))
+          faults)
+        (list)))
+  (expectation apply-and #:name 'and))
 
 (struct or-attribute attribute (cases) #:transparent)
 
@@ -102,13 +106,13 @@
   (or-attribute msg cases))
 
 (define (expect-conjoin . preds)
-  (apply expect-and (map expect-pred preds)))
+  (expectation-rename (apply expect-and (map expect-pred preds)) 'conjoin))
 
 (define (expect-disjoin . preds)
-  (expect/singular
-   (λ (v)
-     (define (app pred) (pred v))
-     (and (not (ormap app preds))
-          (fault #:summary "a different kind of value"
-                 #:expected (make-or-attribute (map pred-attribute preds))
-                 #:actual (make-self-attribute v))))))
+  (define (disjoin-fault v)
+    (define (app pred) (pred v))
+    (and (not (ormap app preds))
+         (fault #:summary "a different kind of value"
+                #:expected (make-or-attribute (map pred-attribute preds))
+                #:actual (make-self-attribute v))))
+  (expectation-rename (expect/singular disjoin-fault) 'disjoin))

@@ -39,14 +39,16 @@
   (faults-context (format "the faults found in input ~v" input) input))
 
 (define (expect-exp-faults input . vs)
-  (expect-exp-faults* input vs))
+  (expectation-rename (expect-exp-faults* input vs) 'faults))
 
 (define (expect-exp-faults* input v)
   (define exp (->expectation v))
   (define (apply e) (expectation-apply e input))
-  (expect-and (expect-pred expectation?)
-              (expect/context (expect/proc exp apply)
-                              (make-faults-context input))))
+  (define anon-exp
+    (expect-and (expect-pred expectation?)
+                (expect/context (expect/proc exp apply)
+                                (make-faults-context input))))
+  (expectation-rename anon-exp 'faults*))
 
 (define-struct-expectation fault)
 

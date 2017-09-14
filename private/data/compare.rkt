@@ -32,7 +32,8 @@
          racket/function
          expect/private/base
          expect/private/combinator
-         expect/private/logic)
+         expect/private/logic
+         syntax/parse/define)
 
 ;; Equivalence constructors
 
@@ -52,7 +53,7 @@
 (define (eqv-attribute v) (comp-attr make-eqv-attribute "eqv?" v))
 (define (equal-attribute v) (comp-attr make-equal-attribute "equal?" v))
 
-(define (expect-compare comparison attr e)
+(define (expect-compare/no-rename comparison attr e)
   (define (make-fault v)
     (and (not (comparison e v))
          (fault #:summary "a different value"
@@ -60,18 +61,26 @@
                 #:actual (make-self-attribute v))))
   (expect/singular make-fault))
 
-(define expect-eq? (expect-compare eq? eq-attribute _))
-(define expect-eqv? (expect-compare eqv? eqv-attribute _))
-(define expect-equal? (expect-compare equal? equal-attribute _))
+(define (expect-compare comparison attr e)
+  (expectation-rename (expect-compare/no-rename comparison attr e)
+                      (object-name comparison)))
+
+(define (expect-eq? v) (expect-compare eq? eq-attribute v))
+(define (expect-eqv? v) (expect-compare eqv? eqv-attribute v))
+(define (expect-equal? v) (expect-compare equal? equal-attribute v))
 
 (define ((negate-attribute attr-proc) v) (not-attribute (attr-proc v)))
 
 (define (expect-not-compare comparison attr e)
-  (expect-compare (negate comparison) (negate-attribute attr) e))
+  (define name (string->symbol (format "not-~a" (object-name comparison))))
+  (expectation-rename (expect-compare/no-rename (negate comparison)
+                                                (negate-attribute attr)
+                                                e)
+                      name))
 
-(define expect-not-eq? (expect-not-compare eq? eq-attribute _))
-(define expect-not-eqv? (expect-not-compare eqv? eqv-attribute _))
-(define expect-not-equal? (expect-not-compare equal? equal-attribute _))
+(define (expect-not-eq? v) (expect-not-compare eq? eq-attribute v))
+(define (expect-not-eqv? v) (expect-not-compare eqv? eqv-attribute v))
+(define (expect-not-equal? v) (expect-not-compare equal? equal-attribute v))
 
 (struct =-attribute attribute (value epsilon)
   #:transparent #:omit-define-syntaxes #:constructor-name make-=-attribute)
@@ -88,4 +97,4 @@
          (fault #:summary "a different number"
                 #:expected (=-attribute e tolerance)
                 #:actual (make-self-attribute v))))
-  (expect/singular make-fault))
+  (expectation-rename (expect/singular make-fault) '=))

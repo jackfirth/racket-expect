@@ -38,7 +38,7 @@
          (fault #:summary "a set containing a specific value"
                 #:expected (member-attribute v)
                 #:actual (make-self-attribute st))))
-  (expect/singular make-fault))
+  (expectation-rename (expect/singular make-fault) 'set-member?))
 
 (define (expect-set-not-member? v)
   (define (make-fault st)
@@ -46,20 +46,24 @@
          (fault #:summary "a set not containing a specific value"
                 #:expected (not-attribute (member-attribute v))
                 #:actual (make-self-attribute st))))
-  (expect/singular make-fault))
+  (expectation-rename (expect/singular make-fault) 'set-not-member?))
 
 (define (expect-subset big-st)
   (define (make-expectation-from-extras little-st)
     (apply expect-all
            (map expect-set-not-member?
                 (set->list (set-subtract little-st big-st)))))
-  (expect/dependent make-expectation-from-extras))
+  (expectation-rename (expect/dependent make-expectation-from-extras) 'subset))
 
 (define (expect-superset little-st)
-  (apply expect-all (map expect-set-member? (set->list little-st))))
+  (define exp
+    (apply expect-all (map expect-set-member? (set->list little-st))))
+  (expectation-rename exp 'superset))
 
-(define expect-set-count (expect/count _ set-count))
+(define (expect-set-count exp)
+  (expectation-rename (expect/count exp set-count) 'set-count))
 
 (define (expect-set . vs)
   (define st (list->set vs))
-  (expect-all (expect-subset st) (expect-superset st)))
+  (expectation-rename (expect-all (expect-subset st) (expect-superset st))
+                      'set))

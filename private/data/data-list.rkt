@@ -23,13 +23,18 @@
 
 
 (define (expect-list-ref exp idx)
-  (expect/context (expect/proc exp (list-ref _ idx)) (index-context idx)))
+  (define anon-exp
+    (expect/context (expect/proc exp (list-ref _ idx)) (index-context idx)))
+  (expectation-rename anon-exp 'list-ref))
 
-(define expect-list-count (expect/count _ length))
+(define (expect-list-count e)
+  (expectation-rename (expect/count e length) 'list-count))
 
 (define (expect-list . exps)
   (define (list->items-exp vs)
     (apply expect-all (map/index expect-list-ref (take/chop exps vs))))
-  (expect-and (expect-pred list?)
-              (expect-all (expect-list-count (expect-equal? (length exps)))
-                          (expect/dependent list->items-exp))))
+  (define exp
+    (expect-and (expect-pred list?)
+                (expect-all (expect-list-count (expect-equal? (length exps)))
+                            (expect/dependent list->items-exp))))
+  (expectation-rename exp 'list))
