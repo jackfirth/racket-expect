@@ -5,6 +5,7 @@
 (provide
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
+  [expect-apply (-> procedure? expectation? expectation?)]
   [expect-not-raise expectation?]
   [expect-raise (-> any/c expectation?)]
   [expect-return (rest-> any/c expectation?)]
@@ -18,6 +19,9 @@
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
+  [struct (apply-context context)
+    ([description string?] [proc procedure?]) #:omit-constructor]
+  [make-apply-context (-> procedure? apply-context?)]
   [struct (arity-context context) ([description string?]) #:omit-constructor]
   [the-arity-context arity-context?]
   [struct (arity-includes-attribute attribute)
@@ -93,6 +97,13 @@
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
 
+(struct apply-context context (proc) #:transparent)
+(define (make-apply-context proc)
+  (define n (object-name proc))
+  (apply-context (format "application to ~a"
+                         (if n (format "procedure ~a" n) (~v proc)))
+                 proc))
+
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
 
@@ -153,5 +164,13 @@
               (expect-proc-arity (expect-arity-includes? num-pos))
               (expectation
                (λ (proc)
+                 (define (call) (apply/arguments proc args))
+                 (expectation-apply call-exp* call)))))
+
+(define (expect-apply proc call-exp)
+  (define call-exp* (expect/context call-exp (make-apply-context proc)))
+  (expect-and (expect-pred arguments?)
+              (expectation
+               (λ (args)
                  (define (call) (apply/arguments proc args))
                  (expectation-apply call-exp* call)))))

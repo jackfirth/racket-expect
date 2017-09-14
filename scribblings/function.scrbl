@@ -19,6 +19,18 @@
    (eval:error (expect! (thunk 'wrong-arity) exp-addition))
    (eval:error (expect! (thunk* (raise 'error)) exp-addition)))}
 
+@defproc[(expect-apply [f procedure?] [call-exp expectation?]) expectation?]{
+ The inverse of @racket[expect-call]. Returns an @expectation-tech{expectation}
+ that expects an @racket[arguments] value and checks @racket[call-exp] on a
+ thunk wrapping a call to @racket[f] with the arguments. Like
+ @racket[expect-call], to check the return value or raised values use
+ @racket[expect-return], @racket[expect-raise], or @racket[expect-not-raise] for
+ @racket[call-exp].
+ @(expect-examples
+   (define exp-add1=10 (expect-apply add1 (expect-return 10)))
+   (expect! (arguments 9) exp-add1=10)
+   (eval:error (expect! (arguments 2) exp-add1=10)))}
+
 @defproc[(expect-return [value-exp any/c] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk that returns one
  value for each @racket[value-exp]. Then, each returned value is checked against
@@ -83,8 +95,15 @@
  (@defstruct*[(call-context context) ([args arguments?])
               #:transparent #:omit-constructor]
    @defproc[(make-call-context [args arguments?]) call-context?])]{
- A @context-tech{context} and its constructor that represents a call to a
- procedure with @racket[args] passed as the procedure's arguments.}
+ A @context-tech{context} and its constructor that represents the thunk created
+ by calling the subject procedure with @racket[args].}
+
+@deftogether[
+ (@defstruct*[(apply-context context) ([proc procedure?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-apply-context [proc procedure?]) apply-context?])]{
+ A @context-tech{context} and its constructor that represents the thunk created
+ by applying the subject arguments to @racket[proc].}
 
 @deftogether[
  (@defstruct*[(arity-context context) () #:transparent #:omit-constructor]
