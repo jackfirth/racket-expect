@@ -4,11 +4,13 @@
 
 (provide
  (contract-out
-  [expect-exp-faults
-   (-> any/c (or/c (listof (or/c fault? expectation?)) expectation?)
-       expectation?)]
-  [expect-exp-no-faults (-> any/c expectation?)]
-  [expect-exp-one-fault (->* (any/c) ((or/c fault? expectation?)) expectation?)]
+  [expect-exp-faults (->* (any/c)
+                          #:rest (listof (or/c fault? expectation?))
+                          expectation?)]
+  [expect-exp-faults* (-> any/c
+                          (or/c expectation?
+                                (listof (or/c fault? expectation?)))
+                          expectation?)]
   [expect-fault (->* ()
                      (#:summary (or/c string? expectation?)
                       #:expected (or/c attribute? expectation?)
@@ -17,13 +19,18 @@
                      expectation?)]
   [expect-attribute (->* () ((or/c string? expectation?)) expectation?)]))
 
-(require racket/list
-         "base.rkt"
+(require (except-in "base.rkt"
+                    fault
+                    fault?
+                    fault-summary
+                    fault-expected
+                    fault-actual
+                    fault-contexts)
+         (submod "base.rkt" for-meta)
          "combinator.rkt"
          "data/main.rkt"
          "logic.rkt"
-         "struct.rkt"
-         "util-context.rkt")
+         "struct.rkt")
 
 
 (struct faults-context context (input) #:transparent)
@@ -31,27 +38,15 @@
 (define (make-faults-context input)
   (faults-context (format "the faults found in input ~v" input) input))
 
-(define (expect/proc+context exp proc ctxt)
-  (expect/context (expect/proc exp proc) ctxt))
+(define (expect-exp-faults input . vs)
+  (expect-exp-faults* input vs))
 
-(define (expect-exp-faults input v)
+(define (expect-exp-faults* input v)
   (define exp (->expectation v))
   (define (apply e) (expectation-apply e input))
   (expect-and (expect-pred expectation?)
-              (expect/proc+context exp apply (make-faults-context input))))
-
-(define (expect-exp-no-faults input)
-  (expect-exp-faults input (expect-pred empty?)))
-
-(define (expect-exp-one-fault input [v expect-any])
-  (expect-exp-faults input (expect-list v)))
-
-(define-singleton-contexts
-  fault-summary-context "the summary field of the fault"
-  fault-expected-context "the expected field of the fault"
-  fault-actual-context "the actual field of the fault"
-  fault-contexts-context "the contexts field of the fault"
-  attribute-description-context "the description field of the attribute")
+              (expect/context (expect/proc exp apply)
+                              (make-faults-context input))))
 
 (define-struct-expectation fault)
 

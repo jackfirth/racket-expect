@@ -27,7 +27,7 @@
         'd 'WRONG))
 
 (define exp-wrong-data
-  (expect-exp-faults wrong-data (expect-list-count 3)))
+  (expect-exp-faults* wrong-data (expect-list-count 3)))
 
 (check-expect (->expectation compound-data) exp-wrong-data)
 (check-expect (expect-equal? compound-data) exp-wrong-data)
@@ -39,7 +39,7 @@
         'd #f))
 
 (define exp-wrong-data/pred-fault
-  (expect-exp-faults wrong-data (expect-list-count 4)))
+  (expect-exp-faults* wrong-data (expect-list-count 4)))
 
 (check-expect (->expectation compound-data/pred-exp) exp-wrong-data)
 (check-expect (expect-equal? compound-data/pred-exp)

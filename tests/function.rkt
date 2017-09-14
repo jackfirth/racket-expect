@@ -9,8 +9,8 @@
   (expect-struct attribute [attribute-description descr]))
 
 (define (expect-expects input descr)
-  (expect-exp-one-fault input
-                        (expect-fault #:expected (expect-attribute descr))))
+  (expect-exp-faults input
+                     (expect-fault #:expected (expect-attribute descr))))
 
 (define (raise-foo) (raise 'foo))
 
