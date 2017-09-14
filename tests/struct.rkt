@@ -8,18 +8,35 @@
          racket/function
          (only-in rackunit test-case))
 
-(struct expand-context context () #:transparent)
-(define the-expand-context (expand-context "call to expand syntax"))
-
-(define (expect-expand exp)
-  (define ((expand-thnk stx)) (expand stx))
-  (expect/context (expect/proc exp expand-thnk) the-expand-context))
-
-(define expect-syntax-exn
-  (expect-expand (expect-raise (expect-struct exn:fail:syntax))))
-
+;; test structs and definitions
 (struct fish (color weight))
+(struct shark fish (teeth))
+
+(define legs #f)
+
+(define-syntax fish/pred-unknown
+  (list-set (extract-struct-info
+             (syntax-local-value #'fish))
+            2 #f))
+
+(define-syntax fish/pred-undefined
+  (list-set (extract-struct-info
+             (syntax-local-value #'fish))
+            2 #'unbound))
+
+(define-syntax fish/ambiguous-kw-accessor
+  (list-set (extract-struct-info
+             (syntax-local-value #'fish))
+            3 (list #'fish-color #'get-weight)))
+
+;; namespace used by syntax expectations
+(define-namespace-anchor here)
+(define here-ns (namespace-anchor->namespace here))
+
+;; shorthands
 (define red-fish-passes (expect-exp-no-faults (fish 'red 5)))
+(define (expect-syntax-exn/here msg-exp)
+  (expect-syntax-exn msg-exp #:namespace here-ns))
 
 (test-case "expect-struct"
   (check-expect (expect-struct fish [fish-color 'red] [fish-weight 5])
@@ -31,48 +48,28 @@
     (check-expect (expect-struct fish [fish-color 'red]) red-fish-passes))
   (test-case "predicate"
     (check-expect (expect-struct fish) (expect-exp-one-fault 5)))
+  (test-case "subtype"
+    (test-case "subtype-field"
+      (check-expect (shark 'red 5 100) (expect-struct shark [shark-teeth 100])))
+    (test-case "supertype-field"
+      (check-expect (shark 'red 5 100) (expect-struct shark [fish-color 'red]))))
   (test-case "syntax"
-    (test-case "accessor-unbound"
-      (check-expect #'(let ()
-                        (struct fish (color weight))
-                        (expect-struct fish [unbound 4]))
-                    expect-syntax-exn))
+    (test-case "accessor-undefined"
+      (check-expect #'(expect-struct fish [unbound 4])
+                    (expect-syntax-exn/here #rx"accessor.*undefined")))
     (test-case "non-accessor-binding"
-      (check-expect #'(let ()
-                        (define legs #f)
-                        (expect-struct fish [legs 4]))
-                    expect-syntax-exn))
+      (check-expect #'(expect-struct fish [legs 4])
+                    (expect-syntax-exn/here
+                     #rx"not known.*accessor")))
     (test-case "duplicate"
-      (check-expect #'(let ()
-                        (struct fish (color weight))
-                        (expect-struct fish
-                                       [fish-color 'red] [fish-color 'red]))
-                    expect-syntax-exn))
+      (check-expect #'(expect-struct fish [fish-color 'red] [fish-color 'red])
+                    (expect-syntax-exn/here #rx"duplicate")))
     (test-case "predicate-unknown"
-      (check-expect #'(let ()
-                        (struct fish (color weight))
-                        (define-syntax fish/no-pred
-                          (list-set (extract-struct-info
-                                     (syntax-local-value #'fish))
-                                    2 #f))
-                        (expect-struct fish/no-pred))
-                    expect-syntax-exn))
-    (test-case "predicate-unbound"
-      (check-expect #'(let ()
-                        (struct fish (color weight))
-                        (define-syntax fish/bad-pred
-                          (list-set (extract-struct-info
-                                     (syntax-local-value #'fish))
-                                    2 #'unbound))
-                        (expect-struct fish/bad-pred))
-                    expect-syntax-exn))
-    (test-case "parent-field-disallowed"
-      (define stx
-        #'(let ()
-            (struct parent (a))
-            (struct child (b))
-            (expect-struct child [parent-a 'foo])))
-      (check-expect stx expect-syntax-exn))))
+      (check-expect #'(expect-struct fish/pred-unknown)
+                    (expect-syntax-exn/here #rx"predicate.*not known")))
+    (test-case "predicate-undefined"
+      (check-expect #'(expect-struct fish/pred-undefined)
+                    (expect-syntax-exn/here #rx"predicate.*undefined")))))
 
 (test-case "define-struct-expectation"
   (define-struct-expectation fish)
@@ -81,12 +78,5 @@
     (define-struct-expectation (expfish fish))
     (check-expect (expfish #:color 'red) red-fish-passes))
   (test-case "keyword-ambiguous"
-    (define stx
-      #'(let ()
-          (struct fish (color weight))
-          (define-syntax fish/ambiguous-kw-accessor
-            (list-set (extract-struct-info
-                       (syntax-local-value #'fish))
-                      3 (list #'fish-color #'get-weight)))
-          (define-struct-expectation fish/ambiguous-kw-accessor)))
-    (check-expect stx expect-syntax-exn)))
+    (check-expect #'(define-struct-expectation fish/ambiguous-kw-accessor)
+                  (expect-syntax-exn/here #rx"get-weight.*ambiguous keyword"))))

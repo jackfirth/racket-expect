@@ -99,10 +99,7 @@
 
 (struct apply-context context (proc) #:transparent)
 (define (make-apply-context proc)
-  (define n (object-name proc))
-  (apply-context (format "application to ~a"
-                         (if n (format "procedure ~a" n) (~v proc)))
-                 proc))
+  (apply-context (format "application to ~v" proc) proc))
 
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))

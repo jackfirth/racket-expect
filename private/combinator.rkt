@@ -7,7 +7,10 @@
   [expect/context (-> expectation? context? expectation?)]
   [expect/dependent (-> (-> any/c expectation?) expectation?)]
   [expect/proc (-> expectation? (-> any/c any/c) expectation?)]
-  [expect/singular (-> (-> any/c (or/c fault? #f)) expectation?)]))
+  [expect/singular (-> (-> any/c (or/c fault? #f)) expectation?)]
+  [expect/around (-> expectation?
+                     (-> (-> (listof fault?)) (listof fault?))
+                     expectation?)]))
 
 (require arguments
          fancy-app
@@ -40,3 +43,6 @@
 (define (expect/singular maybe-fault-func)
   (expectation
    (λ (v) (define flt (maybe-fault-func v)) (if flt (list flt) (list)))))
+
+(define (expect/around exp f)
+  (expectation (λ (v) (f (thunk (expectation-apply exp v))))))
