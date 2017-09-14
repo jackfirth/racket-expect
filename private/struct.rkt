@@ -51,10 +51,10 @@
   #:fail-when (check (attribute id.predicate-id) #'id)
   "predicate for struct type not known"
   #:fail-when (check-bound (attribute id.predicate-id) #'id)
-  (format "predicate ~a for struct type not bound"
+  (format "predicate ~a for struct type undefined"
           (identifier-binding-symbol #'id.predicate-id))
   #:fail-when (check-all-bound #'(accessor-id ...))
-  "accessor not bound"
+  "accessor undefined"
   #:fail-when (check-duplicate-identifier (syntax->list #'(accessor-id ...)))
   "duplicate accessor identifier"
   #:fail-when (check-all-accessor #'(accessor-id ...) (attribute id.info))
