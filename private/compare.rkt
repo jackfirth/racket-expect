@@ -20,6 +20,9 @@
     ([description string?] [value real?] [epsilon real?]) #:omit-constructor]
   [make-=-attribute (-> real? real? =-attribute?)]))
 
+(module+ for-sugar
+  (provide define-attr-sugar))
+
 (require syntax/parse/define
          "base.rkt"
          "combinator.rkt"
@@ -66,11 +69,6 @@
       (provide
        (contract-out [id (-> any/c compare-attribute?)] [pred predicate/c])))
     ...))
-
-(define-attr-sugar
-  [make-eq-attribute eq-attribute? eq?]
-  [make-eqv-attribute eqv-attribute? eqv?]
-  [make-equal-attribute equal-attribute? equal?])
 
 (struct =-attribute attribute (value epsilon)
   #:transparent)

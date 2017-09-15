@@ -2,6 +2,7 @@
 "base.rkt"
 "combinator.rkt"
 "compare.rkt"
+"compare-sugar.rkt"
 "data/main.rkt"
 "fail.rkt"
 "function.rkt"
