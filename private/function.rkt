@@ -3,12 +3,12 @@
 (require racket/contract)
 
 (provide
+ (all-from-out "function-kernel.rkt")
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
   [expect-call-exn (->* (arguments?)
                         ((or/c string? regexp? expectation?))
                         expectation?)]
-  [expect-apply (-> procedure? expectation? expectation?)]
   [expect-apply-exn (->* (procedure?)
                          ((or/c string? regexp? expectation?))
                          expectation?)]
@@ -26,9 +26,6 @@
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
-  [struct (apply-context context)
-    ([description string?] [proc procedure?]) #:omit-constructor]
-  [make-apply-context (-> procedure? apply-context?)]
   [struct (arity-context context) ([description string?]) #:omit-constructor]
   [the-arity-context arity-context?]
   [struct (arity-includes-attribute attribute)
@@ -46,6 +43,7 @@
          "base.rkt"
          "combinator.rkt"
          "data/main.rkt"
+         "function-kernel.rkt"
          "logic.rkt"
          "regexp.rkt"
          "struct.rkt"
@@ -105,10 +103,6 @@
 (struct call-context context (args) #:transparent)
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
-
-(struct apply-context context (proc) #:transparent)
-(define (make-apply-context proc)
-  (apply-context (format "application to ~v" proc) proc))
 
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
@@ -181,16 +175,6 @@
                    (define (call) (apply/arguments proc args))
                    (expectation-apply call-exp* call)))))
   (expectation-rename anon-exp 'call))
-
-(define (expect-apply proc call-exp)
-  (define call-exp* (expect/context call-exp (make-apply-context proc)))
-  (define anon-exp
-    (expect-and (expect-pred arguments?)
-                (expectation
-                 (λ (args)
-                   (define (call) (apply/arguments proc args))
-                   (expectation-apply call-exp* call)))))
-  (expectation-rename anon-exp 'apply))
 
 (define (expect-exn [msg-exp expect-any])
   (define exp
