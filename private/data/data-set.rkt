@@ -21,7 +21,6 @@
          expect/private/combinator
          expect/private/logic
          expect/private/util
-         "data-collect.rkt"
          (submod "data-list.rkt" for-count))
 
 
@@ -45,7 +44,7 @@
   (define (make-fault st)
     (and (set-member? st v)
          (fault #:summary "a set not containing a specific value"
-                #:expected (not-attribute (member-attribute v))
+                #:expected (make-not-attribute (member-attribute v))
                 #:actual (make-self-attribute st))))
   (expectation-rename (expect/singular make-fault) 'set-not-member?))
 

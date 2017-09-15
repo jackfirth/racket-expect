@@ -4,20 +4,18 @@
 
 (provide
  (contract-out
-  [rename cvrt:expect-equal? expect-equal? (-> any/c exp?)]
+  [rename expect-equal? expect-equal? (-> any/c exp?)]
   [rename cvrt:expect-hash expect-hash (rest->* (list any/c any/c) exp?)]))
 
-(require (for-syntax racket/base
-                     racket/syntax)
-         racket/list
+(require racket/list
          racket/math
          racket/set
          expect/private/base
+         expect/private/compare
          expect/private/util
          "data-set.rkt"
          "convert-base.rkt"
          (submod "convert-base.rkt" for-conversion)
-         (submod "compare.rkt" for-conversion)
          (submod "data-hash.rkt" for-conversion)
          (submod "data-list.rkt" for-conversion)
          (submod "data-set.rkt" for-conversion)
@@ -26,16 +24,16 @@
 
 (define exp? expectation?)
 
-(define (cvrt:expect-equal? v)
+(define (expect-equal? v)
   (cond
-    [(list? v) (apply expect-list (map cvrt:expect-equal? v))]
+    [(list? v) (apply expect-list (map expect-equal? v))]
     [(vector? v)
-     (apply expect-vector (map cvrt:expect-equal? (vector->list v)))]
+     (apply expect-vector (map expect-equal? (vector->list v)))]
     [(set? v) (apply expect-set (set->list v))]
     [(hash? v)
-     (define converted (map cvrt:expect-equal? (hash-values v)))
+     (define converted (map expect-equal? (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
-    [else (expect-equal? v)]))
+    [else (expect-compare equal? v)]))
 
 (define (cvrt:expect-hash . k+vs)
   (define converted (map ->expectation (slice k+vs #:start 1 #:step 2)))

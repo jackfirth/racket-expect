@@ -11,16 +11,15 @@
            <convert>))
 
 (require (for-syntax racket/base
-                     racket/syntax
-                     syntax/parse)
+                     racket/syntax)
          racket/function
          racket/list
          racket/set
          syntax/parse/define
          expect/private/base
+         expect/private/compare
          expect/private/logic
          "data-set.rkt"
-         (submod "compare.rkt" for-conversion)
          (submod "data-hash.rkt" for-conversion)
          (submod "data-list.rkt" for-conversion)
          (submod "data-vector.rkt" for-conversion))
@@ -37,7 +36,7 @@
      (define converted (map ->expectation (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
     [(boolean? v) (if v expect-true expect-false)]
-    [else (expect-equal? v)]))
+    [else (expect-compare equal? v)]))
 
 (define-syntax <convert> #f)
 

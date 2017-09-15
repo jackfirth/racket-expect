@@ -19,12 +19,12 @@
          fancy-app
          expect/private/base
          expect/private/combinator
+         expect/private/compare
          expect/private/function-kernel
          expect/private/logic
          expect/private/util
          "data-collect.rkt"
-         (submod expect/private/function-kernel no-reprovide)
-         (submod "compare.rkt" for-conversion))
+         (submod expect/private/function-kernel no-reprovide))
 
 (module+ test
   (require racket/function
@@ -52,6 +52,6 @@
 (define (expect-list . exps)
   (define exp
     (expect-and (expect-pred list?)
-                (expect-all (expect-list-count (expect-equal? (length exps)))
+                (expect-all (expect-list-count (expect-eqv? (length exps)))
                             (apply expect-list/kernel exps))))
   (expectation-rename exp 'list))
