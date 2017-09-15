@@ -191,3 +191,11 @@
  @racket[in-range]. Like @racket[dict-context], thiscontext may be used in
  faults that operate on specific kinds of sequences. See
  @racket[expect-list-ref] for an example.}
+
+@deftogether[
+ (@defstruct*[(member-attribute attribute) ([value any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-member-attribute [value any/c]) member-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents a
+ @racket[set] that has @racket[value] as a member. See
+ @racket[expect-set-member?] for examples.}
