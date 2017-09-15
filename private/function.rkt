@@ -5,11 +5,18 @@
 (provide
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
+  [expect-call-exn (->* (arguments?)
+                        ((or/c string? regexp? expectation?))
+                        expectation?)]
   [expect-apply (-> procedure? expectation? expectation?)]
+  [expect-apply-exn (->* (procedure?)
+                         ((or/c string? regexp? expectation?))
+                         expectation?)]
   [expect-not-raise expectation?]
   [expect-raise (-> any/c expectation?)]
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
+  [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
   [struct (return-context context)
     ([description string?]) #:omit-constructor]
   [the-return-context return-context?]
@@ -40,6 +47,8 @@
          "combinator.rkt"
          "data/main.rkt"
          "logic.rkt"
+         "regexp.rkt"
+         "struct.rkt"
          "util.rkt")
 
 (module+ test
@@ -182,3 +191,18 @@
                    (define (call) (apply/arguments proc args))
                    (expectation-apply call-exp* call)))))
   (expectation-rename anon-exp 'apply))
+
+(define (expect-exn [msg-exp expect-any])
+  (define exp
+    (if (regexp? msg-exp)
+        (expect-regexp-match msg-exp)
+        (->expectation msg-exp)))
+  (expectation-rename (expect-struct exn [exn-message exp]) 'exn))
+
+(define (expect-call-exn args [msg-exp expect-any])
+  (expectation-rename (expect-call args (expect-raise (expect-exn msg-exp)))
+                      'call-exn))
+
+(define (expect-apply-exn proc [msg-exp expect-any])
+  (expectation-rename (expect-apply proc (expect-raise (expect-exn msg-exp)))
+                      'apply-exn))
