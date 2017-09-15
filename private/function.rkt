@@ -17,9 +17,6 @@
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
-  [struct (return-context context)
-    ([description string?]) #:omit-constructor]
-  [the-return-context return-context?]
   [struct (raise-context context)
     ([description string?]) #:omit-constructor]
   [the-raise-context raise-context?]
@@ -44,6 +41,7 @@
          "combinator.rkt"
          "data/main.rkt"
          "function-kernel.rkt"
+         (submod "function-kernel.rkt" no-reprovide)
          "logic.rkt"
          "regexp.rkt"
          "struct.rkt"
@@ -96,9 +94,6 @@
 
 (struct raise-context context () #:transparent)
 (define the-raise-context (raise-context "the raised value"))
-
-(struct return-context context () #:transparent)
-(define the-return-context (return-context "the return values list"))
 
 (struct call-context context (args) #:transparent)
 (define (make-call-context args)
@@ -154,15 +149,10 @@
   (expectation-rename (expect-return* (apply expect-list vs)) 'return))
 
 (define (expect-return* v)
-  (define exp/context (expect/context (->expectation v) the-return-context))
-  (define anon-exp
-    (expect-thunk
-     (expectation
-      (λ (proc)
-        (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
-          (define results (call-with-values proc list))
-          (expectation-apply exp/context results))))))
-  (expectation-rename anon-exp 'return*))
+  (define (around call)
+    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (call)))
+  (define exp (expect/around (expect-return*/kernel (->expectation v)) around))
+  (expectation-rename (expect-thunk exp) 'return*))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))

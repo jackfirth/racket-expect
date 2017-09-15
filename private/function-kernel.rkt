@@ -13,7 +13,15 @@
   [expect-apply (-> procedure? expectation? expectation?)]
   [struct (apply-context context)
     ([description string?] [proc procedure?]) #:omit-constructor]
-  [make-apply-context (-> procedure? apply-context?)]))
+  [make-apply-context (-> procedure? apply-context?)]
+  [struct (return-context context)
+    ([description string?]) #:omit-constructor]
+  [the-return-context return-context?]))
+
+(module+ no-reprovide
+  (provide
+   (contract-out
+    [expect-return*/kernel (-> expectation? expectation?)])))
 
 (require arguments
          "base.rkt"
@@ -34,3 +42,13 @@
 (struct apply-context context (proc) #:transparent)
 (define (make-apply-context proc)
   (apply-context (format "application to ~v" proc) proc))
+
+(struct return-context context () #:transparent)
+(define the-return-context (return-context "the return values list"))
+
+(define (expect-return*/kernel exp)
+  (define exp/context (expect/context exp the-return-context))
+  (expectation
+   (λ (proc)
+     (define results (call-with-values proc list))
+     (expectation-apply exp/context results))))
