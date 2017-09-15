@@ -59,3 +59,10 @@ expectations.
    (expect! flt (expect-fault #:actual (make-self-attribute 'bar)))
    (eval:error (expect! flt (expect-fault #:summary "not test fault"))))}
 
+@deftogether[
+ (@defstruct*[(fault-context context) ([input any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-fault-context [input any/c]) fault-context?])]{
+ A @context-tech{context} and its constructor that represents the list of faults
+ returned by checking @racket[input] with the tested expectation using
+ @racket[expectation-apply].}
