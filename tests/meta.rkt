@@ -9,11 +9,6 @@
 (struct test-attribute attribute () #:transparent)
 (define test-attr (test-attribute "test attr"))
 
-(test-case "expect-attribute"
-  (check-expect test-attr (expect-attribute))
-  (check-expect test-attr (expect-attribute "test attr"))
-  (check-expect (expect-attribute "blah")
-                (expect-exp-faults test-attr expect-any)))
 
 (define test-fault
   (fault #:summary "some fault"
