@@ -11,7 +11,7 @@
  procedure call and with @racket[expect-raise] or @racket[expect-not-raise] to
  check how the procedure call behaves with respect to raised errors. The
  expected procedure's arity is checked to ensure it can be called with
- @racket[args].
+ @racket[args]. See also @racket[expect-call-exn].
  @(expect-examples
    (define exp-addition (expect-call (arguments 3 8) (expect-return 11)))
    (expect! + exp-addition)
@@ -25,7 +25,7 @@
  thunk wrapping a call to @racket[f] with the arguments. Like
  @racket[expect-call], to check the return value or raised values use
  @racket[expect-return], @racket[expect-raise], or @racket[expect-not-raise] for
- @racket[call-exp].
+ @racket[call-exp]. See also @racket[expect-apply-exn].
  @(expect-examples
    (define exp-add1=10 (expect-apply add1 (expect-return 10)))
    (expect! (arguments 9) exp-add1=10)
@@ -76,6 +76,36 @@
    (define (not-a-thunk unexpected-arg)
      'foo)
    (eval:error (expect! not-a-thunk expect-not-raise)))}
+
+@defproc[(expect-exn [msg-exp (or/c string? regexp? expectation?) expect-any])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects an @racket[exn] value or
+ a subtype. The input exception's message is then checked against
+ @racket[msg-exp]. If @racket[msg-exp] is a regexp, it is converted to an
+ expectation with @racket[(expect-regexp-match msg-exp)]; otherwise it is
+ converted with @racket[->expectation]. See also @racket[expect-call-exn] and
+ @racket[expect-apply-exn].
+
+ @(expect-examples
+   (define foo-exn (make-exn "foo exception" (current-continuation-marks)))
+   (expect! foo-exn (expect-exn #rx"foo"))
+   (expect! foo-exn (expect-exn "foo exception"))
+   (eval:error (expect! foo-exn (expect-exn "foo")))
+   (eval:error (expect! 'not-an-exn (expect-exn))))}
+
+@defproc[(expect-call-exn
+          [args arguments?]
+          [msg-exp (or/c string? regexp? expectation?) expect-any])
+         expectation?]{
+ Convenient shorthand for
+ @racket[(expect-call args (expect-raise (expect-exn msg-exp)))].}
+
+@defproc[(expect-apply-exn
+          [f procedure?]
+          [msg-exp (or/c string? regexp? expectation?) expect-any])
+         expectation?]{
+ Convenient shorthand for
+ @racket[(expect-apply args (expect-raise (expect-exn msg-exp)))].}
 
 @section{Procedure Context Structures}
 
