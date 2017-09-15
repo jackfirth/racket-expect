@@ -53,12 +53,11 @@
     (define none-exp (expect-return))
     (check-expect none-exp (expect-exp-faults values)))
   (test-case "not-thunk"
-    (define (not-a-thunk _) 'result)
     (define arity-fault-exp
       (expect-fault #:expected (make-arity-includes-attribute 0)
                     #:actual (make-self-attribute 1)
                     #:contexts (list the-arity-context)))
-    (check-expect foo-exp (expect-exp-faults not-a-thunk arity-fault-exp))))
+    (check-expect foo-exp (expect-exp-faults add1 arity-fault-exp))))
 
 (test-case "expect-return*"
   (define even-ret-exp
