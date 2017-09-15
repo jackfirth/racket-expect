@@ -71,7 +71,15 @@
     (test-case "expectation"
       (define starts-with-bar-attr (pred-attribute starts-with-bar?))
       (check-expect (expect-exn (expect-pred starts-with-bar?))
-                    (exp-foo-exn-expects starts-with-bar-attr)))))
+                    (exp-foo-exn-expects starts-with-bar-attr))))
+
+  (test-case "default"
+    (check-expect (expect-exn) (expect-exp-faults foo-exn))
+    (define fault-exp
+      (expect-fault #:actual (make-self-attribute 'not-an-exn)
+                    #:expected (pred-attribute exn?)
+                    #:contexts (list)))
+    (check-expect (expect-exn) (expect-exp-faults 'not-an-exn fault-exp))))
 
 (define foo-args (arguments 'foo))
 
@@ -79,10 +87,14 @@
   (check-expect (expect-call-exn foo-args #rx"foo") (expect-exp-faults error))
   (define exp (exp-exn-rx-fault #rx"nonsense" (make-call-context foo-args)))
   (check-expect (expect-call-exn foo-args #rx"nonsense")
-                (expect-exp-faults error exp)))
+                (expect-exp-faults error exp))
+  (test-case "default"
+    (check-expect (expect-call-exn foo-args) (expect-exp-faults error))))
 
 (test-case "expect-apply-exn"
   (check-expect (expect-apply-exn error #rx"foo") (expect-exp-faults foo-args))
   (define exp (exp-exn-rx-fault #rx"nonsense" (make-apply-context error)))
   (check-expect (expect-apply-exn error #rx"nonsense")
-                (expect-exp-faults foo-args exp)))
+                (expect-exp-faults foo-args exp))
+  (test-case "default"
+    (check-expect (expect-apply-exn error) (expect-exp-faults foo-args))))
