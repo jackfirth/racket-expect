@@ -15,7 +15,8 @@
          expect/private/logic
          expect/private/util
          "data-collect.rkt"
-         (submod "compare.rkt" for-conversion))
+         (submod "compare.rkt" for-conversion)
+         (submod "data-list.rkt" for-count))
 
 
 (define (expect-vector-ref exp idx)
