@@ -39,7 +39,7 @@
          racket/string
          "base.rkt"
          "combinator.rkt"
-         "data/main.rkt"
+         "data.rkt"
          "function-kernel.rkt"
          (submod "function-kernel.rkt" no-reprovide)
          "logic.rkt"

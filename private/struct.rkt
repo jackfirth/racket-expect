@@ -19,7 +19,7 @@
          syntax/parse/define
          "base.rkt"
          "combinator.rkt"
-         "data/main.rkt"
+         "data.rkt"
          "logic.rkt")
 
 
@@ -78,7 +78,7 @@
     (define correct-format? (string-prefix? id-str prefix))
     (and correct-format?
          (string->keyword (substring id-str (string-length prefix)))))
-  
+
   (define-syntax-class struct-id+expect
     #:attributes (id struct [struct.accessor-id 1])
     #:description "struct identifier or identifier and struct identifier pair"

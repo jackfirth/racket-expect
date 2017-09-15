@@ -3,7 +3,7 @@
 "combinator.rkt"
 "compare.rkt"
 "compare-sugar.rkt"
-"data/main.rkt"
+"data.rkt"
 "fail.rkt"
 "function.rkt"
 "logic.rkt"

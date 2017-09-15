@@ -12,7 +12,7 @@
      [faults (listof fault?)])]))
 
 (require "base.rkt"
-         "data/main.rkt")
+         "data.rkt")
 
 (module+ test
   (require rackunit))

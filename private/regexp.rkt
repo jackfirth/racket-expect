@@ -19,7 +19,7 @@
 (require fancy-app
          "base.rkt"
          "combinator.rkt"
-         "data/main.rkt"
+         "data.rkt"
          "logic.rkt")
 
 
