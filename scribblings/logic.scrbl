@@ -28,18 +28,6 @@
    (expect! 10 (expect-pred number?))
    (eval:error (expect! 'foo (expect-pred number?))))}
 
-@deftogether[
- (@defproc[(pred-attribute [pred predicate/c]) pred-attribute?]
-   @defproc[(pred-attribute? [v any/c]) boolean?]
-   @defproc[(pred-attribute-value [pred-attr pred-attribute?]) predicate/c])]{
- Constructor, predicate, and field accessor for the @attribute-tech{attribute}
- returned by @racket[expect-pred].
- @(expect-examples
-   (define number-attr (pred-attribute number?))
-   number-attr
-   (pred-attribute? number-attr)
-   (pred-attribute-value number-attr))}
-
 @defproc[(expect-all [exp expectation?] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects everything that each of
  the given @racket[exp] values expects. All expectations are tested and each
@@ -97,6 +85,13 @@
  An @attribute-tech{attribute} and its constructor that negates the meaning of
  @racket[negated]. The description of a constucted attribute has the format
  @litchar{"not } @racket[(attribute-description negated)] @litchar{"}.}
+
+@deftogether[
+ (@defstruct*[(pred-attribute attribute) ([value predicate/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-pred-attribute [value predicate/c]) pred-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents whether or
+ not the input value satisfies the @racket[value] predicate.}
 
 @deftogether[
  (@defstruct*[(or-attribute attribute) ([cases (listof attribute?)])

@@ -13,16 +13,14 @@
   [expect-conjoin (rest-> predicate/c expectation?)]
   [expect-disjoin (rest-> predicate/c expectation?)]
   [struct (not-attribute attribute)
-    ([description string?] [negated attribute?])
-    #:omit-constructor]
+    ([description string?] [negated attribute?]) #:omit-constructor]
   [make-not-attribute (-> attribute? not-attribute?)]
   [struct (or-attribute attribute)
-    ([description string?] [cases (listof attribute?)])
-    #:omit-constructor]
+    ([description string?] [cases (listof attribute?)]) #:omit-constructor]
   [make-or-attribute (-> (listof attribute?) or-attribute?)]
-  [pred-attribute (-> predicate/c pred-attribute?)]
-  [pred-attribute? predicate/c]
-  [pred-attribute-value (-> pred-attribute? predicate/c)]))
+  [struct (pred-attribute attribute)
+    ([description string?] [value predicate/c]) #:omit-constructor]
+  [make-pred-attribute (-> predicate/c pred-attribute?)]))
 
 (require fancy-app
          racket/function
@@ -69,16 +67,14 @@
 
 ;; Logical / predicate combinators
 
-(struct pred-attribute attribute (value)
-  #:transparent #:omit-define-syntaxes #:constructor-name make-pred-attribute)
-
-(define (pred-attribute pred)
-  (make-pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
+(struct pred-attribute attribute (value) #:transparent)
+(define (make-pred-attribute pred)
+  (pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
 
 (define (pred-fault pred v)
   (and (not (pred v))
        (fault #:summary "a different kind of value"
-              #:expected (pred-attribute pred)
+              #:expected (make-pred-attribute pred)
               #:actual (make-self-attribute v))))
 
 (define (expect-pred pred)
@@ -112,6 +108,6 @@
     (define (app pred) (pred v))
     (and (not (ormap app preds))
          (fault #:summary "a different kind of value"
-                #:expected (make-or-attribute (map pred-attribute preds))
+                #:expected (make-or-attribute (map make-pred-attribute preds))
                 #:actual (make-self-attribute v))))
   (expectation-rename (expect/singular disjoin-fault) 'disjoin))
