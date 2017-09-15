@@ -12,10 +12,10 @@
 (require fancy-app
          expect/private/base
          expect/private/combinator
+         expect/private/compare
          expect/private/logic
          expect/private/util
          "data-collect.rkt"
-         (submod "compare.rkt" for-conversion)
          (submod "data-list.rkt" for-count))
 
 
@@ -33,6 +33,6 @@
            (map/index expect-vector-ref (take/chop exps (vector->list vec)))))
   (define exp
     (expect-and (expect-pred vector?)
-                (expect-all (expect-vector-count (expect-equal? (length exps)))
+                (expect-all (expect-vector-count (expect-eqv? (length exps)))
                             (expect/dependent vec->items-exp))))
   (expectation-rename exp 'vector))

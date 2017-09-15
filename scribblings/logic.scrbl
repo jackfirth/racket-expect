@@ -88,13 +88,22 @@
    (expect! 'foo exp-str-or-sym)
    (eval:error (expect! 42 exp-str-or-sym)))}
 
-@defstruct*[(or-attribute attribute) ([cases (listof attribute?)])
-            #:transparent #:omit-constructor]{
- An @attribute-tech{attribute} that describes at least one of @racket[cases]. A
- @fault-tech{fault} might use this to describe that it expected one of multiple
- possible values.}
+@section{Boolean Attributes}
 
-@defproc[(make-or-attribute [cases (listof attribute?)]) or-attribute?]{
- Returns an @racket[or-attribute] value with a default
- @racket[attribute-description] generated from the descriptions of the given
- @racket[cases].}
+@deftogether[
+ (@defstruct*[(not-attribute attribute) ([negated attribute?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-not-attribute [negated attribute?]) not-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that negates the meaning of
+ @racket[negated]. The description of a constucted attribute has the format
+ @litchar{"not } @racket[(attribute-description negated)] @litchar{"}.}
+
+@deftogether[
+ (@defstruct*[(or-attribute attribute) ([cases (listof attribute?)])
+              #:transparent #:omit-constructor]
+   @defproc[(make-or-attribute [cases (listof attribute?)]) or-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that describes at least one
+ of @racket[cases]. A @fault-tech{fault} might use this to describe that it
+ expected one of multiple possible values. The description of a constructed
+ attribute joins the descriptions of each of @racket[cases] with commas and an
+ @litchar{or} between the last two descriptions.}

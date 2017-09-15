@@ -1,6 +1,7 @@
 #lang reprovide
 "base.rkt"
 "combinator.rkt"
+"compare.rkt"
 "data/main.rkt"
 "fail.rkt"
 "function.rkt"

@@ -12,9 +12,10 @@
   [expect-and (rest-> expectation? expectation?)]
   [expect-conjoin (rest-> predicate/c expectation?)]
   [expect-disjoin (rest-> predicate/c expectation?)]
-  [not-attribute? predicate/c]
-  [not-attribute (-> attribute? not-attribute?)]
-  [not-attribute-negated (-> not-attribute? attribute?)]
+  [struct (not-attribute attribute)
+    ([description string?] [negated attribute?])
+    #:omit-constructor]
+  [make-not-attribute (-> attribute? not-attribute?)]
   [struct (or-attribute attribute)
     ([description string?] [cases (listof attribute?)])
     #:omit-constructor]
@@ -53,16 +54,14 @@
 
 (define expect-false (expectation-rename (expect/singular false-fault) 'false))
 
-(struct not-attribute attribute (negated)
-  #:transparent #:omit-define-syntaxes #:constructor-name make-not-attribute)
-
-(define (not-attribute negated)
-  (make-not-attribute (format "not ~a" (attribute-description negated)) negated))
+(struct not-attribute attribute (negated) #:transparent)
+(define (make-not-attribute negated)
+  (not-attribute (format "not ~a" (attribute-description negated)) negated))
 
 (define (not-false-fault v)
   (and (not v)
        (fault #:summary "not false"
-              #:expected (not-attribute (make-self-attribute #f))
+              #:expected (make-not-attribute (make-self-attribute #f))
               #:actual (make-self-attribute v))))
 
 (define expect-not-false
