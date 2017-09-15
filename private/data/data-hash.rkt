@@ -18,7 +18,8 @@
          expect/private/util
          "data-collect.rkt"
          "data-set.rkt"
-         (submod "compare.rkt" for-conversion))
+         (submod "compare.rkt" for-conversion)
+         (submod "data-list.rkt" for-count))
 
 
 (define (expect-hash-count exp)

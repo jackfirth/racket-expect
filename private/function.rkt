@@ -3,12 +3,12 @@
 (require racket/contract)
 
 (provide
+ (all-from-out "function-kernel.rkt")
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
   [expect-call-exn (->* (arguments?)
                         ((or/c string? regexp? expectation?))
                         expectation?)]
-  [expect-apply (-> procedure? expectation? expectation?)]
   [expect-apply-exn (->* (procedure?)
                          ((or/c string? regexp? expectation?))
                          expectation?)]
@@ -17,18 +17,12 @@
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
-  [struct (return-context context)
-    ([description string?]) #:omit-constructor]
-  [the-return-context return-context?]
   [struct (raise-context context)
     ([description string?]) #:omit-constructor]
   [the-raise-context raise-context?]
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
-  [struct (apply-context context)
-    ([description string?] [proc procedure?]) #:omit-constructor]
-  [make-apply-context (-> procedure? apply-context?)]
   [struct (arity-context context) ([description string?]) #:omit-constructor]
   [the-arity-context arity-context?]
   [struct (arity-includes-attribute attribute)
@@ -46,6 +40,8 @@
          "base.rkt"
          "combinator.rkt"
          "data/main.rkt"
+         "function-kernel.rkt"
+         (submod "function-kernel.rkt" no-reprovide)
          "logic.rkt"
          "regexp.rkt"
          "struct.rkt"
@@ -99,16 +95,9 @@
 (struct raise-context context () #:transparent)
 (define the-raise-context (raise-context "the raised value"))
 
-(struct return-context context () #:transparent)
-(define the-return-context (return-context "the return values list"))
-
 (struct call-context context (args) #:transparent)
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
-
-(struct apply-context context (proc) #:transparent)
-(define (make-apply-context proc)
-  (apply-context (format "application to ~v" proc) proc))
 
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
@@ -160,15 +149,10 @@
   (expectation-rename (expect-return* (apply expect-list vs)) 'return))
 
 (define (expect-return* v)
-  (define exp/context (expect/context (->expectation v) the-return-context))
-  (define anon-exp
-    (expect-thunk
-     (expectation
-      (λ (proc)
-        (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))])
-          (define results (call-with-values proc list))
-          (expectation-apply exp/context results))))))
-  (expectation-rename anon-exp 'return*))
+  (define (around call)
+    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (call)))
+  (define exp (expect/around (expect-return*/kernel (->expectation v)) around))
+  (expectation-rename (expect-thunk exp) 'return*))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))
@@ -181,16 +165,6 @@
                    (define (call) (apply/arguments proc args))
                    (expectation-apply call-exp* call)))))
   (expectation-rename anon-exp 'call))
-
-(define (expect-apply proc call-exp)
-  (define call-exp* (expect/context call-exp (make-apply-context proc)))
-  (define anon-exp
-    (expect-and (expect-pred arguments?)
-                (expectation
-                 (λ (args)
-                   (define (call) (apply/arguments proc args))
-                   (expectation-apply call-exp* call)))))
-  (expectation-rename anon-exp 'apply))
 
 (define (expect-exn [msg-exp expect-any])
   (define exp

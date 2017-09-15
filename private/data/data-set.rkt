@@ -20,8 +20,9 @@
          expect/private/base
          expect/private/combinator
          expect/private/logic
+         expect/private/util
          "data-collect.rkt"
-         expect/private/util)
+         (submod "data-list.rkt" for-count))
 
 
 (struct member-attribute attribute (value)
