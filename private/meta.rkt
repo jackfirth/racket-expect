@@ -15,7 +15,8 @@
                      (#:summary (or/c string? expectation?)
                       #:expected (or/c attribute? expectation?)
                       #:actual (or/c attribute? expectation?)
-                      #:contexts (or/c list? expectation?))
+                      #:contexts (or/c expectation?
+                                       (listof (or/c context? expectation?))))
                      expectation?)]
   [expect-attribute (->* () ((or/c string? expectation?)) expectation?)]))
 
