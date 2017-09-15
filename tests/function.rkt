@@ -65,7 +65,7 @@
   (check-expect even-ret-exp (expect-exp-faults values))
   (check-expect even-ret-exp (expect-exp-faults (thunk (values 'foo 'bar))))
   (define even-fault-exp
-    (expect-fault #:expected (pred-attribute even?)
+    (expect-fault #:expected (make-pred-attribute even?)
                   #:actual (make-self-attribute 1)
                   #:contexts (list the-return-context
                                    (make-apply-context length)
@@ -111,7 +111,7 @@
       (define foooo-attr (make-regexp-match-attribute #rx"foooo"))
       (check-expect (expect-exn #rx"foooo") (exp-foo-exn-expects foooo-attr)))
     (test-case "expectation"
-      (define starts-with-bar-attr (pred-attribute starts-with-bar?))
+      (define starts-with-bar-attr (make-pred-attribute starts-with-bar?))
       (check-expect (expect-exn (expect-pred starts-with-bar?))
                     (exp-foo-exn-expects starts-with-bar-attr))))
 
@@ -119,7 +119,7 @@
     (check-expect (expect-exn) (expect-exp-faults foo-exn))
     (define fault-exp
       (expect-fault #:actual (make-self-attribute 'not-an-exn)
-                    #:expected (pred-attribute exn?)
+                    #:expected (make-pred-attribute exn?)
                     #:contexts (list)))
     (check-expect (expect-exn) (expect-exp-faults 'not-an-exn fault-exp))))
 

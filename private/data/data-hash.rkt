@@ -10,14 +10,17 @@
     [expect-hash-keys (-> expectation? expectation?)]
     [expect-hash-ref (-> any/c expectation? expectation?)])))
 
-(require fancy-app
+(require arguments
+         fancy-app
          racket/set
          expect/private/base
          expect/private/combinator
+         expect/private/function-kernel
          expect/private/logic
          expect/private/util
-         "data-collect.rkt"
          "data-set.rkt"
+         (submod expect/private/function-kernel no-reprovide)
+         (submod "data-list.rkt" for-conversion)
          (submod "data-list.rkt" for-count))
 
 
@@ -37,18 +40,14 @@
     (expect/context (expect/proc value-exp (hash-ref _ k)) (key-context k)))
   (expectation-rename exp 'hash-ref))
 
-(struct key-set-context context ()
-  #:transparent
-  #:omit-define-syntaxes
-  #:constructor-name make-key-set-context)
-
-(define key-set-context (make-key-set-context "the set of hash keys"))
+(define (expect-apply1-return proc exp)
+  (expect/proc (expect-apply proc (expect-return*/kernel (expect-list exp)))
+               arguments))
 
 (define (expect-hash-keys set-exp)
-  (define (hash-key-set h) (list->set (hash-keys h)))
-  (expectation-rename (expect/context (expect/proc set-exp hash-key-set)
-                                      key-set-context)
-                      'hash-keys))
+  (define anon-exp
+    (expect-apply1-return hash-keys (expect-apply1-return list->set set-exp)))
+  (expectation-rename anon-exp 'hash-keys))
 
 (define (expect-hash . k+exps)
   (define keys (slice k+exps #:step 2))
