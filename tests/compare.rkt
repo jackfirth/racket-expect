@@ -54,3 +54,7 @@
     (expect-fault #:expected (make-=-attribute 10 0.1)
                   #:actual (make-self-attribute 10.5)))
   (check-expect 10-exp (expect-exp-faults 10.5 fault-exp)))
+
+(test-case "attribute-sugar"
+  (check-expect (make-eq-attribute 'foo) (make-compare-attribute eq? 'foo))
+  (check-pred eqv-attribute? (make-compare-attribute eqv? 'foo)))
