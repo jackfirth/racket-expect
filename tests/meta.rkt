@@ -23,8 +23,7 @@
 (test-case "expect-fault"
   (check-expect test-fault (expect-fault))
   (check-expect test-fault (expect-fault #:summary "some fault"))
-  (check-expect test-fault (expect-fault #:actual (expect-attribute)))
-  (check-expect test-fault
-                (expect-fault #:expected (expect-attribute "test attr")))
+  (check-expect test-fault (expect-fault #:actual (expect-pred self-attribute?)))
+  (check-expect test-fault (expect-fault #:expected test-attr))
   (check-expect (expect-fault #:summary "some other fault")
                 (expect-exp-faults test-fault expect-any)))
