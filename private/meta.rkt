@@ -15,9 +15,9 @@
                      (#:summary (or/c string? expectation?)
                       #:expected (or/c attribute? expectation?)
                       #:actual (or/c attribute? expectation?)
-                      #:contexts (or/c list? expectation?))
-                     expectation?)]
-  [expect-attribute (->* () ((or/c string? expectation?)) expectation?)]))
+                      #:contexts (or/c expectation?
+                                       (listof (or/c context? expectation?))))
+                     expectation?)]))
 
 (require (except-in "base.rkt"
                     fault
@@ -51,6 +51,3 @@
   (expectation-rename anon-exp 'faults*))
 
 (define-struct-expectation fault)
-
-(define (expect-attribute [attr expect-any])
-  (expect-struct attribute [attribute-description attr]))

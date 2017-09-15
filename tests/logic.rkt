@@ -15,8 +15,7 @@
 
 (check-fault (expect-pred number?) 'foo
              (expect-fault #:summary "a different kind of value"
-                           #:expected (expect-attribute
-                                       "value satisfying number?")))
+                           #:expected (make-pred-attribute number?)))
 
 (check-expect (expect-all (expect-pred number?) (expect-pred symbol?))
               (expect-exp-faults* "neither" (expect-list-count 2)))

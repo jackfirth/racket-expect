@@ -169,3 +169,33 @@
  @(expect-examples
    (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
    (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
+
+@section{Data Structure Contexts and Attributes}
+
+@deftogether[
+ (@defstruct*[(dict-context context) ([key any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-dict-context [key any/c]) dict-context?])]{
+ A @context-tech{context} and its constructor that represents the dictionary
+ value for @racket[key] in a dictionary, as defined by the @racket[gen:dict]
+ interface. This context may be used in faults that only operate on specialized
+ dictionaries, see @racket[expect-hash-ref] for an example.}
+
+@deftogether[
+ (@defstruct*[(sequence-context context) ([position exact-nonnegative-integer?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-sequence-context [position exact-nonnegative-integer?])
+            sequence-context?])]{
+ A @context-tech{context} and its constructor that represents the sequence item
+ at @racket[position] in a sequence, such as those returned by
+ @racket[in-range]. Like @racket[dict-context], thiscontext may be used in
+ faults that operate on specific kinds of sequences. See
+ @racket[expect-list-ref] for an example.}
+
+@deftogether[
+ (@defstruct*[(member-attribute attribute) ([value any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-member-attribute [value any/c]) member-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represents a
+ @racket[set] that has @racket[value] as a member. See
+ @racket[expect-set-member?] for examples.}

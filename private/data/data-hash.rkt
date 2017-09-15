@@ -18,6 +18,7 @@
          expect/private/function-kernel
          expect/private/logic
          expect/private/util
+         "context.rkt"
          "data-set.rkt"
          (submod expect/private/function-kernel no-reprovide)
          (submod "data-list.rkt" for-conversion)
@@ -27,17 +28,10 @@
 (define (expect-hash-count exp)
   (expectation-rename (expect/count exp hash-count) 'hash-count))
 
-(struct key-context context (value)
-  #:transparent
-  #:omit-define-syntaxes
-  #:constructor-name make-key-context)
-
-(define (key-context k)
-  (make-key-context (format "value for key ~v" k) k))
-
 (define (expect-hash-ref k value-exp)
   (define exp
-    (expect/context (expect/proc value-exp (hash-ref _ k)) (key-context k)))
+    (expect/context (expect/proc value-exp (hash-ref _ k))
+                    (make-dict-context k)))
   (expectation-rename exp 'hash-ref))
 
 (define (expect-apply1-return proc exp)

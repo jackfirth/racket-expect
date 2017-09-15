@@ -23,7 +23,7 @@
          expect/private/function-kernel
          expect/private/logic
          expect/private/util
-         "data-collect.rkt"
+         "context.rkt"
          (submod expect/private/function-kernel no-reprovide))
 
 (module+ test
@@ -38,7 +38,8 @@
 
 (define (expect-list-ref exp idx)
   (define anon-exp
-    (expect/context (expect/proc exp (list-ref _ idx)) (index-context idx)))
+    (expect/context (expect/proc exp (list-ref _ idx))
+                    (make-sequence-context idx)))
   (expectation-rename anon-exp 'list-ref))
 
 (define (expect-list-count e)

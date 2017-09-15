@@ -21,22 +21,15 @@
          expect/private/combinator
          expect/private/logic
          expect/private/util
+         "attribute.rkt"
          (submod "data-list.rkt" for-count))
 
-
-(struct member-attribute attribute (value)
-  #:transparent
-  #:omit-define-syntaxes
-  #:constructor-name make-member-attribute)
-
-(define (member-attribute v)
-  (make-member-attribute (format "set containing ~v" v) v))
 
 (define (expect-set-member? v)
   (define (make-fault st)
     (and (not (set-member? st v))
          (fault #:summary "a set containing a specific value"
-                #:expected (member-attribute v)
+                #:expected (make-member-attribute v)
                 #:actual (make-self-attribute st))))
   (expectation-rename (expect/singular make-fault) 'set-member?))
 
@@ -44,7 +37,7 @@
   (define (make-fault st)
     (and (set-member? st v)
          (fault #:summary "a set not containing a specific value"
-                #:expected (make-not-attribute (member-attribute v))
+                #:expected (make-not-attribute (make-member-attribute v))
                 #:actual (make-self-attribute st))))
   (expectation-rename (expect/singular make-fault) 'set-not-member?))
 
