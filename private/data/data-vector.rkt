@@ -15,13 +15,14 @@
          expect/private/compare
          expect/private/logic
          expect/private/util
-         "data-collect.rkt"
+         "context.rkt"
          (submod "data-list.rkt" for-count))
 
 
 (define (expect-vector-ref exp idx)
   (define anon-exp
-    (expect/context (expect/proc exp (vector-ref _ idx)) (index-context idx)))
+    (expect/context (expect/proc exp (vector-ref _ idx))
+                    (make-sequence-context idx)))
   (expectation-rename anon-exp 'vector-ref))
 
 (define (expect-vector-count exp)
