@@ -28,7 +28,7 @@
                     fault-contexts)
          (submod "base.rkt" for-meta)
          "combinator.rkt"
-         "data/main.rkt"
+         "data.rkt"
          "logic.rkt"
          "struct.rkt")
 
