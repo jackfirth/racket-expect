@@ -55,8 +55,8 @@ from RackUnit.
  the value to test by each @racket[check-expect] expression. If
  @racket[name-str] is provided, it must be a string and the resulting test is a
  @racket[test-case] with @racket[name-str] as its name, otherwise it is a
- @racket[test-begin] form. Note that each @racket[expectation-expr] is converted to an
- expectation by @racket[check-expect].
+ @racket[test-begin] form. Note that each @racket[expectation-expr] is converted
+ to an expectation by @racket[check-expect].
 
  @(expect-examples
    (test-subject "addition" #:subject +
