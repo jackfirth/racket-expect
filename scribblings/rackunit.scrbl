@@ -71,4 +71,7 @@ from RackUnit.
  containing the @fault-tech{faults} raised by @racket[exp] are added to the
  exception, but no other infos (such as @racket['expression]) are included. Like
  @racket[check-expect], if @racket[exp] is not an expectation it is converted to
- one with @racket[->expectation].}
+ one with @racket[->expectation].
+
+ @(expect-examples
+   (eval:error (fail-check/expect 'foo (expect-pred number?))))}
