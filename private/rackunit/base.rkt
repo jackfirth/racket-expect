@@ -1,6 +1,10 @@
 #lang racket/base
 
-(provide check-expect)
+(provide check-expect
+         fail-check/expect)
+
+(module+ for-sugar
+  (provide define-expect-checks))
 
 (require fancy-app
          expect
@@ -11,28 +15,24 @@
          rackunit
          syntax/parse/define)
 
-(module+ for-custom-checks
-  (provide define-expect-checks
-           check-expect*))
-
 
 (define-simple-macro
   (define-expect-checks [(id:id arg:id ...+) subject:expr expectation:expr] ...+)
   (begin
     (begin
-      (define-check (id arg ...) (check-expect* subject expectation))
+      (define-check (id arg ...) (fail-check/expect subject expectation))
       (provide id))
     ...))
 
-(define-check (check-expect v exp) (check-expect* v exp))
+(define-check (check-expect v exp) (fail-check/expect v exp))
 
-(define (check-expect* v exp)
+(define (fail-check/expect v exp)
   (match (expectation-apply (->expectation exp) v)
     [(list) (void)]
-    [(list flt) (fail-check-expect/singular v flt)]
-    [(list* flts) (fail-check-expect/plural v flts)]))
+    [(list flt) (fail-check/expect/singular v flt)]
+    [(list* flts) (fail-check/expect/plural v flts)]))
 
-(define (fail-check-expect/singular v flt)
+(define (fail-check/expect/singular v flt)
   (define infos (fault-infos flt))
   (define infos/subject
     (if (member 'context (map check-info-name infos))
@@ -41,7 +41,7 @@
   (with-check-info* infos/subject
     (thunk (fail-check (format "Expected ~a" (fault-summary flt))))))
 
-(define (fail-check-expect/plural v flts)
+(define (fail-check/expect/plural v flts)
   (with-check-info* (cons (make-check-actual v)
                           (map fault-infos-nested flts))
     (thunk (fail-check "Multiple faults found"))))

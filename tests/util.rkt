@@ -4,9 +4,13 @@
 
 (require arguments
          expect
-         rackunit
+         expect/rackunit
          rackunit/log
-         (submod expect/private/rackunit/base for-custom-checks))
+         (only-in rackunit
+                  exn:test:check?
+                  current-check-handler
+                  define-check))
+
 
 (define ((call-check chk))
   (parameterize ([current-check-handler raise] [test-log-enabled? #f]) (chk)))
@@ -17,4 +21,4 @@
                             call-check)))
 
 (define-check (check-fail f args)
-  (check-expect* f (apply/arguments expect-check-fail args)))
+  (fail-check/expect f (apply/arguments expect-check-fail args)))

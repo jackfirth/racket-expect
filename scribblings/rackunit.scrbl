@@ -41,3 +41,8 @@ from RackUnit.
  failures. None of these checks accept expectations as arguments.
  @(expect-examples
    (check-equal? '(1 2 3 foo 5) '(1 2 3 4 5)))}
+
+@defproc[(fail-check/expect [v any/c] [exp any/c]) void?]{
+ Essentially equivalent to @racket[(check-expect v exp)], except as an ordinary
+ function instead of a check. Check infos containing the @fault-tech{faults}
+ raised by @racket[exp] are added, but no other infos are included.}
