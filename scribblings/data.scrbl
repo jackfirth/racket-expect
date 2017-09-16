@@ -223,6 +223,35 @@
  @racket[expect-syntax] adds to its faults.}
 
 @deftogether[
+ (@defthing[the-length-context splice-context?]
+   @defthing[the-vector-length-context splice-context?])]{
+ A pair of @context-tech{context} values that @racket[expect-list-count] and
+ @racket[expect-vector-count] add to their faults, respectively. Each is a
+ @racket[splice-context] containing the contexts representing the first return
+ value of applying either @racket[length] or @racket[vector-length], as would be
+ returned by @racket[expect-apply].}
+
+@defthing[the-set-count-context splice-context?]{
+ A @context-tech{context} value that @racket[expect-set-count] adds to its
+ faults. This value is a @racket[splice-context] for the same reasons as
+ @racket[the-length-context] and @racket[the-vector-length-context], except the
+ applied procedure is @racket[set-count].}
+
+@defthing[the-hash-count-context splice-context?]{
+ A @context-tech{context} value that @racket[expect-hash-count] adds to its
+ faults. This value is a @racket[splice-context] for the same reasons as
+ @racket[the-length-context] and @racket[the-vector-length-context], except the
+ applied procedure is @racket[hash-count].}
+
+@deftogether[
+ (@defthing[the-hash-keys-context splice-context?]
+   @defthing[the-list->set-context splice-context?])]{
+ A pair of @context-tech{context} values that @racket[expect-hash-keys] adds to
+ its faults. Each is a splice context like @racket[the-length-context] and
+ @racket[the-vector-length-context], but two are added to represent the calling
+ of @racket[list->set] on the list returned by @racket[hash-keys].}
+
+@deftogether[
  (@defstruct*[(member-attribute attribute) ([value any/c])
               #:transparent #:omit-constructor]
    @defproc[(make-member-attribute [value any/c]) member-attribute?])]{
