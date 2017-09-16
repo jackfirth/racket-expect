@@ -34,7 +34,7 @@
 (define (expect-list-count e)
   (expectation-rename (expect-apply1 length e) 'list-count))
 
-(define (expect-list/kernel . exps)
+(define (expect-list-items . exps)
   (define (list->items-exp vs)
     (apply expect-all (map/index expect-list-ref (take/chop exps vs))))
   (expect/dependent list->items-exp))
@@ -43,5 +43,5 @@
   (define exp
     (expect-and (expect-pred list?)
                 (expect-all (expect-list-count (expect-eqv? (length exps)))
-                            (apply expect-list/kernel exps))))
+                            (apply expect-list-items exps))))
   (expectation-rename exp 'list))
