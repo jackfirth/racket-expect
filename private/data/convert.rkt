@@ -11,7 +11,9 @@
          racket/math
          racket/set
          expect/private/base
+         expect/private/combinator
          expect/private/compare
+         expect/private/logic
          expect/private/util
          "data-set.rkt"
          "convert-base.rkt"
@@ -19,7 +21,8 @@
          (submod "data-hash.rkt" for-conversion)
          (submod "data-list.rkt" for-conversion)
          (submod "data-set.rkt" for-conversion)
-         (submod "data-vector.rkt" for-conversion))
+         (submod "data-vector.rkt" for-conversion)
+         (submod "data-syntax.rkt" for-conversion))
 
 
 (define exp? expectation?)
@@ -33,6 +36,12 @@
     [(hash? v)
      (define converted (map expect-equal? (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
+    [(syntax? v)
+     (if (syntax->list v)
+         (expect-and (expect-syntax-list (expect-equal? (syntax->list v)))
+                     (expect-eq? v))
+         (expect-and (expect-syntax (expect-equal? (syntax-e v)))
+                     (expect-eq? v)))]
     [else (expect-compare equal? v)]))
 
 (define (cvrt:expect-hash . k+vs)
@@ -47,6 +56,12 @@
   [(expect-list-ref <convert> v) (-> any/c natural? exp?)]
   [(expect-list-count <convert>) (-> (or/c natural? exp?) exp?)]
   [(expect-set-count <convert>) (-> (or/c natural? exp?) exp?)]
+
+  ;; expect-syntax with conversion makes expect-syntax-list unnecessary due to
+  ;; how conversion converts syntax list objects into expectations that flatten
+  ;; their input first
+  [(expect-syntax <convert>) (-> any/c exp?)]
+
   [(expect-vector . <convert>) (rest-> any/c exp?)]
   [(expect-vector-ref <convert> v) (-> any/c natural? exp?)]
   [(expect-vector-count <convert>) (-> (or/c natural? exp?) exp?)])

@@ -72,8 +72,7 @@
 
 (define exp-exn-message-context
   (expect-struct struct-accessor-context
-                 [struct-accessor-context-accessor-id
-                  (expect-syntax 'exn-message)]))
+                 [struct-accessor-context-accessor-id #'exn-message]))
 
 (define (exp-exn-rx-fault pattern ctxt)
   (define ctxt-list (list ctxt the-raise-context exp-exn-message-context))

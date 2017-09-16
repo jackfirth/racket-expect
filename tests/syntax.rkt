@@ -17,14 +17,17 @@
     (define s subject)
     (check-expect s exp) ...))
 
+
+(define there-exp
+  (expect-fault #:expected (expect-pred equal-attribute?)
+                #:contexts (list (expect-pred syntax-context?))))
+
 (test-case/expect "expect-syntax"
   (expect-syntax 'here)
   (expect-exp-faults #'here)
   (expect-exp-faults 'here
                      (expect-fault #:expected (expect-pred pred-attribute?)))
-  (expect-exp-faults #'there
-                     (expect-fault #:expected (expect-pred equal-attribute?)
-                                   #:contexts (list the-datum-context))))
+  (expect-exp-faults #'there there-exp))
 
 (define-syntax-rule (foo ([id v] ...)) (bar v ...))
 (define-syntax-rule (bar v) add1)
@@ -56,8 +59,8 @@
                    #:actual (make-self-attribute 'sub1)
                    #:contexts (list (make-apply-context expand)
                                     the-return-context
-                                    expect-any
-                                    the-datum-context)))
+                                    (make-sequence-context 0)
+                                    (expect-pred syntax-context?))))
     (expect-exp-faults #'(foo ([a 1] [b 2]))
                        expect-expand-raise-any-fault)))
 
@@ -68,7 +71,7 @@
     (expect-exp-faults #'(let ([a 1]) (let (1) (void))))
     (expect-exp-faults #'(let (1) (void)) expect-expand-once-raise-any-fault))
   (test-case/expect "#:namespace"
-    (expect-expand-once (expect-return (expect-syntax '(bar 1 2)))
+    (expect-expand-once (expect-return #'(bar 1 2))
                         #:namespace here-ns)
     (expect-exp-faults #'(foo ([a 1] [b 2])))
     (expect-exp-faults #'(foo (1)) expect-expand-once-raise-any-fault)))
