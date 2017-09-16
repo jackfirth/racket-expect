@@ -66,5 +66,6 @@ from RackUnit.
 
 @defproc[(fail-check/expect [v any/c] [exp any/c]) void?]{
  Essentially equivalent to @racket[(check-expect v exp)], except as an ordinary
- function instead of a check. Check infos containing the @fault-tech{faults}
- raised by @racket[exp] are added, but no other infos are included.}
+ function that raises an @racket[exn:test:check] exception. Check infos
+ containing the @fault-tech{faults} raised by @racket[exp] are added to the
+ exception, but no other infos (such as @racket['expression]) are included.}
