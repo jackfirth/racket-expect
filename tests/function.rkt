@@ -10,48 +10,43 @@
 (define (raise-foo) (raise 'foo))
 (define (raise-bar) (raise 'bar))
 
-(test-case "expect-raise"
-  (define exp (expect-raise 'foo))
-  (check-expect exp (expect-exp-faults raise-foo))
-  (define raise-fault-exp
-    (expect-fault #:expected the-any-attribute
-                  #:actual the-none-attribute
-                  #:contexts (list the-raise-context)))
-  (check-expect exp (expect-exp-faults void raise-fault-exp))
-  (define bar-fault-exp
-    (expect-fault #:expected (make-equal-attribute 'foo)
-                  #:actual (make-self-attribute 'bar)
-                  #:contexts (list the-raise-context)))
-  (check-expect exp (expect-exp-faults raise-bar bar-fault-exp)))
+(define (expect-raise-fault exp act)
+  (expect-fault #:expected exp
+                #:actual act
+                #:contexts (list the-raise-context)))
 
-(test-case "expect-not-raise"
-  (check-expect expect-not-raise (expect-exp-faults void))
-  (define fault-exp
-    (expect-fault #:expected the-none-attribute
-                  #:actual (make-self-attribute 'foo)
-                  #:contexts (list the-raise-context)))
-  (check-expect expect-not-raise (expect-exp-faults raise-foo fault-exp)))
+(test-subject "expect-raise" #:subject (expect-raise 'foo)
+  (expect-exp-faults raise-foo)
+  (expect-exp-faults void
+                     (expect-raise-fault the-any-attribute the-none-attribute))
+  (expect-exp-faults raise-bar
+                     (expect-raise-fault (make-equal-attribute 'foo)
+                                         (make-self-attribute 'bar))))
+
+(test-subject "expect-not-raise" #:subject expect-not-raise
+  (expect-exp-faults void)
+  (expect-exp-faults raise-foo
+                     (expect-raise-fault the-none-attribute
+                                         (make-self-attribute 'foo))))
 
 (test-case "expect-return"
   (define foo-exp (expect-return 'foo))
-  (check-expect foo-exp (expect-exp-faults (thunk 'foo)))
   (define bar-fault-exp
     (expect-fault #:expected (make-equal-attribute 'foo)
                   #:actual (make-self-attribute 'bar)
-                  #:contexts (list the-return-context expect-any)))
-  (check-expect foo-exp (expect-exp-faults (thunk 'bar) bar-fault-exp))
+                  #:contexts (list the-return-context
+                                   (make-sequence-context 0))))
+  (test-subject #:subject foo-exp
+    (expect-exp-faults (thunk 'foo))
+    (expect-exp-faults (thunk 'bar) bar-fault-exp))
   (test-case "exception"
     (define exn-fault-exp
-      (expect-fault #:expected the-none-attribute
-                    #:actual (make-self-attribute 'foo)
-                    #:contexts (list the-raise-context)))
+      (expect-raise-fault the-none-attribute (make-self-attribute 'foo)))
     (check-expect foo-exp (expect-exp-faults raise-foo exn-fault-exp)))
-  (test-case "multiple-values"
-    (define foo+bar-exp (expect-return 'foo 'bar))
-    (check-expect foo+bar-exp (expect-exp-faults (thunk (values 'foo 'bar)))))
+  (test-subject "multiple-values" #:subject (expect-return 'foo 'bar)
+    (expect-exp-faults (thunk (values 'foo 'bar))))
   (test-case "no-values"
-    (define none-exp (expect-return))
-    (check-expect none-exp (expect-exp-faults values)))
+    (check-expect (expect-return) (expect-exp-faults values)))
   (test-case "not-thunk"
     (define arity-fault-exp
       (expect-fault #:expected (make-arity-includes-attribute 0)
@@ -59,16 +54,16 @@
                     #:contexts (list the-arity-context)))
     (check-expect foo-exp (expect-exp-faults add1 arity-fault-exp))))
 
-(test-case "expect-return*"
-  (define even-ret-exp
-    (expect-return* (expect-list-count (expect-pred even?))))
-  (check-expect even-ret-exp (expect-exp-faults values))
-  (check-expect even-ret-exp (expect-exp-faults (thunk (values 'foo 'bar))))
-  (define even-fault-exp
-    (expect-fault #:expected (make-pred-attribute even?)
-                  #:actual (make-self-attribute 1)
-                  #:contexts (list the-return-context the-length-context)))
-  (check-expect even-ret-exp (expect-exp-faults (thunk 'foo) even-fault-exp)))
+(define even-fault-exp
+  (expect-fault #:expected (make-pred-attribute even?)
+                #:actual (make-self-attribute 1)
+                #:contexts (list the-return-context the-length-context)))
+
+(test-subject "expect-return*"
+  #:subject (expect-return* (expect-list-count (expect-pred even?)))
+  (expect-exp-faults values)
+  (expect-exp-faults (thunk (values 'foo 'bar)))
+  (expect-exp-faults (thunk 'foo) even-fault-exp))
 
 (define exp-exn-message-context
   (expect-struct struct-accessor-context
