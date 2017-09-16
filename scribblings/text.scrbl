@@ -23,6 +23,16 @@
    (expect! "12x4x6" (expect-regexp-match #rx"x." '("x4")))
    (eval:error (expect! "12x4x6" (expect-regexp-match #rx"x." '("x6")))))}
 
+@defproc[(expect-string-contains? [str string?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a string that contains
+ @racket[str].
+
+ @(expect-examples
+   (expect! "This is some message" (expect-string-contains? "some message"))
+   (eval:error
+    (expect! "This is some message" (expect-string-contains? "foo"))))}
+
+@section{String Attributes and Contexts}
 
 @deftogether[
  (@defstruct*[(regexp-match-context context) ([regexp regexp?])
@@ -40,3 +50,11 @@
             regexp-match-attribute?])]{
  An @attribute-tech{attribute} and its constructor that refers to whether or not
  a value matches @racket[regexp].}
+
+@deftogether[
+ (@defstruct*[(string-contains-attribute attribute) ([value string?])
+              #:transparent #:omit-constructor]
+   @defproc[(make-string-contains-attribute [value string?])
+            string-contains-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that refers to whether or not
+ a string contains @racket[value].}
