@@ -10,10 +10,7 @@
 (require racket/list
          racket/math
          racket/set
-         expect/private/base
-         expect/private/combinator
-         expect/private/compare
-         expect/private/logic
+         expect/private/lite
          expect/private/util
          "data-set.rkt"
          "convert-base.rkt"

@@ -16,9 +16,7 @@
          racket/list
          racket/set
          syntax/parse/define
-         expect/private/base
-         expect/private/compare
-         expect/private/logic
+         expect/private/lite
          "data-set.rkt"
          (submod "data-hash.rkt" for-conversion)
          (submod "data-list.rkt" for-conversion)

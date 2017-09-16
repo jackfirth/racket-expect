@@ -11,7 +11,7 @@
     ([description string?]) #:omit-constructor]
   [the-return-context return-context?]))
 
-(require expect/private/base)
+(require "lite.rkt")
 
 
 (struct apply-context context (proc) #:transparent)

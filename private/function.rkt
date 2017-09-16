@@ -38,11 +38,9 @@
          racket/function
          racket/match
          racket/string
-         "base.rkt"
-         "combinator.rkt"
+         "lite.rkt"
          "data.rkt"
          "function-context.rkt"
-         "logic.rkt"
          "struct.rkt"
          "text.rkt"
          "util.rkt")

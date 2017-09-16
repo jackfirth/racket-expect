@@ -18,9 +18,7 @@
 
 (require fancy-app
          racket/set
-         expect/private/base
-         expect/private/combinator
-         expect/private/logic
+         expect/private/lite
          expect/private/util
          "attribute.rkt"
          "kernel-apply.rkt")

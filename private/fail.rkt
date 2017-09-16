@@ -11,8 +11,8 @@
      [subject any/c]
      [faults (listof fault?)])]))
 
-(require "base.rkt"
-         "data.rkt")
+(require "data.rkt"
+         "lite.rkt")
 
 (module+ test
   (require rackunit))

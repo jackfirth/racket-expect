@@ -12,7 +12,7 @@
     #:omit-constructor]
   [make-sequence-context (-> exact-nonnegative-integer? sequence-context?)]))
 
-(require expect/private/base)
+(require expect/private/lite)
 
 (module+ test
   (require rackunit))

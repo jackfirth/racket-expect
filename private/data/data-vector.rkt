@@ -14,10 +14,7 @@
     [expect-vector-count (-> expectation? expectation?)])))
 
 (require fancy-app
-         expect/private/base
-         expect/private/combinator
-         expect/private/compare
-         expect/private/logic
+         expect/private/lite
          expect/private/util
          "context.rkt"
          "kernel-apply.rkt")

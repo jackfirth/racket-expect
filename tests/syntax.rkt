@@ -7,23 +7,11 @@
          (only-in rackunit test-begin test-case))
 
 
-(define-simple-macro (test-begin/expect subject:expr exp:expr ...)
-  (test-begin
-    (define s subject)
-    (check-expect s exp) ...))
-
-(define-simple-macro (test-case/expect name:str subject:expr exp:expr ...)
-  (test-case name
-    (define s subject)
-    (check-expect s exp) ...))
-
-
 (define there-exp
   (expect-fault #:expected (expect-pred equal-attribute?)
                 #:contexts (list (expect-pred syntax-context?))))
 
-(test-case/expect "expect-syntax"
-  (expect-syntax 'here)
+(test-subject "expect-syntax" #:subject (expect-syntax 'here)
   (expect-exp-faults #'here)
   (expect-exp-faults 'here
                      (expect-fault #:expected (expect-pred pred-attribute?)))
@@ -45,13 +33,13 @@
                                  the-raise-context)))
 
 (test-case "expect-expand"
-  (test-case/expect "not-raise"
-    (expect-expand expect-not-raise)
+  (test-subject "not-raise" #:subject (expect-expand expect-not-raise)
     (expect-exp-faults #'(void))
     (expect-exp-faults #'(let ([a 1]) (let (1) (void)))
                        expect-expand-raise-any-fault))
-  (test-case/expect "#:namespace"
-    (expect-expand (expect-return (expect-syntax 'add1)) #:namespace here-ns)
+  (test-subject "#:namespace"
+    #:subject (expect-expand (expect-return (expect-syntax 'add1))
+                             #:namespace here-ns)
     (expect-exp-faults #'(foo ([a 1])))
     (expect-exp-faults
      #'sub1
@@ -65,34 +53,27 @@
                        expect-expand-raise-any-fault)))
 
 (test-case "expect-expand-once"
-  (test-case/expect "not-raise"
-    (expect-expand-once expect-not-raise)
+  (test-subject "not-raise" #:subject (expect-expand-once expect-not-raise)
     (expect-exp-faults #'(void))
     (expect-exp-faults #'(let ([a 1]) (let (1) (void))))
     (expect-exp-faults #'(let (1) (void)) expect-expand-once-raise-any-fault))
-  (test-case/expect "#:namespace"
-    (expect-expand-once (expect-return #'(bar 1 2))
-                        #:namespace here-ns)
+  (test-subject "#:namespace"
+    #:subject (expect-expand-once (expect-return #'(bar 1 2))
+                                  #:namespace here-ns)
     (expect-exp-faults #'(foo ([a 1] [b 2])))
     (expect-exp-faults #'(foo (1)) expect-expand-once-raise-any-fault)))
 
-(define (contains-let? str) (string-contains? str "let"))
-
 (test-case "expect-syntax-exn"
-  (test-begin/expect
-    (expect-syntax-exn (expect-pred contains-let?))
+  (test-subject #:subject (expect-syntax-exn (expect-string-contains? "let"))
     (expect-exp-faults #'(let (1) (void)))
     (expect-exp-faults #'(lambda) expect-any))
-  (test-case/expect "default"
-    (expect-syntax-exn)
+  (test-subject "default" #:subject (expect-syntax-exn)
     (expect-exp-faults #'(let (1) (void)))
     (expect-exp-faults #'(let ([a 1]) (void)) expect-any))
-  (test-case/expect "regexp"
-    (expect-syntax-exn #rx"lamb")
+  (test-subject "regexp" #:subject (expect-syntax-exn #rx"lamb")
     (expect-exp-faults #'(lambda))
     (expect-exp-faults #'(let (1) (void)) expect-any))
-  (test-case/expect "#:namespace"
-    (expect-syntax-exn #:namespace here-ns)
+  (test-subject "#:namespace" #:subject (expect-syntax-exn #:namespace here-ns)
     (expect-exp-faults
      #'(foo ([v 1]))
      (expect-fault #:expected the-any-attribute

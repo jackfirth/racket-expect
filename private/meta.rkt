@@ -19,18 +19,16 @@
                                        (listof (or/c context? expectation?))))
                      expectation?)]))
 
-(require (except-in "base.rkt"
+(require (except-in "lite.rkt"
                     fault
                     fault?
                     fault-summary
                     fault-expected
                     fault-actual
                     fault-contexts)
-         (submod "base.rkt" for-meta)
-         "combinator.rkt"
          "data.rkt"
-         "logic.rkt"
-         "struct.rkt")
+         "struct.rkt"
+         (submod "lite/base.rkt" for-meta))
 
 
 (struct faults-context context (input) #:transparent)

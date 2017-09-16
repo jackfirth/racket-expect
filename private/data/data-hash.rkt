@@ -19,9 +19,7 @@
 (require arguments
          fancy-app
          racket/set
-         expect/private/base
-         expect/private/combinator
-         expect/private/logic
+         expect/private/lite
          expect/private/util
          "context.rkt"
          "data-set.rkt"

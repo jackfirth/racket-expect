@@ -19,11 +19,9 @@
 
 (require arguments
          racket/function
-         "base.rkt"
-         "combinator.rkt"
+         "lite.rkt"
          "data.rkt"
          "function.rkt"
-         "logic.rkt"
          "struct.rkt"
          "text.rkt")
 
