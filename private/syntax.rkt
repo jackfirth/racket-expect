@@ -24,8 +24,8 @@
          "data.rkt"
          "function.rkt"
          "logic.rkt"
-         "regexp.rkt"
-         "struct.rkt")
+         "struct.rkt"
+         "text.rkt")
 
 
 (define (expect-expand* f exp ns)

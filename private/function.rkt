@@ -43,8 +43,8 @@
          "data.rkt"
          "function-context.rkt"
          "logic.rkt"
-         "regexp.rkt"
          "struct.rkt"
+         "text.rkt"
          "util.rkt")
 
 (module+ test

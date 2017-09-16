@@ -50,7 +50,3 @@
 (struct regexp-match-attribute attribute (regexp) #:transparent)
 (define (make-regexp-match-attribute regexp)
   (regexp-match-attribute (format "string matching regexp ~v" regexp) regexp))
-
-(module+ main
-  (require "fail.rkt")
-  (expect! "12x4x6" (expect-regexp-match #rx"x." '("x4"))))

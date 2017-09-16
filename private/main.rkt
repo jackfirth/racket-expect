@@ -8,6 +8,6 @@
 "function.rkt"
 "logic.rkt"
 "meta.rkt"
-"regexp.rkt"
 "struct.rkt"
+"text.rkt"
 "syntax.rkt"
