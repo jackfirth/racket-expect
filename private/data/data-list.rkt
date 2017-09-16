@@ -2,6 +2,10 @@
 
 (require racket/contract)
 
+(provide
+ (contract-out
+  [the-length-context splice-context?]))
+
 (module+ for-conversion
   (provide
    (contract-out
@@ -24,6 +28,7 @@
            rackunit))
 
 
+(define the-length-context (make-apply1-context length))
 
 (define (expect-list-ref exp idx)
   (define anon-exp

@@ -67,10 +67,7 @@
   (define even-fault-exp
     (expect-fault #:expected (make-pred-attribute even?)
                   #:actual (make-self-attribute 1)
-                  #:contexts (list the-return-context
-                                   (make-apply-context length)
-                                   the-return-context
-                                   expect-any)))
+                  #:contexts (list the-return-context the-length-context)))
   (check-expect even-ret-exp (expect-exp-faults (thunk 'foo) even-fault-exp)))
 
 (define exp-exn-message-context
