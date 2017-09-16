@@ -49,12 +49,24 @@
                       #:contexts (list)))
       (check-expect (expect-equal? id-stx)
                     (expect-exp-faults other-id not-eq-exp)))
+    (define list-stx #'(a b c))
+    (define list*-stx #'(a b . c))
     (test-case "list-contents"
-      (define list-stx #'(a b c))
-      (check-expect (expect-equal? list-stx) (expect-exp-faults list-stx)))
+      (define list-exp (expect-equal? list-stx))
+      (check-expect list-exp (expect-exp-faults list-stx))
+      (define fault-exp
+        (expect-fault #:expected (make-not-attribute (make-self-attribute #f))
+                      #:actual (make-self-attribute #f)
+                      #:contexts (list (expect-pred syntax-context?))))
+      (check-expect list-exp (expect-exp-faults list*-stx fault-exp)))
     (test-case "list*-contents"
-      (define list*-stx #'(a b . c))
-      (check-expect (expect-equal? list*-stx) (expect-exp-faults list*-stx)))))
+      (define list*-exp (expect-equal? list*-stx))
+      (check-expect list*-exp (expect-exp-faults list*-stx))
+      (define fault-exp
+        (expect-fault #:expected (make-equal-attribute (syntax-e list*-stx))
+                      #:actual (make-self-attribute (syntax-e list-stx))
+                      #:contexts (list (expect-pred syntax-context?))))
+      (check-expect list*-exp (expect-exp-faults list-stx fault-exp)))))
 
 (test-case "expect-not-eq?"
   (check-expect (expect-not-eq? b1) (expect-exp-faults b2))
