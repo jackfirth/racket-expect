@@ -16,7 +16,7 @@
          expect/private/logic
          expect/private/util
          "context.rkt"
-         (submod "data-list.rkt" for-count))
+         "kernel-apply.rkt")
 
 
 (define (expect-vector-ref exp idx)
@@ -26,7 +26,7 @@
   (expectation-rename anon-exp 'vector-ref))
 
 (define (expect-vector-count exp)
-  (expectation-rename (expect/count exp vector-length) 'vector-count))
+  (expectation-rename (expect-apply1 vector-length exp) 'vector-count))
 
 (define (expect-vector . exps)
   (define (vec->items-exp vec)

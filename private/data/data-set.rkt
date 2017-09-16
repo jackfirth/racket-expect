@@ -22,7 +22,7 @@
          expect/private/logic
          expect/private/util
          "attribute.rkt"
-         (submod "data-list.rkt" for-count))
+         "kernel-apply.rkt")
 
 
 (define (expect-set-member? v)
@@ -54,7 +54,7 @@
   (expectation-rename exp 'superset))
 
 (define (expect-set-count exp)
-  (expectation-rename (expect/count exp set-count) 'set-count))
+  (expectation-rename (expect-apply1 set-count exp) 'set-count))
 
 (define (expect-set . vs)
   (define st (list->set vs))
