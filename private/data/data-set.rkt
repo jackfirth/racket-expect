@@ -8,7 +8,8 @@
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
   [expect-superset (-> set? expectation?)]
-  [expect-set (rest-> any/c expectation?)]))
+  [expect-set (rest-> any/c expectation?)]
+  [the-set-count-context splice-context?]))
 
 (module+ for-conversion
   (provide
@@ -24,6 +25,8 @@
          "attribute.rkt"
          "kernel-apply.rkt")
 
+
+(define the-set-count-context (make-apply1-context set-count))
 
 (define (expect-set-member? v)
   (define (make-fault st)

@@ -2,6 +2,12 @@
 
 (require racket/contract)
 
+(provide
+ (contract-out
+  [the-hash-count-context splice-context?]
+  [the-hash-keys-context splice-context?]
+  [the-list->set-context splice-context?]))
+
 (module+ for-conversion
   (provide
    (contract-out
@@ -22,6 +28,10 @@
          "kernel-apply.rkt"
          (submod "data-list.rkt" for-conversion))
 
+
+(define the-hash-count-context (make-apply1-context hash-count))
+(define the-hash-keys-context (make-apply1-context hash-keys))
+(define the-list->set-context (make-apply1-context list->set))
 
 (define (expect-hash-count exp)
   (expectation-rename (expect-apply1 hash-count exp) 'hash-count))

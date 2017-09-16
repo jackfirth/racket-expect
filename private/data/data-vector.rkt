@@ -2,6 +2,10 @@
 
 (require racket/contract)
 
+(provide
+ (contract-out
+  [the-vector-length-context splice-context?]))
+
 (module+ for-conversion
   (provide
    (contract-out
@@ -18,6 +22,8 @@
          "context.rkt"
          "kernel-apply.rkt")
 
+
+(define the-vector-length-context (make-apply1-context vector-length))
 
 (define (expect-vector-ref exp idx)
   (define anon-exp
