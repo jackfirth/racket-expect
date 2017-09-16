@@ -185,6 +185,17 @@
    (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
    (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
 
+@defproc[(expect-syntax [value-exp any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a syntax object whose
+ contents (as returned by @racket[syntax-e]) are then checked against
+ @racket[datum-exp]. If @racket[datum-exp] is not an expectation, it is
+ converted to one with @racket[->expectation].
+
+ @(expect-examples
+   (expect! #'foo (expect-syntax 'foo))
+   (expect! #'#(1 2 3) (expect-syntax (vector #'1 #'2 #'3)))
+   (eval:error (expect! #'foo (expect-syntax 'bar))))}
+
 @section{Data Structure Contexts and Attributes}
 
 @deftogether[
@@ -206,6 +217,10 @@
  @racket[in-range]. Like @racket[dict-context], thiscontext may be used in
  faults that operate on specific kinds of sequences. See
  @racket[expect-list-ref] for an example.}
+
+@defproc[(syntax-context? [v any/c]) boolean?]{
+ Returns true if @racket[v] is the @context-tech{context} value that
+ @racket[expect-syntax] adds to its faults.}
 
 @deftogether[
  (@defstruct*[(member-attribute attribute) ([value any/c])
