@@ -16,8 +16,7 @@
 (provide expect-apply1
          make-apply1-context)
 
-(require expect/private/base
-         expect/private/combinator
+(require expect/private/lite
          expect/private/function-context
          "context.rkt")
 

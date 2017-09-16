@@ -22,10 +22,8 @@
 
 (require fancy-app
          racket/string
-         "base.rkt"
-         "combinator.rkt"
-         "data.rkt"
-         "logic.rkt")
+         "lite.rkt"
+         "data.rkt")
 
 
 (define (expect-regexp-match pattern [result-exp expect-any])

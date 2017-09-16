@@ -6,7 +6,7 @@
          expect
          rackunit
          rackunit/log
-         (submod expect/private/rackunit for-custom-checks))
+         (submod expect/private/rackunit/base for-custom-checks))
 
 (define ((call-check chk))
   (parameterize ([current-check-handler raise] [test-log-enabled? #f]) (chk)))

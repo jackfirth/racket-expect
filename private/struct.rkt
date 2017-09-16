@@ -17,10 +17,8 @@
                      racket/syntax
                      syntax/parse/class/struct-id)
          syntax/parse/define
-         "base.rkt"
-         "combinator.rkt"
-         "data.rkt"
-         "logic.rkt")
+         "lite.rkt"
+         "data.rkt")
 
 
 (struct struct-accessor-context context (accessor-id) #:transparent)

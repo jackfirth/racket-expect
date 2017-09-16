@@ -2,7 +2,7 @@
 
 (require arguments
          expect
-         (submod "rackunit.rkt" for-custom-checks))
+         (submod "base.rkt" for-custom-checks))
 
 (define (rx-or-pred->exp p)
   (if (regexp? p)

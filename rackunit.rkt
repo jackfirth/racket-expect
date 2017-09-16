@@ -1,2 +1,2 @@
 #lang reprovide
-"private/main-rackunit.rkt"
+"private/rackunit/main.rkt"

@@ -8,7 +8,7 @@
     ([description string?] [value any/c]) #:omit-constructor]
   [make-member-attribute (-> any/c member-attribute?)]))
 
-(require expect/private/base)
+(require expect/private/lite)
 
 (module+ test
   (require rackunit))

@@ -12,14 +12,13 @@
     [expect-syntax (-> expectation? expectation?)]
     [expect-syntax-list (-> expectation? expectation?)])))
 
-(require expect/private/base
-         expect/private/logic
+(require expect/private/lite
          "kernel-apply.rkt")
 
 
 (define (syntax-context? v)
   (or (equal? v (make-apply1-context syntax-e))
-      (equal? v (make-apply1-context syntax->list))))      
+      (equal? v (make-apply1-context syntax->list))))
 
 (define (expect-syntax exp)
   (define anon-exp

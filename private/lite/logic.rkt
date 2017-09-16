@@ -23,13 +23,13 @@
   [make-pred-attribute (-> predicate/c pred-attribute?)]))
 
 (require fancy-app
+         expect/private/util
          racket/function
          racket/list
          racket/stream
          racket/string
          "base.rkt"
-         "combinator.rkt"
-         "util.rkt")
+         "combinator.rkt")
 
 (module+ test
   (require rackunit))

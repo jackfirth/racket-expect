@@ -13,13 +13,13 @@
                      expectation?)]))
 
 (require arguments
+         expect/private/util
          fancy-app
          racket/format
          racket/function
          racket/list
          racket/stream
-         "base.rkt"
-         "util.rkt")
+         "base.rkt")
 
 (module+ test
   (require rackunit))

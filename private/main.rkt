@@ -1,12 +1,8 @@
 #lang reprovide
-"base.rkt"
-"combinator.rkt"
-"compare.rkt"
-"compare-sugar.rkt"
+"lite.rkt"
 "data.rkt"
 "fail.rkt"
 "function.rkt"
-"logic.rkt"
 "meta.rkt"
 "struct.rkt"
 "text.rkt"
