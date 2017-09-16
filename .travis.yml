@@ -1,5 +1,10 @@
 language: c
 sudo: false
+
+branches:
+  only:
+    - master
+
 env:
   global:
     - RACKET_DIR=~/racket
