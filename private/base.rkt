@@ -23,6 +23,11 @@
   [fault-expected (-> fault? attribute?)]
   [fault-contexts (-> fault? (listof context?))]
   [struct context ([description string?]) #:omit-constructor]
+  [struct (splice-context context)
+    ([description string?] [values (listof context?)]) #:omit-constructor]
+  [make-splice-context (->* ((listof context?))
+                            (#:description string?)
+                            splice-context?)]
   [struct attribute ([description string?]) #:omit-constructor]
   [struct (self-attribute attribute) ([description string?] [value any/c])
     #:omit-constructor]
@@ -67,6 +72,21 @@
 
 (struct context (description) #:transparent)
 (struct attribute (description) #:transparent)
+
+(struct splice-context context (values) #:transparent)
+(define (make-splice-context vs #:description [desc* #f])
+  (define desc (or desc* (string-join (map context-description vs) " of ")))
+  (splice-context desc vs))
+
+(module+ test
+  (struct test-context context () #:transparent)
+  (define ctxts
+    (list (test-context "foo") (test-context "bar") (test-context "baz")))
+  (check-equal? (context-description (make-splice-context ctxts))
+                "foo of bar of baz")
+  (check-equal? (context-description
+                 (make-splice-context ctxts #:description "foo.bar.baz"))
+                "foo.bar.baz"))
 
 (struct self-attribute attribute (value) #:transparent)
 (define (make-self-attribute v) (self-attribute (~v v) v))
