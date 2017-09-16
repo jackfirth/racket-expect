@@ -1,7 +1,12 @@
 #lang racket/base
 
-(provide check-expect
-         fail-check/expect)
+(require racket/contract/base)
+
+(provide check-expect)
+
+(provide
+ (contract-out
+  [fail-check/expect (-> any/c any/c void?)]))
 
 (module+ for-sugar
   (provide define-expect-checks))
