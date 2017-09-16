@@ -8,7 +8,8 @@
                                   racket/format
                                   racket/function
                                   racket/list
-                                  racket/set))
+                                  racket/set
+                                  rackunit))
          (all-from-out syntax/parse/define)
          defchecks
          expect-examples
@@ -22,7 +23,22 @@
                     racket/format
                     racket/function
                     racket/list
-                    racket/set)
+                    racket/set
+                    (except-in rackunit
+                               check-eq?
+                               check-eqv?
+                               check-equal?
+                               check-not-eq?
+                               check-not-eqv?
+                               check-not-equal?
+                               check-pred
+                               check-=
+                               check-true
+                               check-false
+                               check-not-false
+                               check-exn
+                               check-not-exn
+                               check))
          scribble/example
          scribble/manual
          scribble/text
@@ -39,6 +55,7 @@
                   '(require arguments
                             expect
                             expect/rackunit
+                            racket/contract
                             racket/function
                             racket/list
                             racket/set)))
