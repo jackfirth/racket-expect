@@ -2,12 +2,7 @@
 
 @(require "base.rkt")
 
-@title{Macro and Syntax Expectations}
-
-@defproc[(expect-syntax [datum-exp any/c]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a syntax object whose
- datum is then checked against @racket[datum-exp]. If @racket[datum-exp] is not
- an expectation, it is converted to one with @racket[->expectation].}
+@title{Macro Expansion Expectations}
 
 @defproc[(expect-expand [exp expectation?]
                         [#:namespace ns namespace? (current-namespace)])
@@ -49,11 +44,3 @@
 
  @(expect-examples
    (expect! #'(let ([a 1] [a 2]) (void)) (expect-syntax-exn #rx"duplicate")))}
-
-@section{Syntax Expectation Contexts}
-
-@deftogether[
- (@defstruct*[(datum-context context) () #:transparent #:omit-constructor]
-   @defthing[the-datum-context datum-context?])]{
- A @context-tech{context} that represents the results of calling
- @racket[syntax->datum] on a syntax object.}

@@ -8,7 +8,8 @@
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
   [expect-superset (-> set? expectation?)]
-  [expect-set (rest-> any/c expectation?)]))
+  [expect-set (rest-> any/c expectation?)]
+  [the-set-count-context splice-context?]))
 
 (module+ for-conversion
   (provide
@@ -22,8 +23,10 @@
          expect/private/logic
          expect/private/util
          "attribute.rkt"
-         (submod "data-list.rkt" for-count))
+         "kernel-apply.rkt")
 
+
+(define the-set-count-context (make-apply1-context set-count))
 
 (define (expect-set-member? v)
   (define (make-fault st)
@@ -54,7 +57,7 @@
   (expectation-rename exp 'superset))
 
 (define (expect-set-count exp)
-  (expectation-rename (expect/count exp set-count) 'set-count))
+  (expectation-rename (expect-apply1 set-count exp) 'set-count))
 
 (define (expect-set . vs)
   (define st (list->set vs))

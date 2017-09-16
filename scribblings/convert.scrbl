@@ -20,6 +20,8 @@
    @item{Sets are convertible with @racket[expect-set]. Items in the set are
   not converted, as that would have no sensible definition that respected the
   properties of sets.}
+   @item{Syntax objects are convertible with @racket[expect-syntax] after first
+  converting the syntax object's contents.}
    @item{All other values are convertible to expectations constructed with
   @racket[expect-equal?].})
 

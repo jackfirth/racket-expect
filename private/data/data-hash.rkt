@@ -2,6 +2,12 @@
 
 (require racket/contract)
 
+(provide
+ (contract-out
+  [the-hash-count-context splice-context?]
+  [the-hash-keys-context splice-context?]
+  [the-list->set-context splice-context?]))
+
 (module+ for-conversion
   (provide
    (contract-out
@@ -15,18 +21,20 @@
          racket/set
          expect/private/base
          expect/private/combinator
-         expect/private/function-kernel
          expect/private/logic
          expect/private/util
          "context.rkt"
          "data-set.rkt"
-         (submod expect/private/function-kernel no-reprovide)
-         (submod "data-list.rkt" for-conversion)
-         (submod "data-list.rkt" for-count))
+         "kernel-apply.rkt"
+         (submod "data-list.rkt" for-conversion))
 
+
+(define the-hash-count-context (make-apply1-context hash-count))
+(define the-hash-keys-context (make-apply1-context hash-keys))
+(define the-list->set-context (make-apply1-context list->set))
 
 (define (expect-hash-count exp)
-  (expectation-rename (expect/count exp hash-count) 'hash-count))
+  (expectation-rename (expect-apply1 hash-count exp) 'hash-count))
 
 (define (expect-hash-ref k value-exp)
   (define exp
@@ -34,13 +42,9 @@
                     (make-dict-context k)))
   (expectation-rename exp 'hash-ref))
 
-(define (expect-apply1-return proc exp)
-  (expect/proc (expect-apply proc (expect-return*/kernel (expect-list exp)))
-               arguments))
-
 (define (expect-hash-keys set-exp)
   (define anon-exp
-    (expect-apply1-return hash-keys (expect-apply1-return list->set set-exp)))
+    (expect-apply1 hash-keys (expect-apply1 list->set set-exp)))
   (expectation-rename anon-exp 'hash-keys))
 
 (define (expect-hash . k+exps)

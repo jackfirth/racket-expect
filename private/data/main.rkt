@@ -6,4 +6,5 @@
 "data-hash.rkt"
 "data-list.rkt"
 "data-set.rkt"
+"data-syntax.rkt"
 "data-vector.rkt"

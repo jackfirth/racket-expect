@@ -126,6 +126,32 @@ use their basic functionalities.
  @racket[self-attribute] for a trivial implementation.}
 
 @deftogether[
+ (@defstruct*[(splice-context context) ([values (listof context?)])
+              #:transparent #:omit-constructor]
+   @defproc[(make-splice-context [ctxts (listof context?)]
+                                 [#:description desc (or/c string? #f) #f])
+            splice-context?])]{
+ A @context-tech{context} and its constructor that represents a summary of
+ @racket[ctxts]. A list of contexts containing a @racket[splice-context] can be
+ thought of as equivalent to if @racket[ctxts] were inserted to the list instead
+ of the @racket[splice-context]. This is used by expectations that produce
+ several fine-grained contexts that can be considered a single logical context.
+ The @racket[make-splice-context] constructor uses @racket[desc] as the
+ description of the splice; if not provided, it combines the descriptions of
+ @racket[ctxts]. Like a contexts list passed to @racket[fault], the
+ @racket[ctxts] contexts are expected to be ordered from most specific to least
+ specific.
+
+ @(expect-examples
+   (define data-contexts
+     (list (make-sequence-context 2)
+           (make-sequence-context 6)
+           (make-dict-context 'foo)))
+   (context-description (make-splice-context data-contexts))
+   (context-description
+    (make-splice-context data-contexts #:description ".foo[6][2]")))}
+
+@deftogether[
  (@defstruct*[(self-attribute attribute) ([value any/c])
               #:transparent #:omit-constructor]
    @defproc[(make-self-attribute [v any/c]) self-attribute?])]{

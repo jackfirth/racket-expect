@@ -22,7 +22,8 @@
          "data-set.rkt"
          (submod "data-hash.rkt" for-conversion)
          (submod "data-list.rkt" for-conversion)
-         (submod "data-vector.rkt" for-conversion))
+         (submod "data-vector.rkt" for-conversion)
+         (submod "data-syntax.rkt" for-conversion))
 
 
 (define (->expectation v)
@@ -35,6 +36,10 @@
     [(hash? v)
      (define converted (map ->expectation (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
+    [(syntax? v)
+     (if (syntax->list v)
+         (expect-syntax-list (->expectation (syntax->list v)))
+         (expect-syntax (->expectation (syntax-e v))))]
     [(boolean? v) (if v expect-true expect-false)]
     [else (expect-compare equal? v)]))
 

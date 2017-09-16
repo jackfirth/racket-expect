@@ -1,10 +1,13 @@
 #lang racket/base
 
+;; This module is meant for expectations on syntax operations like expansion and
+;; evaluation. For expectations on the contents of the syntax objects
+;; themselves, see expect/private/data/data-syntax.
+
 (require racket/contract/base)
 
 (provide
  (contract-out
-  [expect-syntax (-> any/c expectation?)]
   [expect-expand (->* (expectation?) (#:namespace namespace?) expectation?)]
   [expect-expand-once (->* (expectation?)
                            (#:namespace namespace?)
@@ -12,9 +15,7 @@
   [expect-syntax-exn (->* ()
                           ((or/c string? regexp? expectation?)
                            #:namespace namespace?)
-                          expectation?)]
-  [struct (datum-context context) ([description string?]) #:omit-constructor]
-  [the-datum-context datum-context?]))
+                          expectation?)]))
 
 (require arguments
          racket/function
@@ -26,16 +27,6 @@
          "regexp.rkt"
          "struct.rkt")
 
-
-(struct datum-context context () #:transparent)
-(define the-datum-context (datum-context "the syntax's datum"))
-
-(define (expect-syntax exp)
-  (define anon-exp
-    (expect-and (expect-pred syntax?)
-                (expect/context (expect/proc (->expectation exp) syntax->datum)
-                                the-datum-context)))
-  (expectation-rename anon-exp 'syntax))
 
 (define (expect-expand* f exp ns)
   (define (around thnk) (parameterize ([current-namespace ns]) (thnk)))

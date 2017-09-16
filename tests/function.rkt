@@ -67,16 +67,12 @@
   (define even-fault-exp
     (expect-fault #:expected (make-pred-attribute even?)
                   #:actual (make-self-attribute 1)
-                  #:contexts (list the-return-context
-                                   (make-apply-context length)
-                                   the-return-context
-                                   expect-any)))
+                  #:contexts (list the-return-context the-length-context)))
   (check-expect even-ret-exp (expect-exp-faults (thunk 'foo) even-fault-exp)))
 
 (define exp-exn-message-context
   (expect-struct struct-accessor-context
-                 [struct-accessor-context-accessor-id
-                  (expect-syntax 'exn-message)]))
+                 [struct-accessor-context-accessor-id #'exn-message]))
 
 (define (exp-exn-rx-fault pattern ctxt)
   (define ctxt-list (list ctxt the-raise-context exp-exn-message-context))

@@ -3,12 +3,13 @@
 (require racket/contract)
 
 (provide
- (all-from-out "function-kernel.rkt")
+ (all-from-out "function-context.rkt")
  (contract-out
   [expect-call (-> arguments? expectation? expectation?)]
   [expect-call-exn (->* (arguments?)
                         ((or/c string? regexp? expectation?))
                         expectation?)]
+  [expect-apply (-> procedure? expectation? expectation?)]
   [expect-apply-exn (->* (procedure?)
                          ((or/c string? regexp? expectation?))
                          expectation?)]
@@ -40,8 +41,7 @@
          "base.rkt"
          "combinator.rkt"
          "data.rkt"
-         "function-kernel.rkt"
-         (submod "function-kernel.rkt" no-reprovide)
+         "function-context.rkt"
          "logic.rkt"
          "regexp.rkt"
          "struct.rkt"
@@ -154,6 +154,13 @@
   (define exp (expect/around (expect-return*/kernel (->expectation v)) around))
   (expectation-rename (expect-thunk exp) 'return*))
 
+(define (expect-return*/kernel exp)
+  (define exp/context (expect/context exp the-return-context))
+  (expectation
+   (λ (proc)
+     (define results (call-with-values proc list))
+     (expectation-apply exp/context results))))
+
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))
   (define num-pos (length (arguments-positional args)))
@@ -165,6 +172,16 @@
                    (define (call) (apply/arguments proc args))
                    (expectation-apply call-exp* call)))))
   (expectation-rename anon-exp 'call))
+
+(define (expect-apply proc call-exp)
+  (define call-exp* (expect/context call-exp (make-apply-context proc)))
+  (define anon-exp
+    (expect-and (expect-pred arguments?)
+                (expectation
+                 (λ (args)
+                   (define (call) (apply/arguments proc args))
+                   (expectation-apply call-exp* call)))))
+  (expectation-rename anon-exp 'apply))
 
 (define (expect-exn [msg-exp expect-any])
   (define exp

@@ -2,6 +2,10 @@
 
 (require racket/contract)
 
+(provide
+ (contract-out
+  [the-length-context splice-context?]))
+
 (module+ for-conversion
   (provide
    (contract-out
@@ -9,32 +13,22 @@
     [expect-list-ref (-> expectation? exact-nonnegative-integer? expectation?)]
     [expect-list-count (-> expectation? expectation?)])))
 
-(module+ for-count
-  (provide
-   (contract-out
-    [expect/count
-     (-> expectation? (-> any/c exact-nonnegative-integer?) expectation?)])))
-
 (require arguments
          fancy-app
          expect/private/base
          expect/private/combinator
          expect/private/compare
-         expect/private/function-kernel
          expect/private/logic
          expect/private/util
          "context.rkt"
-         (submod expect/private/function-kernel no-reprovide))
+         "kernel-apply.rkt")
 
 (module+ test
   (require racket/function
            rackunit))
 
 
-(define (expect/count exp count-proc)
-  (expect/proc (expect-apply count-proc
-                             (expect-return*/kernel (expect-list/kernel exp)))
-               arguments))
+(define the-length-context (make-apply1-context length))
 
 (define (expect-list-ref exp idx)
   (define anon-exp
@@ -43,9 +37,9 @@
   (expectation-rename anon-exp 'list-ref))
 
 (define (expect-list-count e)
-  (expectation-rename (expect/count e length) 'list-count))
+  (expectation-rename (expect-apply1 length e) 'list-count))
 
-(define (expect-list/kernel . exps)
+(define (expect-list-items . exps)
   (define (list->items-exp vs)
     (apply expect-all (map/index expect-list-ref (take/chop exps vs))))
   (expect/dependent list->items-exp))
@@ -54,5 +48,5 @@
   (define exp
     (expect-and (expect-pred list?)
                 (expect-all (expect-list-count (expect-eqv? (length exps)))
-                            (apply expect-list/kernel exps))))
+                            (apply expect-list-items exps))))
   (expectation-rename exp 'list))
