@@ -109,17 +109,13 @@
 
 @section{Procedure Context Structures}
 
-@deftogether[
- (@defstruct*[(return-context context) () #:transparent #:omit-constructor]
-   @defthing[the-return-context return-context?])]{
+@defthing[the-return-context context?]{
  A @context-tech{context} that represents the list of return values in a
  procedure call.}
 
-@deftogether[
- (@defstruct*[(raise-context context) () #:transparent #:omit-constructor]
-   @defthing[the-raise-context raise-context?])]{
+@defthing[the-raise-context context?]{
  A @context-tech{context} that represents the value that was given to
- @racket[raise] in a procedure call that aborted.}
+ @racket[raise] in a procedure call that aborted with an exception.}
 
 @deftogether[
  (@defstruct*[(call-context context) ([args arguments?])
@@ -135,9 +131,7 @@
  A @context-tech{context} and its constructor that represents the thunk created
  by applying the subject arguments to @racket[proc].}
 
-@deftogether[
- (@defstruct*[(arity-context context) () #:transparent #:omit-constructor]
-   @defthing[the-arity-context arity-context?])]{
+@defthing[the-arity-context context?]{
  A @context-tech{context} that represents the arity of a procedure, as returned
  by @racket[procedure-arity].}
 

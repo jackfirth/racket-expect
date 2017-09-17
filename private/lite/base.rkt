@@ -32,10 +32,8 @@
   [struct (self-attribute attribute) ([description string?] [value any/c])
     #:omit-constructor]
   [make-self-attribute (-> any/c self-attribute?)]
-  [struct (any-attribute attribute) ([description string?]) #:omit-constructor]
-  [the-any-attribute any-attribute?]
-  [struct (none-attribute attribute) ([description string?]) #:omit-constructor]
-  [the-none-attribute none-attribute?]))
+  [the-any-attribute attribute?]
+  [the-none-attribute attribute?]))
 
 (module+ for-meta
   (provide (struct-out fault)))

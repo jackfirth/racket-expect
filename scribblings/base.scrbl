@@ -161,10 +161,8 @@ use their basic functionalities.
    (make-self-attribute 'foo))}
 
 @deftogether[
- (@defstruct*[(any-attribute attribute) () #:transparent #:omit-constructor]
-   @defstruct*[(none-attribute attribute) () #:transparent #:omit-constructor]
-   @defthing[the-any-attribute any-attribute?]
-   @defthing[the-none-attribute none-attribute?])]{
+ (@defthing[the-any-attribute attribute?]
+   @defthing[the-none-attribute attribute?])]{
  These @attribute-tech{attributes} are used by @fault-tech{faults} to express
  that they expected or found any value at all or no value at all. This is
  typically for faults with a @context-tech{context} that may not be present on
