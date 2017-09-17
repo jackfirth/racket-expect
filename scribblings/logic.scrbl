@@ -94,11 +94,26 @@
  not the input value satisfies the @racket[value] predicate.}
 
 @deftogether[
+ (@defstruct*[(and-attribute attribute) ([cases (listof attribute?)])
+              #:transparent #:omit-constructor]
+   @defproc[(make-and-attribute [cases (listof attribute?)]
+                                [#:description desc (or/c string? #f) #f])
+            and-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that describes that a fault
+ refers to every one of @racket[cases]. This is useful for collapsing multiple
+ nearly identical faults into a single fault; see @racket[expect-contains-all?]
+ for an example. If @racket[desc] is not provided, it defaults to the
+ descriptions of each of @racket[cases] joined with commas and an @litchar{and}
+ between the last two descriptions.}
+
+@deftogether[
  (@defstruct*[(or-attribute attribute) ([cases (listof attribute?)])
               #:transparent #:omit-constructor]
-   @defproc[(make-or-attribute [cases (listof attribute?)]) or-attribute?])]{
+   @defproc[(make-or-attribute [cases (listof attribute?)]
+                               [#:description desc (or/c string? #f) #f])
+            or-attribute?])]{
  An @attribute-tech{attribute} and its constructor that describes at least one
  of @racket[cases]. A @fault-tech{fault} might use this to describe that it
- expected one of multiple possible values. The description of a constructed
- attribute joins the descriptions of each of @racket[cases] with commas and an
- @litchar{or} between the last two descriptions.}
+ expected one of multiple possible values. If @racket[desc] is not provided, it
+ defaults to the descriptions of each of @racket[cases] joined with commas and
+ an @litchar{or} between the last two descriptions.}
