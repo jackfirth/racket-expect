@@ -13,12 +13,8 @@
   (check-expect (expect-regexp-match #rx"y.")
                 (expect-exp-faults "12x4x6" expect-any)))
 
-(test-case "expect-string-contains?"
-  (define foo-exp (expect-string-contains? "foo"))
-  (check-expect foo-exp (expect-exp-faults "some foo message"))
-  (define fault-exp
-    (expect-fault #:expected (make-string-contains-attribute "foo")
-                  #:actual (make-self-attribute "some bar message")
-                  #:contexts (list)))
-  (check-expect foo-exp (expect-exp-faults "some bar message" fault-exp))
-  (check-expect foo-exp (expect-exp-faults 'not-a-string expect-any)))
+(test-subject "expect-string-contains?"
+  #:subject (expect-string-contains? "foo")
+  (expect-exp-faults "some foo message")
+  (expect-exp-faults "some bar message" expect-any)
+  (expect-exp-faults 'not-a-string expect-any))
