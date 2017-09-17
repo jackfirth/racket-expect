@@ -33,7 +33,7 @@
 
 (struct compare-attribute attribute (proc other) #:transparent)
 (define (make-compare-attribute proc other)
-  (define desc (format "~a when compared to ~v" (object-name proc) other))
+  (define desc (format "~a compared to ~v" (object-name proc) other))
   (compare-attribute desc proc other))
 
 (define (expect-compare compare other)
