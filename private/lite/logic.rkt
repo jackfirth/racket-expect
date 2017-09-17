@@ -76,7 +76,7 @@
 
 (struct pred-attribute attribute (value) #:transparent)
 (define (make-pred-attribute pred)
-  (pred-attribute (format "value satisfying ~a" (object-name pred)) pred))
+  (pred-attribute (format "~a" (object-name pred)) pred))
 
 (define (pred-fault pred v)
   (and (not (pred v))
