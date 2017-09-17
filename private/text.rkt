@@ -10,9 +10,6 @@
                expectation?))
         expectation?)]
   [expect-string-contains? (-> string? expectation?)]
-  [struct (string-contains-attribute attribute)
-    ([description string?] [value string?]) #:omit-constructor]
-  [make-string-contains-attribute (-> string? string-contains-attribute?)]
   [struct (regexp-match-context context)
     ([description string?] [regexp regexp?]) #:omit-constructor]
   [make-regexp-match-context (-> regexp? regexp-match-context?)]
@@ -54,16 +51,5 @@
 (define (make-regexp-match-attribute regexp)
   (regexp-match-attribute (format "string matching regexp ~v" regexp) regexp))
 
-(struct string-contains-attribute attribute (value) #:transparent)
-(define (make-string-contains-attribute str)
-  (string-contains-attribute (format "string containing ~v" str) str))
-
 (define (expect-string-contains? str)
-  (define (contains-fault v)
-    (and (not (string-contains? v str))
-         (fault #:summary "a contained substring"
-                #:expected (make-string-contains-attribute str)
-                #:actual (make-self-attribute v))))
-  (define exp
-    (expect-and (expect-pred string?) (expect/singular contains-fault)))
-  (expectation-rename exp 'string-contains?))
+  (expect-and (expect-pred string?) (expect-contains? string-contains? str)))

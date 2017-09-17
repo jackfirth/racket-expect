@@ -20,44 +20,42 @@
          racket/set
          expect/private/lite
          expect/private/util
-         "attribute.rkt"
          "kernel-apply.rkt")
 
 
 (define the-set-count-context (make-apply1-context set-count))
 
 (define (expect-set-member? v)
-  (define (make-fault st)
-    (and (not (set-member? st v))
-         (fault #:summary "a set containing a specific value"
-                #:expected (make-member-attribute v)
-                #:actual (make-self-attribute st))))
-  (expectation-rename (expect/singular make-fault) 'set-member?))
+  (expect-and (expect-pred set?) (expect-contains? set-member? v)))
 
 (define (expect-set-not-member? v)
-  (define (make-fault st)
-    (and (set-member? st v)
-         (fault #:summary "a set not containing a specific value"
-                #:expected (make-not-attribute (make-member-attribute v))
-                #:actual (make-self-attribute st))))
-  (expectation-rename (expect/singular make-fault) 'set-not-member?))
+  (expect-and (expect-pred set?) (expect-not-contains? set-member? v)))
 
 (define (expect-subset big-st)
+  (define exp (expect-and (expect-pred set?) (expect-subset* big-st)))
+  (expectation-rename exp 'subset))
+
+(define (expect-subset* big-st)
   (define (make-expectation-from-extras little-st)
-    (apply expect-all
-           (map expect-set-not-member?
-                (set->list (set-subtract little-st big-st)))))
-  (expectation-rename (expect/dependent make-expectation-from-extras) 'subset))
+    (define extras (set->list (set-subtract little-st big-st)))
+    (expect-contains-none? set-member? extras))
+  (expect/dependent make-expectation-from-extras))
 
 (define (expect-superset little-st)
-  (define exp
-    (apply expect-all (map expect-set-member? (set->list little-st))))
+  (define exp (expect-and (expect-pred set?) (expect-superset* little-st)))
   (expectation-rename exp 'superset))
 
+(define (expect-superset* little-st)
+  (expect-contains-all? set-member? (set->list little-st)))
+
 (define (expect-set-count exp)
-  (expectation-rename (expect-apply1 set-count exp) 'set-count))
+  (define count-exp
+    (expect-and (expect-pred set?) (expect-apply1 set-count exp)))
+  (expectation-rename count-exp 'set-count))
 
 (define (expect-set . vs)
   (define st (list->set vs))
-  (expectation-rename (expect-all (expect-subset st) (expect-superset st))
-                      'set))
+  (define exp
+    (expect-and (expect-pred set?)
+                (expect-all (expect-superset* st) (expect-subset* st))))
+  (expectation-rename exp 'set))

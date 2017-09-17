@@ -88,13 +88,15 @@
 @defproc[(expect-set [v any/c] ...) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a set that
  contains exactly the given @racket[v] values and no other values. The
- expectation finds one @fault-tech{fault} for each extra item and for each
- missing item in the checked set. @bold{This function does not convert its
+ expectation finds two @fault-tech{faults}: one describing that values were
+ missing and one describing what values were unexpected. Each of these fault is
+ constructed in the same way as in @racket[expect-superset] and
+ @racket[expect-subset], respectively. @bold{This function does not convert its
   arguments to expectations}, see @racket[->expectation].
 
  @(expect-examples
    (expect! (set 1 2 3) (expect-set 1 2 3))
-   (eval:error (expect! (set 1 'foo) (expect-set 1 2 3))))}
+   (eval:error (expect! (set 1 'foo 'bar) (expect-set 1 2 3))))}
 
 @defproc[(expect-set-member? [v any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a set
@@ -112,23 +114,24 @@
    (expect! (set 1 2) (expect-set-not-member? 'foo))
    (eval:error (expect! (set 1 2) (expect-set-not-member? 1))))}
 
+@defproc[(expect-superset [st set?]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a value is a set that
+ is a superset of @racket[st]. The expectation finds one @fault-tech{fault} that
+ describes what values were missing using @racket[make-contains-all-attribute].
+
+ @(expect-examples
+   (expect! (set 1 2 3 4 5) (expect-superset (set 1 2 3)))
+   (eval:error (expect! (set 1 5) (expect-superset (set 1 2 3)))))}
+ 
 @defproc[(expect-subset [st set?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a set that
- is a subset of @racket[st]. The expectation finds one @fault-tech{fault} for
- each unexpected item.
+ is a subset of @racket[st]. The expectation finds one @fault-tech{fault} that
+ describes what unexpected values were present using
+ @racket[make-contains-none-attribute].
  
  @(expect-examples
    (expect! (set 1 2) (expect-subset (set 1 2 3)))
    (eval:error (expect! (set 1 2 'foo 'bar) (expect-subset (set 1 2 3)))))}
-
-@defproc[(expect-superset [st set?]) expectation?]{
- Returns an @expectation-tech{expectation} that expects a value is a set that
- is a superset of @racket[st]. The expectation finds one @fault-tech{fault} for
- each item in @racket[st] not found in the checked set.
- 
- @(expect-examples
-   (expect! (set 1 2 3) (expect-superset (set 1 2)))
-   (eval:error (expect! (set 'foo) (expect-superset (set 1 2)))))}
 
 @defproc[(expect-set-count
           [count-exp (or/c exact-nonnegative-integer? expectation?)])
@@ -250,11 +253,3 @@
  its faults. Each is a splice context like @racket[the-length-context] and
  @racket[the-vector-length-context], but two are added to represent the calling
  of @racket[list->set] on the list returned by @racket[hash-keys].}
-
-@deftogether[
- (@defstruct*[(member-attribute attribute) ([value any/c])
-              #:transparent #:omit-constructor]
-   @defproc[(make-member-attribute [value any/c]) member-attribute?])]{
- An @attribute-tech{attribute} and its constructor that represents a
- @racket[set] that has @racket[value] as a member. See
- @racket[expect-set-member?] for examples.}

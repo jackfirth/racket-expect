@@ -17,7 +17,14 @@
   [make-not-attribute (-> attribute? not-attribute?)]
   [struct (or-attribute attribute)
     ([description string?] [cases (listof attribute?)]) #:omit-constructor]
-  [make-or-attribute (-> (listof attribute?) or-attribute?)]
+  [make-or-attribute (->* ((listof attribute?))
+                          (#:description (or/c string? #f))
+                          or-attribute?)]
+  [struct (and-attribute attribute)
+    ([description string?] [cases (listof attribute?)]) #:omit-constructor]
+  [make-and-attribute (->* ((listof attribute?))
+                           (#:description (or/c string? #f))
+                           and-attribute?)]
   [struct (pred-attribute attribute)
     ([description string?] [value predicate/c]) #:omit-constructor]
   [make-pred-attribute (-> predicate/c pred-attribute?)]))
@@ -95,10 +102,17 @@
   (expectation apply-and #:name 'and))
 
 (struct or-attribute attribute (cases) #:transparent)
+(struct and-attribute attribute (cases) #:transparent)
 
-(define (make-or-attribute cases)
-  (define msg (string-join (map attribute-description cases) ", or "))
-  (or-attribute msg cases))
+(define ((make-join-attribute construct before-last)
+         cases #:description [desc* #f])
+  (define desc
+    (or desc* (string-join (map attribute-description cases) ", "
+                           #:before-last before-last)))
+  (construct desc cases))
+
+(define make-or-attribute (make-join-attribute or-attribute " or "))
+(define make-and-attribute (make-join-attribute and-attribute " and "))
 
 (define (expect-conjoin . preds)
   (expectation-rename (apply expect-and (map expect-pred preds)) 'conjoin))

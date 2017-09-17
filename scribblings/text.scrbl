@@ -25,7 +25,8 @@
 
 @defproc[(expect-string-contains? [str string?]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a string that contains
- @racket[str].
+ @racket[str]. Convenient shorthand for combining @racket[expect-contains] with
+ @racket[expect-pred] and @racket[string?].
 
  @(expect-examples
    (expect! "This is some message" (expect-string-contains? "some message"))
@@ -50,11 +51,3 @@
             regexp-match-attribute?])]{
  An @attribute-tech{attribute} and its constructor that refers to whether or not
  a value matches @racket[regexp].}
-
-@deftogether[
- (@defstruct*[(string-contains-attribute attribute) ([value string?])
-              #:transparent #:omit-constructor]
-   @defproc[(make-string-contains-attribute [value string?])
-            string-contains-attribute?])]{
- An @attribute-tech{attribute} and its constructor that refers to whether or not
- a string contains @racket[value].}
