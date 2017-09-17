@@ -7,8 +7,6 @@
   [struct (apply-context context)
     ([description string?] [proc procedure?]) #:omit-constructor]
   [make-apply-context (-> procedure? apply-context?)]
-  [struct (return-context context)
-    ([description string?]) #:omit-constructor]
   [the-return-context return-context?]))
 
 (require "lite.rkt")
