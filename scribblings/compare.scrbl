@@ -11,9 +11,9 @@
  a true value.
 
  @(expect-examples
-   (define expect-small (expect-compare < 10))
-   (expect! 6 expect-small)
-   (eval:error (expect! 7256 expect-small)))}
+   (define expect-foo (expect-compare string=? "foo"))
+   (expect! "foo" expect-foo)
+   (eval:error (expect! "bar" expect-foo)))}
 
 @defproc[(expect-not-compare [compare (-> any/c any/c any/c)] [other any/c])
          expectation?]{
@@ -21,9 +21,60 @@
  checks that @racket[(compare v other)] returns false instead of true.
 
  @(expect-examples
-   (define expect-not-small (expect-not-compare < 10))
-   (expect! 7256 expect-not-small)
-   (eval:error (expect! 6 expect-not-small)))}
+   (define expect-not-foo (expect-not-compare string=? "foo"))
+   (expect! "bar" expect-not-foo)
+   (eval:error (expect! "foo" expect-not-foo)))}
+
+@defproc[(expect-contains? [contains? (-> any/c any/c any/c)] [v any/c])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a container value
+ @var[c], that contains @racket[v] as determined by whether
+ @racket[(contains? c v)] returns a true value.
+
+ @(expect-examples
+   (define exp-foo (expect-contains? hash-has-key? 'foo))
+   (expect! (hash 'foo 1 'bar 2) exp-foo)
+   (eval:error (expect! (hash 'bar 2) exp-foo)))}
+
+@defproc[(expect-not-contains? [contains? (-> any/c any/c any/c)] [v any/c])
+         expectation?]{
+ Like @racket[expect-contains?], but for an input @var[c] the returned
+ expectation checks that @racket[(contains? c v)] returns false instead of true.
+
+ @(expect-examples
+   (define exp-not-foo (expect-not-contains? hash-has-key? 'foo))
+   (expect! (hash 'bar 2) exp-not-foo)
+   (eval:error (expect! (hash 'foo 1 'bar 2) exp-not-foo)))}
+
+@defproc[(expect-contains-all? [contains? (-> any/c any/c any/c)] [vs list?])
+         expectation?]{
+ Like @racket[expect-contains?], but for an input @var[c] the returned
+ expectation checks that every item @var[v] in @racket[vs] is contained in
+ @racket[c] according to @racket[(contains? c v)]. Only one @fault-tech{fault}
+ is returned which has an @racket[and-attribute] value containing one
+ @racket[contains-attribute] for each missing @racket[v]. See
+ @racket[make-contains-all-attribute] for details on how this attribute is
+ constructed.
+
+ @(expect-examples
+   (define exp-keys (expect-contains-all? hash-has-key? '(foo bar baz)))
+   (expect! (hash 'foo 1 'bar 2 'baz 3) exp-keys)
+   (eval:error (expect! (hash 'foo 1 'blah 4) exp-keys)))}
+
+@defproc[(expect-contains-none? [contains? (-> any/c any/c any/c)] [vs list?])
+         expectation?]{
+ Like @racket[expect-contains?], but for an input @var[c] the returned
+ expectation checks that no item @var[v] in @racket[vs] is contained in
+ @racket[c] according to @racket[(contains? c v)]. Only one @fault-tech{fault}
+ is returned which has a @racket[not-attribute] wrapping an
+ @racket[or-attribute] containing one @racket[contains-attribute] for each
+ present @racket[v]. See @racket[make-contains-none-attribute] for details on
+ how this attribute is constructed.
+
+ @(expect-examples
+   (define exp-no-keys (expect-contains-none? hash-has-key? '(foo bar baz)))
+   (expect! (hash 'blah 4) exp-no-keys)
+   (eval:error (expect! (hash 'foo 1 'baz 3 'blah 4) exp-no-keys)))}
 
 @deftogether[
  (@defproc[(expect-eq? [v any/c]) expectation?]
@@ -69,12 +120,48 @@
 
 @deftogether[
  (@defstruct*[(compare-attribute attribute)
-              ([proc (-> any/c any/c any/c)] [other any/c]) #:omit-constructor]
+              ([proc (-> any/c any/c any/c)] [other any/c])
+              #:transparent #:omit-constructor]
    @defproc[(make-compare-attribute [proc (-> any/c any/c any/c)] [other any/c])
             compare-attribute?])]{
  An @attribute-tech{attribute} and its constructor that represents the result of
  comparing the input value to @racket[other] using @racket[proc]. See
  @racket[expect-compare] for examples.}
+
+@deftogether[
+ (@defstruct*[(contains-attribute attribute)
+              ([proc (-> any/c any/c any/c)] [value any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-contains-attribute [proc (-> any/c any/c any/c)]
+                                     [value any/c])
+            contains-attribute?])]{
+ An @attribute-tech{attribute} and its constructor that represnts whether the
+ input value contains @racket[value] according to @racket[proc]. See
+ @racket[expect-contains] for examples.}
+
+@defproc[(make-contains-all-attribute [contains? (-> any/c any/c any/c)]
+                                      [vs list?])
+         and-attribute?]{
+ Returns an @racket[and-attribute] value wrapping a list of
+ @racket[contains-attribute] values, one for each of @racket[vs]. The
+ description of the returned attribute is more succinct than the default
+ description that @racket[and-attribute] would normally create. Used by
+ @racket[expect-contains-all].
+
+ @(expect-examples
+   (make-contains-all-attribute hash-has-key? '(foo bar baz)))}
+
+@defproc[(make-contains-none-attribute [contains? (-> any/c any/c any/c)]
+                                       [vs list?])
+         not-attribute?]{
+ Returns a @racket[not-attribute] value wrapping an @racket[or-attribute]
+ which contains a list of @racket[contains-attribute] values, one for each of
+ @racket[vs]. The description of the returned attribute is more succinct than
+ the default description that @racket[or-attribute] would normally create. Used
+ by @racket[expect-contains-none].
+
+ @(expect-examples
+   (make-contains-none-attribute hash-has-key? '(foo bar baz)))}
 
 @deftogether[
  (@defstruct*[(=-attribute attribute) ([value real?] [epsilon real?])
