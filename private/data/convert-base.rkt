@@ -22,6 +22,22 @@
          (submod "data-syntax.rkt" for-conversion))
 
 
+(define-dict-expectations hash?
+  #:length expect-hash-count hash-count
+  #:keys expect-hash-keys hash-keys
+  #:ref expect-hash-ref hash-ref
+  #:all expect-hash hash)
+
+(define-sequence-expectations list?
+  #:length expect-list-length list-length
+  #:ref expect-list-ref list-ref
+  #:all expect-list list)
+
+(define-sequence-expectations vector?
+  #:length expect-vector-length vector-length
+  #:ref expect-vector-ref vector-ref
+  #:all expect-vector vector)
+
 (define (->expectation v)
   (cond
     [(expectation? v) v]
