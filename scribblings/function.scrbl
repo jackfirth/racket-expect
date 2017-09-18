@@ -50,7 +50,7 @@
  to an expectation with @racket[->expectation].
  @(expect-examples
    (define expect-even-values
-     (expect-return* (expect-list-count (expect-pred even?))))
+     (expect-return* (expect-list-length (expect-pred even?))))
    (expect! (thunk (values)) expect-even-values)
    (expect! (thunk (values 'foo 'bar)) expect-even-values)
    (eval:error (expect! (thunk 'foo) expect-even-values)))}

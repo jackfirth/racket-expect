@@ -8,8 +8,7 @@
   [expect-set-not-member? (-> any/c expectation?)]
   [expect-subset (-> set? expectation?)]
   [expect-superset (-> set? expectation?)]
-  [expect-set (rest-> any/c expectation?)]
-  [the-set-count-context splice-context?]))
+  [expect-set (rest-> any/c expectation?)]))
 
 (module+ for-conversion
   (provide
@@ -20,10 +19,8 @@
          racket/set
          expect/private/lite
          expect/private/util
-         "kernel-apply.rkt")
+         (submod "data-sequence.rkt" for-internal))
 
-
-(define the-set-count-context (make-apply1-context set-count))
 
 (define (expect-set-member? v)
   (expect-and (expect-pred set?) (expect-contains? set-member? v)))
@@ -50,7 +47,7 @@
 
 (define (expect-set-count exp)
   (define count-exp
-    (expect-and (expect-pred set?) (expect-apply1 set-count exp)))
+    (expect-and (expect-pred set?) (expect-sequence-length exp)))
   (expectation-rename count-exp 'set-count))
 
 (define (expect-set . vs)

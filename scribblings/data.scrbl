@@ -32,16 +32,16 @@
    (expect! '(10 "text") expect-second-string?)
    (eval:error (expect! '(10 20) expect-second-string?)))}
 
-@defproc[(expect-list-count
-          [count-exp (or/c exact-nonnegative-integer? expectation?)])
+@defproc[(expect-list-length
+          [len-exp (or/c exact-nonnegative-integer? expectation?)])
          expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a list, then
- checks the number of items in the list against @racket[count-exp]. If
- @racket[count-exp] is an integer, it is converted to an expectation with
+ checks the number of items in the list against @racket[len-exp]. If
+ @racket[len-exp] is an integer, it is converted to an expectation with
  @racket[->expectation].
 
  @(expect-examples
-   (define expect-even-list (expect-list-count (expect-pred even?)))
+   (define expect-even-list (expect-list-length (expect-pred even?)))
    (expect! '(a b) expect-even-list)
    (eval:error (expect! '(a b c) expect-even-list)))}
 
@@ -72,16 +72,16 @@
    (expect! #(10 "text") expect-second-string?)
    (eval:error (expect! #(10 20) expect-second-string?)))}
 
-@defproc[(expect-vector-count
-          [count-exp (or/c exact-nonnegative-integer? expectation?)])
+@defproc[(expect-vector-length
+          [len-exp (or/c exact-nonnegative-integer? expectation?)])
          expectation?]{
  Returns an @expectation-tech{expectation} that expects a value is a vector,
- then checks the number of items in the vector against @racket[count-exp]. If
- @racket[count-exp] is an integer, it is converted to an expectation with
+ then checks the number of items in the vector against @racket[len-exp]. If
+ @racket[len-exp] is an integer, it is converted to an expectation with
  @racket[->expectation].
  
  @(expect-examples
-   (define expect-even-vector (expect-vector-count (expect-pred even?)))
+   (define expect-even-vector (expect-vector-length (expect-pred even?)))
    (expect! #(a b) expect-even-vector)
    (eval:error (expect! #(a b c) expect-even-vector)))}
 
@@ -225,31 +225,20 @@
  Returns true if @racket[v] is the @context-tech{context} value that
  @racket[expect-syntax] adds to its faults.}
 
-@deftogether[
- (@defthing[the-length-context splice-context?]
-   @defthing[the-vector-length-context splice-context?])]{
- A pair of @context-tech{context} values that @racket[expect-list-count] and
- @racket[expect-vector-count] add to their faults, respectively. Each is a
- @racket[splice-context] containing the contexts representing the first return
- value of applying either @racket[length] or @racket[vector-length], as would be
- returned by @racket[expect-apply].}
+@defthing[the-length-context splice-context?]{
+ A @context-tech{context} value that represents the length of a sequence. More
+ specifically, it is a @racket[splice-context] containing three contexts:
 
-@defthing[the-set-count-context splice-context?]{
- A @context-tech{context} value that @racket[expect-set-count] adds to its
- faults. This value is a @racket[splice-context] for the same reasons as
- @racket[the-length-context] and @racket[the-vector-length-context], except the
- applied procedure is @racket[set-count].}
+ @(itemlist
+   @item{An @racket[apply-context] containing the procedure used to extract the
+  length of the sequence, e.g. @racket[vector-length].}
+   @item{@racket[the-return-context]}
+   @item{A @racket[sequence-context] with position @racket[0], representing the
+  first (and only) return value.})
 
-@defthing[the-hash-count-context splice-context?]{
- A @context-tech{context} value that @racket[expect-hash-count] adds to its
- faults. This value is a @racket[splice-context] for the same reasons as
- @racket[the-length-context] and @racket[the-vector-length-context], except the
- applied procedure is @racket[hash-count].}
+ This context is used by @racket[expect-list-length], @racket[expect-set-count],
+ and similar procedures.}
 
-@deftogether[
- (@defthing[the-hash-keys-context splice-context?]
-   @defthing[the-list->set-context splice-context?])]{
- A pair of @context-tech{context} values that @racket[expect-hash-keys] adds to
- its faults. Each is a splice context like @racket[the-length-context] and
- @racket[the-vector-length-context], but two are added to represent the calling
- of @racket[list->set] on the list returned by @racket[hash-keys].}
+@defthing[the-keys-context splice-context?]{
+ A @context-tech{context} value that @racket[expect-hash-keys] adds to its
+ faults.}

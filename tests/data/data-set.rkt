@@ -44,7 +44,7 @@
                        (expect-fault
                         #:expected (make-pred-attribute even?)
                         #:actual (make-self-attribute 3)
-                        #:contexts (list the-set-count-context)))
+                        #:contexts (list the-length-context)))
     expect-exp-set-pred-fault)
   (test-subject "conversion" #:subject (expect-set-count 3)
     (expect-exp-faults (set 1 2 3))

@@ -15,10 +15,7 @@
          "data-set.rkt"
          "convert-base.rkt"
          (submod "convert-base.rkt" for-conversion)
-         (submod "data-hash.rkt" for-conversion)
-         (submod "data-list.rkt" for-conversion)
          (submod "data-set.rkt" for-conversion)
-         (submod "data-vector.rkt" for-conversion)
          (submod "data-syntax.rkt" for-conversion))
 
 
@@ -51,7 +48,7 @@
   [(expect-hash-keys <convert>) (-> (or/c set? exp?) exp?)]
   [(expect-list . <convert>) (rest-> any/c exp?)]
   [(expect-list-ref <convert> v) (-> any/c natural? exp?)]
-  [(expect-list-count <convert>) (-> (or/c natural? exp?) exp?)]
+  [(expect-list-length <convert>) (-> (or/c natural? exp?) exp?)]
   [(expect-set-count <convert>) (-> (or/c natural? exp?) exp?)]
 
   ;; expect-syntax with conversion makes expect-syntax-list unnecessary due to
@@ -61,4 +58,4 @@
 
   [(expect-vector . <convert>) (rest-> any/c exp?)]
   [(expect-vector-ref <convert> v) (-> any/c natural? exp?)]
-  [(expect-vector-count <convert>) (-> (or/c natural? exp?) exp?)])
+  [(expect-vector-length <convert>) (-> (or/c natural? exp?) exp?)])

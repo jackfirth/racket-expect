@@ -60,7 +60,7 @@
                 #:contexts (list the-return-context the-length-context)))
 
 (test-subject "expect-return*"
-  #:subject (expect-return* (expect-list-count (expect-pred even?)))
+  #:subject (expect-return* (expect-list-length (expect-pred even?)))
   (expect-exp-faults values)
   (expect-exp-faults (thunk (values 'foo 'bar)))
   (expect-exp-faults (thunk 'foo) even-fault-exp))
