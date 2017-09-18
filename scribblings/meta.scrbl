@@ -33,7 +33,7 @@ expectations.
 
  @(expect-examples
    (define (expect-exp-even-faults input)
-     (expect-exp-faults* input (expect-list-count (expect-pred even?))))
+     (expect-exp-faults* input (expect-list-length (expect-pred even?))))
    (define exp-ab (expect-list 1 2))
    (expect! exp-ab (expect-exp-even-faults '(1 2)))
    (expect! exp-ab (expect-exp-even-faults '(a b)))

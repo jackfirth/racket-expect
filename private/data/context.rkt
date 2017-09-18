@@ -10,9 +10,20 @@
   [struct (sequence-context context)
     ([description string?] [position exact-nonnegative-integer?])
     #:omit-constructor]
-  [make-sequence-context (-> exact-nonnegative-integer? sequence-context?)]))
+  [make-sequence-context (-> exact-nonnegative-integer? sequence-context?)]
+  [the-length-context splice-context?]
+  [the-keys-context splice-context?]
+  [syntax-context? predicate/c]))
 
-(require expect/private/lite)
+(module+ for-internal
+  (provide the-syntax-e-context
+           the-syntax-list-context))
+
+(require expect/private/function-context
+         expect/private/lite
+         racket/dict
+         racket/sequence
+         racket/set)
 
 (module+ test
   (require rackunit))
@@ -34,3 +45,28 @@
 (module+ test
   (check-equal? (make-sequence-context 123)
                 (sequence-context "item at position 123" 123)))
+
+;; This is so the data structure expectations can provide the same fault
+;; contexts that an equivalent use of expect-apply would produce without
+;; causing a cyclic dependency between expect/private/function and
+;; expect/private/data.
+
+(define (make-apply1-context f #:description [desc* #f])
+  (define ctxts
+    (list (make-apply-context f) the-return-context (make-sequence-context 1)))
+  (define desc (or desc* (format "the return value of ~a" (object-name f))))
+  (make-splice-context ctxts #:description desc))
+
+(define the-length-context
+  (make-apply1-context sequence-length #:description "the number of items"))
+
+(define the-keys-context
+  (make-splice-context (list (make-apply1-context dict-keys)
+                             (make-apply1-context list->set))
+                       #:description "the set of keys"))
+
+(define the-syntax-e-context (make-apply1-context syntax-e))
+(define the-syntax-list-context (make-apply1-context syntax->list))
+
+(define (syntax-context? v)
+  (or (equal? v the-syntax-e-context) (equal? v the-syntax-list-context)))

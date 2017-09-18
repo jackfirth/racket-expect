@@ -12,15 +12,13 @@
 
 (require (for-syntax racket/base
                      racket/syntax)
-         racket/function
          racket/list
          racket/set
          syntax/parse/define
          expect/private/lite
          "data-set.rkt"
-         (submod "data-hash.rkt" for-conversion)
-         (submod "data-list.rkt" for-conversion)
-         (submod "data-vector.rkt" for-conversion)
+         (submod "data-dict.rkt" for-conversion)
+         (submod "data-sequence.rkt" for-conversion)
          (submod "data-syntax.rkt" for-conversion))
 
 

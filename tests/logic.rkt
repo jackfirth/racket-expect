@@ -18,7 +18,7 @@
                            #:expected (make-pred-attribute number?)))
 
 (check-expect (expect-all (expect-pred number?) (expect-pred symbol?))
-              (expect-exp-faults* "neither" (expect-list-count 2)))
+              (expect-exp-faults* "neither" (expect-list-length 2)))
 
 (check-expect (expect-and (expect-pred number?) (expect-pred symbol?))
               (expect-exp-faults "neither" expect-any))
@@ -31,4 +31,4 @@
                            #:expected
                            (expect-struct or-attribute
                                           [or-attribute-cases
-                                           (expect-list-count 2)])))
+                                           (expect-list-length 2)])))
