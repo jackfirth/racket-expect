@@ -15,8 +15,6 @@
          "data-set.rkt"
          "convert-base.rkt"
          (submod "convert-base.rkt" for-conversion)
-         (submod "data-dict.rkt" for-conversion)
-         (submod "data-sequence.rkt" for-conversion)
          (submod "data-set.rkt" for-conversion)
          (submod "data-syntax.rkt" for-conversion))
 

@@ -6,6 +6,7 @@
 (require expect/private/lite
          expect/private/util
          fancy-app
+         racket/contract/base
          racket/dict
          racket/set
          syntax/parse/define
@@ -46,4 +47,11 @@
     (define (len-id e) (exp/pred+name (expect-sequence-length e) 'len-name))
     (define (keys-id e) (exp/pred+name (expect-dict-keys e) 'keys-name))
     (define (ref-id k e) (exp/pred+name (expect-dict-ref k e) 'ref-name))
-    (define (all-id . k+es) (exp/pred+name (expect-dict k+es) 'all-name))))
+    (define (all-id . k+es) (exp/pred+name (expect-dict k+es) 'all-name))
+    (module+ for-conversion
+      (provide
+       (contract-out
+        [len-id (-> expectation? expectation?)]
+        [keys-id (-> expectation? expectation?)]
+        [ref-id (-> any/c expectation? expectation?)]
+        [all-id (rest->* (list any/c expectation?) expectation?)])))))

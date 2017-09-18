@@ -7,7 +7,9 @@
   (provide define-sequence-expectations))
 
 (require expect/private/lite
+         expect/private/util
          fancy-app
+         racket/contract/base
          racket/sequence
          syntax/parse/define
          "context.rkt")
@@ -41,4 +43,11 @@
       (expectation-rename (expect-and (expect-pred pred) e) n))
     (define (len-id e) (exp/pred+name (expect-sequence-length e) 'len-name))
     (define (ref-id e i) (exp/pred+name (expect-sequence-ref e i) 'ref-name))
-    (define (all-id . es) (exp/pred+name (expect-sequence es) 'all-name))))
+    (define (all-id . es) (exp/pred+name (expect-sequence es) 'all-name))
+    (module+ for-conversion
+      (provide
+       (contract-out
+        [len-id (-> expectation? expectation?)]
+        [ref-id (-> expectation? exact-nonnegative-integer? expectation?)]
+        [all-id (rest-> expectation? expectation?)])))))
+
