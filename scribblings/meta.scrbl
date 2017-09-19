@@ -39,6 +39,22 @@ expectations.
    (expect! exp-ab (expect-exp-even-faults '(a b)))
    (eval:error (expect! exp-ab (expect-exp-even-faults '(1 foo)))))}
 
+@defproc[(expect-exp-apply [v any/c] [thunk-exp expectation?]) expectation?]{
+ A more general form of @racket[expect-exp-faults] and
+ @racket[expect-exp-faults*]. Returns an @expectation-tech{expectation} that
+ expects a value @var[e] that is itself an expectation. Then, a thunk wrapping
+ the expression @racket[(expectation-apply e v)] is created and checked against
+ @racket[thunk-exp]. For @racket[thunk-exp], using @racket[expect-return] checks
+ the returned faults of the expectation just like @racket[expect-exp-faults] and
+ @racket[expect-exp-faults*].
+
+ @(expect-examples
+   (expect! expect-any (expect-exp-apply 'foo (expect-return '())))
+   (define error-exp (expectation (λ (_) (raise 'kaboom!)) #:name 'error))
+   (expect! error-exp (expect-exp-apply 'foo (expect-raise 'kaboom!)))
+   (eval:error
+    (expect! error-exp (expect-exp-apply 'foo (expect-return '())))))}
+
 @defproc[(expect-fault
           [#:summary summary-exp any/c expect-any]
           [#:actual actual-exp any/c expect-any]
@@ -60,9 +76,9 @@ expectations.
    (eval:error (expect! flt (expect-fault #:summary "not test fault"))))}
 
 @deftogether[
- (@defstruct*[(fault-context context) ([input any/c])
+ (@defstruct*[(expect-context context) ([input any/c])
               #:transparent #:omit-constructor]
-   @defproc[(make-fault-context [input any/c]) fault-context?])]{
- A @context-tech{context} and its constructor that represents the list of faults
- returned by checking @racket[input] with the tested expectation using
- @racket[expectation-apply].}
+   @defproc[(make-expect-context [input any/c]) expect-context?])]{
+ A @context-tech{context} and its constructor that represents the thunk created
+ by wrapping a call to @racket[expectation-apply] with the subject expectation
+ and @racket[input]. Used by @racket[expect-exp-apply] and its derivatives.}
