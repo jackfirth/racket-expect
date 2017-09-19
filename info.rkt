@@ -1,7 +1,7 @@
 #lang info
 (define collection "expect")
 (define scribblings
-  '(("scribblings/main.scrbl" (multi-page) (library) "expect")))
+  '(("scribblings/main.scrbl" (multi-page) ("Testing") "expect")))
 (define deps
   '("syntax-classes-lib"
     ("arguments" #:version "1.1")
