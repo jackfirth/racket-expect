@@ -34,8 +34,7 @@
   (define bar-fault-exp
     (expect-fault #:expected (make-equal-attribute 'foo)
                   #:actual (make-self-attribute 'bar)
-                  #:contexts (list the-return-context
-                                   (make-sequence-context 0))))
+                  #:contexts (list the-return-context)))
   (test-subject #:subject foo-exp
     (expect-exp-faults (thunk 'foo))
     (expect-exp-faults (thunk 'bar) bar-fault-exp))
@@ -57,7 +56,7 @@
 (define even-fault-exp
   (expect-fault #:expected (make-pred-attribute even?)
                 #:actual (make-self-attribute 1)
-                #:contexts (list the-return-context the-length-context)))
+                #:contexts (list the-return*-context the-length-context)))
 
 (test-subject "expect-return*"
   #:subject (expect-return* (expect-list-length (expect-pred even?)))

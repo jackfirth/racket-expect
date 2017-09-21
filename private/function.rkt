@@ -18,11 +18,12 @@
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
-  [the-raise-context raise-context?]
+  [the-raise-context context?]
+  [the-return-context context?]
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
-  [the-arity-context arity-context?]
+  [the-arity-context context?]
   [struct (arity-includes-attribute attribute)
     ([description string?] [value procedure-arity?])
     #:omit-constructor]
@@ -33,6 +34,7 @@
          fancy-app
          racket/format
          racket/function
+         racket/list
          racket/match
          racket/string
          "lite.rkt"
@@ -94,6 +96,10 @@
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
 
+(define the-return-context
+  (make-splice-context (list the-return*-context (make-sequence-context 0))
+                       #:description "the return value"))
+
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
 
@@ -141,20 +147,41 @@
   (expectation-rename anon-exp 'raise))
 
 (define (expect-return . vs)
-  (expectation-rename (expect-return* (apply expect-list vs)) 'return))
+  (define exp
+    (if (equal? (length vs) 1)
+        (expect/splice-return (expect-return* vs))
+        (expect-return* vs)))
+  (expectation-rename exp 'return))
+
+(define (splice-return flt)
+  (define ctxts 
+    (match (fault-contexts flt)
+      [(list (== the-return*-context)
+             (== (make-sequence-context 0))
+             cs ...)
+       (cons the-return-context cs)]
+      [cs cs]))
+  (fault #:summary (fault-summary flt)
+         #:expected (fault-expected flt)
+         #:actual (fault-actual flt)
+         #:contexts ctxts))
+
+(define (expect/splice-return exp)
+  (define (around apply-exp) (map splice-return (apply-exp)))
+  (expect/around exp around))
 
 (define (expect-return* v)
-  (define (around call)
-    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (call)))
-  (define exp (expect/around (expect-return*/kernel (->expectation v)) around))
+  (define exp (expect-return/around (expect-return/results v)))
   (expectation-rename (expect-thunk exp) 'return*))
 
-(define (expect-return*/kernel exp)
-  (define exp/context (expect/context exp the-return-context))
-  (expectation
-   (λ (proc)
-     (define results (call-with-values proc list))
-     (expectation-apply exp/context results))))
+(define (expect-return/around exp)
+  (define (around apply-exp)
+    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (apply-exp)))
+  (expect/around exp around))
+
+(define (expect-return/results v)
+  (define exp (expect/context (->expectation v) the-return*-context))
+  (expectation (λ (proc) (expectation-apply exp (call-with-values proc list)))))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))

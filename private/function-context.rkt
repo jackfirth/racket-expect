@@ -7,7 +7,7 @@
   [struct (apply-context context)
     ([description string?] [proc procedure?]) #:omit-constructor]
   [make-apply-context (-> procedure? apply-context?)]
-  [the-return-context return-context?]))
+  [the-return*-context context?]))
 
 (require "lite.rkt")
 
@@ -16,5 +16,5 @@
 (define (make-apply-context proc)
   (apply-context (format "application to ~v" proc) proc))
 
-(struct return-context context () #:transparent)
-(define the-return-context (return-context "the return values list"))
+(struct return*-context context () #:transparent)
+(define the-return*-context (return*-context "the return values list"))

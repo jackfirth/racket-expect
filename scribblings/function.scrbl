@@ -110,7 +110,11 @@
 @section{Procedure Context Structures}
 
 @defthing[the-return-context context?]{
- A @context-tech{context} that represents the list of return values in a
+ A @context-tech{context} that represents the (only) return value of a procedure
+ call. For calls that return multiple values, see @racket[the-return*-context].}
+
+@defthing[the-return*-context context?]{
+ A @context-tech{context} that represents the list of all return values in a
  procedure call.}
 
 @defthing[the-raise-context context?]{
