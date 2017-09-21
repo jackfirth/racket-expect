@@ -141,7 +141,7 @@
   (expectation-rename anon-exp 'raise))
 
 (define (expect-return . vs)
-  (expectation-rename (expect-return* (apply expect-list vs)) 'return))
+  (expectation-rename (expect-return* vs) 'return))
 
 (define (expect-return* v)
   (define (around call)
