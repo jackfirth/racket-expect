@@ -240,6 +240,10 @@
  A @context-tech{context} value that @racket[expect-hash-keys] adds to its
  faults.}
 
+@defthing[the-box-context context?]{
+ A @context-tech{context} value that represents the contents of a @racket[box]
+ value as returned by @racket[unbox].}
+
 @defproc[(syntax-context? [v any/c]) boolean?]{
  Returns true if @racket[v] is the @context-tech{context} value that
  @racket[expect-syntax] adds to its faults.}
