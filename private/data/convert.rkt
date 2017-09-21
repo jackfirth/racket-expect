@@ -15,6 +15,7 @@
          "data-set.rkt"
          "convert-base.rkt"
          (submod "convert-base.rkt" for-conversion)
+         (submod "data-box.rkt" for-conversion)
          (submod "data-set.rkt" for-conversion)
          (submod "data-syntax.rkt" for-conversion))
 
@@ -30,6 +31,7 @@
     [(hash? v)
      (define converted (map expect-equal? (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
+    [(box? v) (expect-box (expect-equal? (unbox v)))]
     [(syntax? v)
      (if (syntax->list v)
          (expect-and (expect-syntax-list (expect-equal? (syntax->list v)))
@@ -53,6 +55,7 @@
   [(expect-vector-ref <convert> v) (-> any/c natural? exp?)]
   [(expect-vector-length <convert>) (-> (or/c natural? exp?) exp?)]
   [(expect-set-count <convert>) (-> (or/c natural? exp?) exp?)]
+  [(expect-box <convert>) (-> any/c exp?)]
 
   ;; expect-syntax with conversion makes expect-syntax-list unnecessary due to
   ;; how conversion converts syntax list objects into expectations that flatten

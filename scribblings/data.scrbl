@@ -189,6 +189,15 @@
    (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
    (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
 
+@defproc[(expect-box [exp any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a @racket[box] whose
+ value is then checked against @racket[exp]. If @racket[exp] is not an
+ expectation, it is converted to one with @racket[->expectation].
+
+ @(expect-examples
+   (expect! (box 1) (expect-box 1))
+   (eval:error (expect! (box 100) (expect-box 1))))}
+
 @defproc[(expect-syntax [value-exp any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a syntax object whose
  contents (as returned by @racket[syntax-e]) are then checked against

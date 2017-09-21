@@ -17,6 +17,7 @@
          syntax/parse/define
          expect/private/lite
          "data-set.rkt"
+         (submod "data-box.rkt" for-conversion)
          (submod "data-dict.rkt" for-conversion)
          (submod "data-sequence.rkt" for-conversion)
          (submod "data-syntax.rkt" for-conversion))
@@ -48,6 +49,7 @@
     [(hash? v)
      (define converted (map ->expectation (hash-values v)))
      (apply expect-hash (append-map list (hash-keys v) converted))]
+    [(box? v) (expect-box (->expectation (unbox v)))]
     [(syntax? v)
      (if (syntax->list v)
          (expect-syntax-list (->expectation (syntax->list v)))
