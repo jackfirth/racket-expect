@@ -3,7 +3,8 @@
 (require racket/function
          racket/set
          expect
-         expect/rackunit)
+         expect/rackunit
+         (only-in rackunit test-case))
 
 
 (check-expect '(1 2 3) (expect-list 1 2 3))
@@ -44,3 +45,15 @@
 (check-expect (->expectation compound-data/pred-exp) exp-wrong-data)
 (check-expect (expect-equal? compound-data/pred-exp)
               exp-wrong-data/pred-fault)
+
+(test-case "box"
+  (test-subject #:subject (->expectation (box 1))
+    (expect-exp-faults (box 1))
+    (expect-exp-faults (box 2) expect-any)
+    (expect-exp-faults 'foo expect-any))
+  (test-subject "contents" #:subject (->expectation (box (list 1 2 3)))
+    (expect-exp-faults (box (list 1 2 3)))
+    (expect-exp-faults (box (list 1 2 100))
+                       (expect-fault
+                        #:contexts (list the-box-context
+                                         (make-sequence-context 2))))))
