@@ -144,18 +144,17 @@
   (expectation-rename (expect-return* vs) 'return))
 
 (define (expect-return* v)
-  (define exp (expect-return/around (expect-return*/results (->expectation v))))
+  (define exp (expect-return/around (expect-return/results v)))
   (expectation-rename (expect-thunk exp) 'return*))
 
 (define (expect-return/around exp)
-  (define (around call)
-    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (call)))
+  (define (around apply-exp)
+    (with-handlers ([(const #t) (λ (e) (list (raise-fault e)))]) (apply-exp)))
   (expect/around exp around))
 
-(define (expect-return*/results exp)
-  (define exp/context (expect/context exp the-return*-context))
-  (expectation
-   (λ (proc) (expectation-apply exp/context (call-with-values proc list)))))
+(define (expect-return/results v)
+  (define exp (expect/context (->expectation v) the-return*-context))
+  (expectation (λ (proc) (expectation-apply exp (call-with-values proc list)))))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))
