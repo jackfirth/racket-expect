@@ -46,8 +46,7 @@
      (expect-fault #:expected (expect-pred equal-attribute?)
                    #:actual (make-self-attribute 'sub1)
                    #:contexts (list (make-apply-context expand)
-                                    the-return*-context
-                                    (make-sequence-context 0)
+                                    the-return-context
                                     (expect-pred syntax-context?))))
     (expect-exp-faults #'(foo ([a 1] [b 2]))
                        expect-expand-raise-any-fault)))

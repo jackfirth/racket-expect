@@ -19,6 +19,7 @@
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
   [the-raise-context context?]
+  [the-return-context context?]
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
@@ -33,6 +34,7 @@
          fancy-app
          racket/format
          racket/function
+         racket/list
          racket/match
          racket/string
          "lite.rkt"
@@ -94,6 +96,10 @@
 (define (make-call-context args)
   (call-context (format "call with ~v" args) args))
 
+(define the-return-context
+  (make-splice-context (list the-return*-context (make-sequence-context 0))
+                       #:description "the return value"))
+
 (define (expect-proc-arity arity-exp)
   (expect/context (expect/proc arity-exp procedure-arity) the-arity-context))
 
@@ -141,7 +147,28 @@
   (expectation-rename anon-exp 'raise))
 
 (define (expect-return . vs)
-  (expectation-rename (expect-return* vs) 'return))
+  (define exp
+    (if (equal? (length vs) 1)
+        (expect/splice-return (expect-return* vs))
+        (expect-return* vs)))
+  (expectation-rename exp 'return))
+
+(define (splice-return flt)
+  (define ctxts 
+    (match (fault-contexts flt)
+      [(list (== the-return*-context)
+             (== (make-sequence-context 0))
+             cs ...)
+       (cons the-return-context cs)]
+      [cs cs]))
+  (fault #:summary (fault-summary flt)
+         #:expected (fault-expected flt)
+         #:actual (fault-actual flt)
+         #:contexts ctxts))
+
+(define (expect/splice-return exp)
+  (define (around apply-exp) (map splice-return (apply-exp)))
+  (expect/around exp around))
 
 (define (expect-return* v)
   (define exp (expect-return/around (expect-return/results v)))
