@@ -18,11 +18,11 @@
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
-  [the-raise-context raise-context?]
+  [the-raise-context context?]
   [struct (call-context context)
     ([description string?] [args arguments?]) #:omit-constructor]
   [make-call-context (-> arguments? call-context?)]
-  [the-arity-context arity-context?]
+  [the-arity-context context?]
   [struct (arity-includes-attribute attribute)
     ([description string?] [value procedure-arity?])
     #:omit-constructor]
