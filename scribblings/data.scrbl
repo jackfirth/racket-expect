@@ -203,15 +203,6 @@
 @section{Data Structure Contexts and Attributes}
 
 @deftogether[
- (@defstruct*[(dict-context context) ([key any/c])
-              #:transparent #:omit-constructor]
-   @defproc[(make-dict-context [key any/c]) dict-context?])]{
- A @context-tech{context} and its constructor that represents the dictionary
- value for @racket[key] in a dictionary, as defined by the @racket[gen:dict]
- interface. This context may be used in faults that only operate on specialized
- dictionaries, see @racket[expect-hash-ref] for an example.}
-
-@deftogether[
  (@defstruct*[(sequence-context context) ([position exact-nonnegative-integer?])
               #:transparent #:omit-constructor]
    @defproc[(make-sequence-context [position exact-nonnegative-integer?])
@@ -221,10 +212,6 @@
  @racket[in-range]. Like @racket[dict-context], thiscontext may be used in
  faults that operate on specific kinds of sequences. See
  @racket[expect-list-ref] for an example.}
-
-@defproc[(syntax-context? [v any/c]) boolean?]{
- Returns true if @racket[v] is the @context-tech{context} value that
- @racket[expect-syntax] adds to its faults.}
 
 @defthing[the-length-context splice-context?]{
  A @context-tech{context} value that represents the length of a sequence. More
@@ -240,6 +227,19 @@
  This context is used by @racket[expect-list-length], @racket[expect-set-count],
  and similar procedures.}
 
+@deftogether[
+ (@defstruct*[(dict-context context) ([key any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-dict-context [key any/c]) dict-context?])]{
+ A @context-tech{context} and its constructor that represents the dictionary
+ value for @racket[key] in a dictionary, as defined by the @racket[gen:dict]
+ interface. This context may be used in faults that only operate on specialized
+ dictionaries, see @racket[expect-hash-ref] for an example.}
+
 @defthing[the-keys-context splice-context?]{
  A @context-tech{context} value that @racket[expect-hash-keys] adds to its
  faults.}
+
+@defproc[(syntax-context? [v any/c]) boolean?]{
+ Returns true if @racket[v] is the @context-tech{context} value that
+ @racket[expect-syntax] adds to its faults.}
