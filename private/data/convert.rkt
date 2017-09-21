@@ -49,13 +49,12 @@
   [(expect-list . <convert>) (rest-> any/c exp?)]
   [(expect-list-ref <convert> v) (-> any/c natural? exp?)]
   [(expect-list-length <convert>) (-> (or/c natural? exp?) exp?)]
+  [(expect-vector . <convert>) (rest-> any/c exp?)]
+  [(expect-vector-ref <convert> v) (-> any/c natural? exp?)]
+  [(expect-vector-length <convert>) (-> (or/c natural? exp?) exp?)]
   [(expect-set-count <convert>) (-> (or/c natural? exp?) exp?)]
 
   ;; expect-syntax with conversion makes expect-syntax-list unnecessary due to
   ;; how conversion converts syntax list objects into expectations that flatten
   ;; their input first
-  [(expect-syntax <convert>) (-> any/c exp?)]
-
-  [(expect-vector . <convert>) (rest-> any/c exp?)]
-  [(expect-vector-ref <convert> v) (-> any/c natural? exp?)]
-  [(expect-vector-length <convert>) (-> (or/c natural? exp?) exp?)])
+  [(expect-syntax <convert>) (-> any/c exp?)])
