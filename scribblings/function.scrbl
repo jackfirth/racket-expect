@@ -109,8 +109,8 @@
 
 @section{Procedure Context Structures}
 
-@defthing[the-return-context context?]{
- A @context-tech{context} that represents the list of return values in a
+@defthing[the-return*-context context?]{
+ A @context-tech{context} that represents the list of all return values in a
  procedure call.}
 
 @defthing[the-raise-context context?]{

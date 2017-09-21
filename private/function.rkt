@@ -150,7 +150,7 @@
   (expectation-rename (expect-thunk exp) 'return*))
 
 (define (expect-return*/kernel exp)
-  (define exp/context (expect/context exp the-return-context))
+  (define exp/context (expect/context exp the-return*-context))
   (expectation
    (λ (proc)
      (define results (call-with-values proc list))

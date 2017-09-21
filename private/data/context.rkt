@@ -57,7 +57,7 @@
 
 (define (make-apply1-context f #:description [desc* #f])
   (define ctxts
-    (list (make-apply-context f) the-return-context (make-sequence-context 1)))
+    (list (make-apply-context f) the-return*-context (make-sequence-context 1)))
   (define desc (or desc* (format "the return value of ~a" (object-name f))))
   (make-splice-context ctxts #:description desc))
 
