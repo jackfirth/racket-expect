@@ -184,6 +184,7 @@
  Returns an @expectation-tech{expectation} that expects a value is a hash whose
  set of keys is then checked against @racket[set-exp]. If @racket[set-exp] is a
  set, it is converted to an expectation with @racket[->expectation].
+
  @(expect-examples
    (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
    (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
