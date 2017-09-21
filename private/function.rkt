@@ -155,9 +155,7 @@
 (define (expect-return*/kernel exp)
   (define exp/context (expect/context exp the-return*-context))
   (expectation
-   (λ (proc)
-     (define results (call-with-values proc list))
-     (expectation-apply exp/context results))))
+   (λ (proc) (expectation-apply exp/context (call-with-values proc list)))))
 
 (define (expect-call args call-exp)
   (define call-exp* (expect/context call-exp (make-call-context args)))
