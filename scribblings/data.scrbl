@@ -184,9 +184,19 @@
  Returns an @expectation-tech{expectation} that expects a value is a hash whose
  set of keys is then checked against @racket[set-exp]. If @racket[set-exp] is a
  set, it is converted to an expectation with @racket[->expectation].
+
  @(expect-examples
    (expect! (hash 'a 1 'b 2) (expect-hash-keys (set 'a 'b)))
    (eval:error (expect! (hash 'a 1) (expect-hash-keys (set 'a 'b)))))}
+
+@defproc[(expect-box [exp any/c]) expectation?]{
+ Returns an @expectation-tech{expectation} that expects a @racket[box] whose
+ value is then checked against @racket[exp]. If @racket[exp] is not an
+ expectation, it is converted to one with @racket[->expectation].
+
+ @(expect-examples
+   (expect! (box 1) (expect-box 1))
+   (eval:error (expect! (box 100) (expect-box 1))))}
 
 @defproc[(expect-syntax [value-exp any/c]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a syntax object whose
@@ -202,15 +212,6 @@
 @section{Data Structure Contexts and Attributes}
 
 @deftogether[
- (@defstruct*[(dict-context context) ([key any/c])
-              #:transparent #:omit-constructor]
-   @defproc[(make-dict-context [key any/c]) dict-context?])]{
- A @context-tech{context} and its constructor that represents the dictionary
- value for @racket[key] in a dictionary, as defined by the @racket[gen:dict]
- interface. This context may be used in faults that only operate on specialized
- dictionaries, see @racket[expect-hash-ref] for an example.}
-
-@deftogether[
  (@defstruct*[(sequence-context context) ([position exact-nonnegative-integer?])
               #:transparent #:omit-constructor]
    @defproc[(make-sequence-context [position exact-nonnegative-integer?])
@@ -220,10 +221,6 @@
  @racket[in-range]. Like @racket[dict-context], thiscontext may be used in
  faults that operate on specific kinds of sequences. See
  @racket[expect-list-ref] for an example.}
-
-@defproc[(syntax-context? [v any/c]) boolean?]{
- Returns true if @racket[v] is the @context-tech{context} value that
- @racket[expect-syntax] adds to its faults.}
 
 @defthing[the-length-context splice-context?]{
  A @context-tech{context} value that represents the length of a sequence. More
@@ -239,6 +236,23 @@
  This context is used by @racket[expect-list-length], @racket[expect-set-count],
  and similar procedures.}
 
+@deftogether[
+ (@defstruct*[(dict-context context) ([key any/c])
+              #:transparent #:omit-constructor]
+   @defproc[(make-dict-context [key any/c]) dict-context?])]{
+ A @context-tech{context} and its constructor that represents the dictionary
+ value for @racket[key] in a dictionary, as defined by the @racket[gen:dict]
+ interface. This context may be used in faults that only operate on specialized
+ dictionaries, see @racket[expect-hash-ref] for an example.}
+
 @defthing[the-keys-context splice-context?]{
  A @context-tech{context} value that @racket[expect-hash-keys] adds to its
  faults.}
+
+@defthing[the-box-context context?]{
+ A @context-tech{context} value that represents the contents of a @racket[box]
+ value as returned by @racket[unbox].}
+
+@defproc[(syntax-context? [v any/c]) boolean?]{
+ Returns true if @racket[v] is the @context-tech{context} value that
+ @racket[expect-syntax] adds to its faults.}

@@ -13,7 +13,8 @@
   [make-sequence-context (-> exact-nonnegative-integer? sequence-context?)]
   [the-length-context splice-context?]
   [the-keys-context splice-context?]
-  [syntax-context? predicate/c]))
+  [syntax-context? predicate/c]
+  [the-box-context context?]))
 
 (module+ for-internal
   (provide the-syntax-e-context
@@ -31,6 +32,7 @@
 
 (struct dict-context context (key) #:transparent)
 (struct sequence-context context (position) #:transparent)
+(struct box-context context () #:transparent)
 
 (define (make-dict-context key)
   (dict-context (format "value for key ~v" key) key))
@@ -45,6 +47,8 @@
 (module+ test
   (check-equal? (make-sequence-context 123)
                 (sequence-context "item at position 123" 123)))
+
+(define the-box-context (box-context "the box's value"))
 
 ;; This is so the data structure expectations can provide the same fault
 ;; contexts that an equivalent use of expect-apply would produce without
