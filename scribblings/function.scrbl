@@ -55,7 +55,7 @@
    (expect! (thunk (values 'foo 'bar)) expect-even-values)
    (eval:error (expect! (thunk 'foo) expect-even-values)))}
 
-@defproc[(expect-raise [raise-exp any/c]) expectation?]{
+@defproc[(expect-raise [raise-exp any/c expect-any]) expectation?]{
  Returns an @expectation-tech{expectation} that expects a thunk @racket[raise]s
  a value which is then checked against @racket[raise-exp]. The given
  @racket[raise-exp] is converted to an expectation with @racket[->expectation].

@@ -15,13 +15,19 @@
                 #:actual act
                 #:contexts (list the-raise-context)))
 
-(test-subject "expect-raise" #:subject (expect-raise 'foo)
-  (expect-exp-faults raise-foo)
-  (expect-exp-faults void
-                     (expect-raise-fault the-any-attribute the-none-attribute))
-  (expect-exp-faults raise-bar
-                     (expect-raise-fault (make-equal-attribute 'foo)
-                                         (make-self-attribute 'bar))))
+(test-case "expect-raise"
+  (test-subject #:subject (expect-raise 'foo)
+    (expect-exp-faults raise-foo)
+    (expect-exp-faults void
+                       (expect-raise-fault the-any-attribute
+                                           the-none-attribute))
+    (expect-exp-faults raise-bar
+                       (expect-raise-fault (make-equal-attribute 'foo)
+                                           (make-self-attribute 'bar))))
+  (test-subject #:subject (expect-raise)
+    (expect-exp-faults raise-foo)
+    (expect-exp-faults raise-bar)
+    (expect-exp-faults void expect-any)))
 
 (test-subject "expect-not-raise" #:subject expect-not-raise
   (expect-exp-faults void)

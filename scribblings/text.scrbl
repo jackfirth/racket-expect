@@ -33,6 +33,32 @@
    (eval:error
     (expect! "This is some message" (expect-string-contains? "foo"))))}
 
+@defproc[(expect-output [exp (or/c string? regexp? expectation?)]
+                        [#:call call-exp expectation? expect-not-raise])
+         expectation?]{
+ Returns an @expectation-tech{expectation} that expects a thunk. That thunk is
+ called and the string it writes to @racket[current-output-port] is checked
+ against @racket[exp]. If @racket[exp] is
+ not an expectation, it is converted to one with either
+ @racket[expect-regexp-match] if it's a regexp or @racket[->expectation]
+ otherwise.
+
+ @(expect-examples
+   (define (foo) (display "foo!!!"))
+   (expect! foo (expect-output "foo!!!"))
+   (expect! foo (expect-output #rx"foo"))
+   (eval:error (expect! foo (expect-output "bar"))))
+
+ If @racket[call-exp] is provided, the input thunk is additionally checked
+ against @racket[call-exp]. This allows asserting both the output of a thunk and
+ other properties of the thunk without calling it twice, for the rare times
+ when multiple calls should be avoided.
+
+ @(expect-examples
+   (define (foo) (display "foo!!!"))
+   (expect! foo (expect-output "foo!!!" #:call (expect-return (void))))
+   (eval:error (expect! foo (expect-output "foo!!!" #:call (expect-raise)))))}
+
 @section{String Attributes and Contexts}
 
 @deftogether[
@@ -51,3 +77,7 @@
             regexp-match-attribute?])]{
  An @attribute-tech{attribute} and its constructor that refers to whether or not
  a value matches @racket[regexp].}
+
+@defthing[the-output-context context?]{
+ A @context-tech{context} that represents the string written to
+ @racket[current-output-port] during the evaluation of a thunk.}

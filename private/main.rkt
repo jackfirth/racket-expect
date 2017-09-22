@@ -6,4 +6,5 @@
 "meta.rkt"
 "struct.rkt"
 "text.rkt"
+"text-io.rkt"
 "syntax.rkt"
