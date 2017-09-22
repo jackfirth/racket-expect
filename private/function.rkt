@@ -14,7 +14,7 @@
                          ((or/c string? regexp? expectation?))
                          expectation?)]
   [expect-not-raise expectation?]
-  [expect-raise (-> any/c expectation?)]
+  [expect-raise (->* () (any/c) expectation?)]
   [expect-return (rest-> any/c expectation?)]
   [expect-return* (-> (or/c list? expectation?) expectation?)]
   [expect-exn (->* () ((or/c string? regexp? expectation?)) expectation?)]
@@ -135,7 +135,7 @@
          #:actual the-none-attribute
          #:contexts (list the-raise-context)))
 
-(define (expect-raise v)
+(define (expect-raise [v expect-any])
   (define exp/context (expect/context (->expectation v) the-raise-context))
   (define anon-exp
     (expect-thunk
