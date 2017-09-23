@@ -3,6 +3,7 @@
 "data.rkt"
 "fail.rkt"
 "function.rkt"
+"log.rkt"
 "meta.rkt"
 "struct.rkt"
 "text.rkt"

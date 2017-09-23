@@ -67,7 +67,8 @@
   attribute-tech "fault attribute"
   context-tech "fault context"
   expectation-tech "expectation"
-  fault-tech "expectation fault")
+  fault-tech "expectation fault"
+  log-receiver-tech "log receiver" scribblings/reference/reference)
 
 (define-simple-macro (defchecks check-id:id ...+ pre-flow:expr ...)
   (deftogether ((defthing check-id procedure?) ...) pre-flow ...))

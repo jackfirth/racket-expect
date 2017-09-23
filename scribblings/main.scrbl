@@ -25,6 +25,7 @@ messages.
 @include-section["struct.scrbl"]
 @include-section["function.scrbl"]
 @include-section["syntax.scrbl"]
+@include-section["log.scrbl"]
 @include-section["combinator.scrbl"]
 @include-section["meta.scrbl"]
 @include-section["convert.scrbl"]
